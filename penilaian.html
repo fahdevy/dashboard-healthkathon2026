@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Seleksi Proposal 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#EEF3F0; --surface:#FFFFFF; --ink:#142320; --muted:#586a64; --line:#D7E0DB; --soft:#E6EDE9;
+  --band:#0B3B36; --band-ink:#E8F5F1; --band-muted:#9CC4BA; --mint:#3FD1B5;
+  --accent:#0E6B5E; --accent-soft:#D3ECE6;
+  --pass:#23804C; --pass-soft:#DAF1E2; --fail:#B5372F; --fail-soft:#F8E0DD;
+  --prov:#A36A0E; --prov-soft:#F7EAD0; --none:#7C8A84; --none-soft:#E3E9E6;
+  --gold:#C8961E; --shadow:0 1px 2px rgba(11,59,54,.06),0 8px 24px -12px rgba(11,59,54,.18);
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0E1513; --surface:#162019; --ink:#E3ECE8; --muted:#95A59E; --line:#26332E; --soft:#1C2724;
+  --band:#0A2926; --band-ink:#E3F2EE; --band-muted:#86B1A6; --mint:#4FDCC0;
+  --accent:#4DBBA8; --accent-soft:#16352F;
+  --pass:#5CC285; --pass-soft:#153122; --fail:#EF8078; --fail-soft:#3A1B19;
+  --prov:#E2B060; --prov-soft:#3A2B12; --none:#8A968F; --none-soft:#222C29;
+  --gold:#E4B84A; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1513; --surface:#162019; --ink:#E3ECE8; --muted:#95A59E; --line:#26332E; --soft:#1C2724;
+  --band:#0A2926; --band-ink:#E3F2EE; --band-muted:#86B1A6; --mint:#4FDCC0;
+  --accent:#4DBBA8; --accent-soft:#16352F;
+  --pass:#5CC285; --pass-soft:#153122; --fail:#EF8078; --fail-soft:#3A1B19;
+  --prov:#E2B060; --prov-soft:#3A2B12; --none:#8A968F; --none-soft:#222C29;
+  --gold:#E4B84A; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.5;margin:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.015em}
+.muted{color:var(--muted)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+
+/* hero band */
+.band{background:var(--band);color:var(--band-ink);padding:32px 20px 88px;position:relative;overflow:hidden}
+.band::before{content:"";position:absolute;inset:0;background:
+  repeating-linear-gradient(90deg,transparent 0 79px,rgba(255,255,255,.035) 79px 80px),
+  repeating-linear-gradient(0deg,transparent 0 79px,rgba(255,255,255,.035) 79px 80px);pointer-events:none}
+.band-in{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:center;position:relative}
+@media (max-width:860px){.band-in{grid-template-columns:1fr}}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:600;color:var(--mint)}
+.band h1{font-size:clamp(28px,4.4vw,46px);line-height:1.02;font-weight:800;margin:10px 0 12px}
+.band p{color:var(--band-muted);max-width:60ch;margin:0}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 18px;font-weight:600;border:0}
+.btn-mint{background:var(--mint);color:#08302b}
+.btn-mint:hover{filter:brightness(1.06)}
+.btn-ghost{background:transparent;color:var(--band-ink);border:1px solid rgba(255,255,255,.25)}
+.btn svg{width:16px;height:16px}
+.thrbox{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:6px 14px}
+.thrbox label{font-size:12px;color:var(--band-muted)}
+.thrbox input{accent-color:var(--mint);width:130px}
+.thrbox b{font-family:var(--mono);color:var(--mint);font-size:16px;min-width:3ch}
+.ringwrap{display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap}
+.ring{position:relative;width:190px;height:190px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .c b{font-family:var(--display);font-size:44px;font-weight:800;line-height:1}
+.ring .c span{font-size:12px;color:var(--band-muted)}
+.rleg{display:flex;flex-direction:column;gap:8px;font-size:13px}
+.rleg div{display:flex;align-items:center;gap:8px}
+.rleg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.rleg b{font-family:var(--mono);margin-left:auto;padding-left:14px}
+
+.wrap{max-width:1200px;margin:-60px auto 0;padding:0 20px 60px;display:flex;flex-direction:column;gap:22px;position:relative}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;text-align:left;color:inherit;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--kc,var(--accent))}
+.kpi.active{outline:2px solid var(--kc,var(--accent));outline-offset:-2px}
+.kpi span{font-size:12px;color:var(--muted);font-weight:500}
+.kpi b{font-family:var(--display);font-size:32px;font-weight:700;line-height:1;color:var(--kc,var(--ink))}
+.kpi i{font-style:normal;font-size:11px;color:var(--muted)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0;box-shadow:var(--shadow)}
+.panel h2{font-size:20px}
+.sub{font-size:12.5px;color:var(--muted);margin:2px 0 0}
+.grid2{display:grid;grid-template-columns:1.5fr 1fr;gap:22px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+
+/* leaderboard */
+.podium{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.pod{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start;background:var(--soft)}
+.rank{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;background:var(--surface);border:2px solid var(--line);color:var(--muted)}
+.pod:nth-child(1) .rank{border-color:var(--gold);color:var(--gold)}
+.pod h3{font-size:15px;line-height:1.2}
+.pod p{margin:2px 0 6px;font-size:12px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pod .sc{font-family:var(--mono);font-weight:600;font-size:18px;color:var(--accent)}
+.pod .sc small{font-size:11px;color:var(--muted);font-weight:400}
+
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:14px;height:8px;border-radius:2px;display:inline-block}
+.chart{overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:520px}
+.chart text{font-family:var(--body);fill:var(--muted);font-size:11px}
+.chart .tn{fill:var(--ink);font-size:11.5px}
+.formula{font-family:var(--mono);font-size:12.5px;background:var(--band);color:var(--band-ink);border-radius:10px;padding:12px 14px;line-height:1.8;overflow-x:auto}
+.formula em{color:var(--mint);font-style:normal}
+.method ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.method code{font-family:var(--mono);font-size:12px;background:var(--soft);padding:1px 5px;border-radius:4px}
+.raters{display:flex;flex-direction:column;gap:9px}
+.rrow{display:grid;grid-template-columns:minmax(0,1fr) 100px 44px;gap:10px;align-items:center;font-size:12.5px}
+.bar{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--mint))}
+
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.tools .r{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:flex-end}
+.tools input,.tools select{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.tools input{min-width:0;flex:1 1 220px;max-width:320px}
+.btn-acc{background:var(--accent);color:#fff;border-radius:10px;padding:8px 14px}
+:root[data-theme="dark"] .btn-acc{color:#062521}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn-acc{color:#062521}}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:1080px;background:var(--surface)}
+th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--soft);white-space:nowrap;user-select:none;position:sticky;top:0}
+th[data-k]{cursor:pointer}
+th.r,td.r{text-align:right}
+tr.row{cursor:pointer}
+tr.row:hover td{background:var(--soft)}
+.tname{font-weight:600}
+.tinov{color:var(--muted);font-size:12px;max-width:34ch}
+.score{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.score b{font-family:var(--mono);font-size:15px;font-weight:600}
+.meter{width:72px;height:5px;background:var(--soft);border-radius:3px;position:relative;overflow:visible}
+.meter i{display:block;height:100%;border-radius:3px}
+.meter s{position:absolute;top:-3px;width:2px;height:11px;background:var(--ink);opacity:.5}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.p-pass{background:var(--pass-soft);color:var(--pass)}
+.p-fail{background:var(--fail-soft);color:var(--fail)}
+.p-none{background:var(--none-soft);color:var(--none)}
+.cert{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+.dots{display:inline-flex;gap:4px;vertical-align:middle}
+.dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--accent)}
+.dot.f{background:var(--accent)} .dot.h{background:linear-gradient(90deg,var(--accent) 50%,transparent 50%)}
+.flags{display:flex;flex-wrap:wrap;gap:4px}
+.flag{font-size:11px;padding:1px 7px;border-radius:4px;background:var(--prov-soft);color:var(--prov);white-space:nowrap}
+.flag.g{background:var(--soft);color:var(--muted)}
+.fb{font-size:12.5px;max-width:42ch;color:var(--ink)}
+.fb.empty{color:var(--muted);font-style:italic}
+.fb .clip{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+tr.detail td{background:var(--soft);padding:16px}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.rcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px}
+.rcard h4{margin:0 0 6px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
+.rcard table{min-width:0;background:transparent}
+.rcard td{padding:3px 0;border:0}
+.fullnote{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13px;max-width:100ch}
+.fullnote b{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.foot{font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--band);color:var(--band-ink);padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:no-preference){.ring circle{transition:stroke-dasharray .5s ease}}
+</style>
+</head>
+<body>
+<div style="max-width:1200px;margin:0 auto;padding:12px 18px 0;font-family:'IBM Plex Sans',ui-sans-serif,system-ui,sans-serif"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:#0E6B5E;text-decoration:none">&larr; Kembali ke Dashboard Utama Healthkathon</a></div>
+
+<section class="band">
+  <div class="band-in">
+    <div>
+      <div class="eyebrow">Healthkathon 2026 · Seleksi Proposal Inovasi AI</div>
+      <h1>Dashboard Hasil Penilaian Proposal</h1>
+      <p id="heroText">Keputusan lulus atau tidak lulus ditetapkan dari penilai yang sudah mengisi, tanpa menunggu ketiga penilai. Nilai dikonversi ke skala maksimal 10.</p>
+      <div class="hero-actions">
+        <button class="btn btn-mint" id="dlTop" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>Unduh Excel</button>
+        <div class="thrbox"><label for="thr">Ambang lulus</label><input id="thr" type="range" min="2.5" max="10" step="0.1" value="6"><b id="thrv">6,0</b></div>
+      </div>
+    </div>
+    <div class="ringwrap">
+      <div class="ring" id="ring"></div>
+      <div class="rleg" id="rleg"></div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <section class="kpis" id="kpis" aria-label="Ringkasan status"></section>
+
+  <section class="panel">
+    <div><h2>Lima nilai tertinggi</h2><p class="sub">Berdasarkan nilai proyeksi saat ini. Urutan bisa berubah setelah penilai lain mengisi.</p></div>
+    <div class="podium" id="podium"></div>
+  </section>
+
+  <section class="grid2">
+    <div class="panel">
+      <div>
+        <h2>Posisi tiap tim terhadap ambang</h2>
+        <p class="sub">Titik = nilai proyeksi. Pita abu = rentang nilai akhir yang masih mungkin (penilai tersisa memberi 1 s.d. 4). Pita yang tidak menyentuh garis ambang berarti keputusan sudah final.</p>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--pass)"></i>Lulus</span>
+        <span><i class="sw" style="background:var(--fail)"></i>Tidak lulus</span>
+        <span><i class="sw" style="background:var(--line)"></i>Rentang kemungkinan</span>
+        <span><i class="sw" style="background:var(--accent);height:2px"></i>Ambang</span>
+      </div>
+      <div class="chart" id="chart"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:22px;min-width:0">
+      <div class="panel method">
+        <h2>Formula keputusan</h2>
+        <div class="formula">
+          Nilai penilai = Σ(bobot × skor) ÷ Σ bobot terisi<br>
+          <em>Total nilai</em> = rata-rata nilai penilai ÷ 4 × 10<br>
+          <em>Keputusan</em> = Total nilai ≥ ambang → LULUS
+        </div>
+        <ol>
+          <li><b>Normalisasi per penilai.</b> Tiap penilai menghasilkan nilai 1–4, sehingga 1 penilai pun sudah cukup untuk dihitung. Ambang 6 dari 10 setara rata-rata <code>2,40</code> per penilai.</li>
+          <li><b>Penilai parsial</b> (belum mengisi 6 kriteria) dihitung dari bobot kriteria yang sudah terisi.</li>
+          <li><b>Final</b> bila hasil tidak mungkin berubah apa pun nilai penilai tersisa; selain itu <b>sementara</b>. Keduanya tetap dihitung sebagai keputusan.</li>
+          <li><b>Tanda risiko:</b> margin tipis (&lt; 0,6 dari ambang) dan beda pendapat (&gt; 1,0 antarpenilai pada skala 1–4).</li>
+        </ol>
+      </div>
+      <div class="panel">
+        <h2>Progres penilai</h2>
+        <div class="raters" id="raters"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tabel">
+    <div class="tools">
+      <div><h2>Rincian per tim</h2><p class="sub" id="countTxt"></p></div>
+      <div class="r">
+        <input id="q" type="search" placeholder="Cari tim, inovasi, ID, penilai">
+        <select id="fs" aria-label="Filter status">
+          <option value="all">Semua status</option>
+          <option value="L">Lulus</option>
+          <option value="T">Tidak lulus</option>
+          <option value="prov">Keputusan sementara</option>
+          <option value="final">Keputusan final</option>
+          <option value="none">Belum dinilai</option>
+          <option value="risk">Bertanda risiko</option>
+          <option value="note">Ada masukan penilai</option>
+        </select>
+        <button class="btn btn-acc" id="dlTable" type="button">Unduh Excel</button>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th data-k="rank" class="r">#</th>
+          <th data-k="tim">Tim / Inovasi</th>
+          <th data-k="n">Penilai</th>
+          <th data-k="proj" class="r">Total nilai /10</th>
+          <th data-k="lo" class="r">Rentang akhir</th>
+          <th data-k="st">Keputusan</th>
+          <th>Masukan tim penilai</th>
+          <th>Tanda</th>
+        </tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+    <p class="foot">Klik baris untuk melihat skor per kriteria dan masukan lengkap. Klik judul kolom untuk mengurutkan. Sumber: sheet "Kertas Kerja Penilaian Seleksi", berkas Kertas Kerja Seleksi 2026.xlsx.</p>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const DATA = [{"no": 1, "id": 1987, "inov": "ASTINA : PENGEMBANGAN ANALISIS SISTEM TRANSAKSI IDENTIFIKASI NILAI ANOMALI KLAIM ASURANSI", "tim": "ASTINA", "r": [{"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [4, 4, 4, 3, null, null]}], "xl": 2.8, "note": ""}, {"no": 2, "id": 1994, "inov": "JKN Verify: Verifikasi Peristiwa Layanan untuk Deteksi Phantom Billing", "tim": "ArcXora", "r": [{"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 3, "id": 2021, "inov": "Jejak JKN", "tim": "Kapan ke kampus nya", "r": [{"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [4, 4, 4, 3, 3, 3]}, {"n": "Arman Annas Putra", "s": [4, 4, 4, 3, 3, 3]}], "xl": 7.1, "note": ""}, {"no": 4, "id": 2022, "inov": "JAGA-Klaim", "tim": "hai kamu iya kamu", "r": [{"n": "Husnun Nashir", "s": [4, 3, 3, 3, 3, 3]}, {"n": "Arman Annas Putra", "s": [4, 4, 4, 3, 3, 3]}, {"n": "Djaka Santosa", "s": [3, 3, 4, 3, 3, 3]}], "xl": 9.95, "note": "Modul (rule engine,NestJS API & Redis Queue ML FastAPI, kanal whistleblower, cross-check e-katalog) dengan stack konkret. Menyasar celah Fraud: FKTP dan RS tipe C/D yang tak terjangkau alat deteksi skala nasional,"}, {"no": 5, "id": 2052, "inov": "SAFETING JKN : Sistem Deteksi Dini & Skoring Risiko Underwriting", "tim": "Idea Space", "r": [{"n": "Arman Annas Putra", "s": [3, 3, 2, 2, 2, 1]}, {"n": "Djaka Santosa", "s": [3, 3, 2, 3, 2, 2]}, {"n": "I Made Karistiawan", "s": [2, 2, 2, 2, 2, 2]}], "xl": 6.8, "note": "underwriting, Kurangnya kedalaman teknis, model skoring Hijau–Merah belum dirinci dan masih prototipe awal berbasis data sintetis."}, {"no": 6, "id": 2058, "inov": "PERISAI Platform Evaluasi Resiko Integrasi Sistem AI untuk JKN", "tim": "Kicau Mania", "r": [{"n": "Djaka Santosa", "s": [3, 2, 2, 2, 2, 1]}, {"n": "I Made Karistiawan", "s": [null, null, null, null, null, null]}, {"n": "Agung Waluyo", "s": [null, null, null, null, null, null]}], "xl": 2.1, "note": "Ide validasi harga klaim terhadap e-katalog LKPP relevan, tetapi proposal minim isi. Deskripsi solusi hanya satu kalimat, tanpa arsitektur, model, sumber data referensi, maupun aspek keamanan dan privasi. Klaim dampak tidak didukung penjelasan metode."}, {"no": 7, "id": 2079, "inov": "CBG-SENTINEL, Asisten Verifikasi Kode Klaim INA-CBG Sebelum Klaim Dikirim", "tim": "Ical Health UwU", "r": [{"n": "I Made Karistiawan", "s": [4, 3, 4, 3, 3, 3]}, {"n": "Agung Waluyo", "s": [4, 3, 3, 3, 2, 4]}, {"n": "Paul Donald P", "s": [null, null, null, null, null, null]}], "xl": 6.55, "note": ""}, {"no": 8, "id": 2089, "inov": "NADI-JKN: Sistem analitik risiko untuk mendukung prioritas pemeriksaan fasilitas kesehatan.", "tim": "Clayton", "r": [{"n": "Agung Waluyo", "s": [4, 3, 4, 3, 4, 3]}, {"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}], "xl": 3.55, "note": ""}, {"no": 9, "id": 2090, "inov": "Automated Engine untuk Deteksi Over-Limit dan Penggelembungan Klaim Obat JKN", "tim": "Null Pointer", "r": [{"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 10, "id": 2091, "inov": "PANDU JKN — Sistem Multi-Agent AI untuk Kejelasan Kepesertaan, Status, dan Kesehatan Peserta JKN", "tim": "WNI Seumur Hidup", "r": [{"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 11, "id": 2105, "inov": "JKN CAPITA- GUARD AI", "tim": "Labda Sari", "r": [{"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [2, 2, 1, 1, 1, 2]}, {"n": "Arman Annas Putra", "s": [4, 3, 3, 3, 3, 2]}], "xl": 4.55, "note": ""}, {"no": 12, "id": 2110, "inov": "BastionGate: Health Claim Integrity Gateway", "tim": "BastionGate", "r": [{"n": "Husnun Nashir", "s": [3, 2, 2, 2, 2, 3]}, {"n": "Arman Annas Putra", "s": [4, 2, 2, 3, 3, 3]}, {"n": "Djaka Santosa", "s": [4, 2, 1, 2, 2, 2]}], "xl": 7.35, "note": "Konsep Claim Integrity Gateway di hulu masuk akal dan audit trail disebut. Tetapi tiga kolom uraian sebagian besar mengulang narasi pemasaran yang sama; tidak ada metode deteksi, model, data, atau bukti prototype. Klaim “siap terpasang” tidak didukung narasi dlm dokumen"}, {"no": 13, "id": 2114, "inov": "ARSA: JKN Risk Intelligence Platform", "tim": "Arsa AI", "r": [{"n": "Arman Annas Putra", "s": [4, 3, 3, 3, 3, 4]}, {"n": "Djaka Santosa", "s": [4, 4, 4, 3, 3, 3]}, {"n": "I Made Karistiawan", "s": [3, 4, 4, 3, 3, 3]}], "xl": 10.2, "note": "Deteksi deterministik + pencocokan semantik pgvector + AI generatif yang selalu mengutip dokumen sumber, sehingga auditor memverifikasi bukti, bukan memercayai skor. Dilengkapi peta risiko 34 provinsi, graf dokter-faskes-klaim, onboarding skema SIMRS, dan anonimisasi sejak input sesuai UU PDP 27/2022."}, {"no": 14, "id": 2127, "inov": "SIMPUL (Sistem Identifikasi Modus Penyalahgunaan Utilisasi Layanan)", "tim": "SISOslo", "r": [{"n": "Djaka Santosa", "s": [4, 4, 3, 3, 3, 2]}, {"n": "I Made Karistiawan", "s": [4, 3, 3, 3, 3, 3]}, {"n": "Agung Waluyo", "s": [3, 4, 4, 3, 3, 3]}], "xl": 9.8, "note": "Solusi inovatif, relevan, dan memiliki potensi dapat diimplementasikan untuk mendukung proses telaah Klaim JKN. Tetapi masih perlu penguatan pengukuran dampak, keamanan dan tata kelola data"}, {"no": 15, "id": 2133, "inov": "CAKRA Sistem AI Rekonsiliasi Resume Medis untuk Mencegah Anomali Klaim Faskes JKN", "tim": "Team", "r": [{"n": "I Made Karistiawan", "s": [null, null, null, null, null, null]}, {"n": "Agung Waluyo", "s": [null, null, null, null, null, null]}, {"n": "Paul Donald P", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 16, "id": 2156, "inov": "Riskora - Gatekeeper AI Pra-Purifikasi Dokumen Klaim JKN Berbasis Multi-Layer Neural Network", "tim": "Rapat RT Bahas Iuran BPJS Nunggak 3 Bulan", "r": [{"n": "Agung Waluyo", "s": [3, 3, 2, 2, 1, 3]}, {"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}], "xl": 2.3, "note": ""}, {"no": 17, "id": 2160, "inov": "CLAIMGUARD AI: Sistem Deteksi Dini Phantom Billing Berbasis Analitik Data Multidimensi dan Risk Scor", "tim": "AnoaByte", "r": [{"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 18, "id": 2163, "inov": "SatuPantau: Platform Integritas Layanan JKN Berbasis Smart Ticketing dan Agentic Multimodal AI", "tim": "Tokenemia", "r": [{"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 19, "id": 2180, "inov": "SIGAP, Smarter Protection for Sustainable JKN (Sistem Identifikasi & Analitik Risiko Anti-Penyalahgu", "tim": "TERSERAH", "r": [{"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [3, 2, 2, 3, 2, 2]}, {"n": "Arman Annas Putra", "s": [4, 4, 4, 3, 3, 4]}], "xl": 6.05, "note": ""}, {"no": 20, "id": 2211, "inov": "ClaimGuard AI", "tim": "Helta", "r": [{"n": "Husnun Nashir", "s": [4, 4, 4, 4, 4, 3]}, {"n": "Arman Annas Putra", "s": [4, 3, 4, 3, 3, 4]}, {"n": "Djaka Santosa", "s": [4, 3, 4, 3, 3, 4]}], "xl": 10.9, "note": "Solusi sangat relevan dan inovatif untuk mendukung pengendalian klaim JKN ketika masih di faskes. Upaya preventif  dalam deteksi fraud pada klaim sebelum pengajuan ke BPJS Kesehatan"}, {"no": 21, "id": 2217, "inov": "JELAS_Jejak Evaluasi Layanan dan Analisis Sinyal", "tim": "MedAI Nexus", "r": [{"n": "Arman Annas Putra", "s": [4, 3, 3, 3, 3, 3]}, {"n": "Djaka Santosa", "s": [3, 3, 3, 2, 2, 3]}, {"n": "I Made Karistiawan", "s": [3, 3, 3, 3, 3, 3]}], "xl": 8.85, "note": "Fokus pada penyalahgunaan obat/alkes sisi peserta dengan cakupan data lengkap (diagnosis, resep, refill, distribusi, estimasi sisa) dan reason code agar dapat diaudit. ada simulasi 6.960 kasus. Penegasan tidak menolak layanan otomatis dan tetap ada mekanisme klarifikasi merupakan nilai lebih pada tata kelola."}, {"no": 22, "id": 2247, "inov": "JKN ObatGuard PRB", "tim": "AKAR", "r": [{"n": "Djaka Santosa", "s": [3, 2, 2, 3, 2, 2]}, {"n": "I Made Karistiawan", "s": [3, 2, 2, 3, 3, 3]}, {"n": "Agung Waluyo", "s": [4, 3, 3, 3, 3, 3]}], "xl": 8.25, "note": "Kasus yang diangkat berdampak langsung ke hak peserta PRB (obat diserahkan kurang dari yang ditagihkan). Namun solusinya berupa dashboard analitik selisih dengan skor risiko — kedalaman metode terbatas dan tata kelola data baru disebut sebagai rencana tahap berikutnya."}, {"no": 23, "id": 2257, "inov": "BPJS Compliance Guard (BCG) — Smarter Protection for a Stronger JKN", "tim": "Link Productive", "r": [{"n": "I Made Karistiawan", "s": [null, null, null, null, null, null]}, {"n": "Agung Waluyo", "s": [null, null, null, null, null, null]}, {"n": "Paul Donald P", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 24, "id": 2259, "inov": "JEJAK Kepatuhan", "tim": "Individual - Johannes HP Sipahutar SH,.CLA", "r": [{"n": "Agung Waluyo", "s": [3, 3, 1, 2, 1, 3]}, {"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}], "xl": 2.1, "note": ""}, {"no": 25, "id": 2262, "inov": "Nexus JKN", "tim": "Hu Tao Supremacy", "r": [{"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 26, "id": 2263, "inov": "INFERA (Intelligent Fraud & Risk Analysis Agent) untuk Efisiensi Risiko Peserta BPJS Kesehatan", "tim": "Infera", "r": [{"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 27, "id": 2269, "inov": "CLAIMGUARD: Smarter Duplicate Claim Detection for JKN", "tim": "CipHer", "r": [{"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}, {"n": "Arman Annas Putra", "s": [3, 3, 3, 2, 2, 2]}], "xl": 2.55, "note": ""}, {"no": 28, "id": 2293, "inov": "MIRA (Medical Insight & Reasoning Agent)", "tim": "unmer", "r": [{"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}, {"n": "Arman Annas Putra", "s": [3, 3, 3, 2, 2, 2]}, {"n": "Djaka Santosa", "s": [4, 3, 2, 3, 2, 2]}], "xl": 5.3, "note": "Secara Fungsi lengkap sebagai alat bantu Coder: pemetaan teks klinis ke ICD, XGBoost, status Hijau/Kuning/Merah, analisis What-If, estimasi tarif, dan ekspor laporan"}, {"no": 29, "id": 2356, "inov": "KlaimGuard AI", "tim": "Craving for Money", "r": [{"n": "Arman Annas Putra", "s": [4, 3, 3, 3, 3, 2]}, {"n": "Djaka Santosa", "s": [3, 3, 3, 3, 3, 3]}, {"n": "I Made Karistiawan", "s": [3, 2, 3, 3, 3, 2]}], "xl": 8.85, "note": "menggunakan hybrid unsupervised (Isolation Forest/Autoencoder) untuk mengatasi tidak adanya label fraud riil dan dipadu supervised XGBoost dengan fitur rasio biaya terhadap median faskes sejenis, serta SHAP per flag"}, {"no": 30, "id": 2381, "inov": "Plafon: Deteksi Klaim yang Melebihi Kapasitas Fisik Fasilitas Kesehatan", "tim": "Solid", "r": [{"n": "Djaka Santosa", "s": [4, 4, 3, 4, 2, 3]}, {"n": "I Made Karistiawan", "s": [null, null, null, null, null, null]}, {"n": "Agung Waluyo", "s": [null, null, null, null, null, null]}], "xl": 3.4, "note": "membandingkan volume klaim dengan batas kapasitas fisik faskes dari HFIS, sehingga selisihnya bukan skor kecurigaan melainkan jumlah yang mustahil dihasilkan. Bekerja pada data agregat tingkat faskes tanpa identitas peserta, diagnosis, atau rekam medis, dan temuannya turut membersihkan data HFIS. Inti perhitungan sengaja tanpa AI (AI hanya untuk estimasi kapasitas yang kosong), teknologi AI relatif masih kurang."}, {"no": 31, "id": 2386, "inov": "PreClaim Guard - Detect Before Submit, Explain Before Reject", "tim": "ProfHabibieBanggaSamaKita", "r": [{"n": "I Made Karistiawan", "s": [null, null, null, null, null, null]}, {"n": "Agung Waluyo", "s": [null, null, null, null, null, null]}, {"n": "Paul Donald P", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 32, "id": 2387, "inov": "NALAR AI: Pemeringkat Klaim JKN Berbasis Selisih Rupiah untuk Efisiensi Risiko Fasilitas Kesehatan", "tim": "Zidan Solo Hackathon", "r": [{"n": "Agung Waluyo", "s": [null, null, null, null, null, null]}, {"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 33, "id": 2392, "inov": "GAPURA JKN — Graph Analytics Pemberi Kerja untuk Risiko & Audit", "tim": "Nusantara Sehat", "r": [{"n": "Paul Donald P", "s": [null, null, null, null, null, null]}, {"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 34, "id": 2417, "inov": "JKN Sentinel AI: One Claim, Three AI Lenses, One Human Decision", "tim": "Trent", "r": [{"n": "Tria Sofa Purnama", "s": [null, null, null, null, null, null]}, {"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}], "xl": 0, "note": ""}, {"no": 35, "id": 2451, "inov": "SiKePo: Sistem Investigasi Kelayakan Klaim dan Pola Overbilling berbasis AI", "tim": "coba namanya ini aja", "r": [{"n": "Ikhlasul Amalia", "s": [null, null, null, null, null, null]}, {"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}, {"n": "Arman Annas Putra", "s": [4, 4, 4, 4, 3, 3]}], "xl": 3.75, "note": ""}, {"no": 36, "id": 2487, "inov": "SERA — Service Evidence & Risk Assessment", "tim": "LUNA", "r": [{"n": "Husnun Nashir", "s": [null, null, null, null, null, null]}, {"n": "Arman Annas Putra", "s": [3, 3, 2, 2, 2, 2]}, {"n": "Djaka Santosa", "s": [3, 2, 2, 2, 2, 2]}], "xl": 4.55, "note": "Kerangka TRACE–CHECK–EXPLAIN–PRIORITIZE prototipe belum terintegrasi. Seluruh uraian bersifat umum: tidak ada model, algoritma, sumber data, arsitektur, aspek keamanan/privasi dijelaskan."}];
+const W = [0.20,0.15,0.20,0.20,0.15,0.10];
+const CRIT = ["Relevansi Permasalahan","Kreativitas & Inovasi","Kualitas Teknis","Efektivitas & Dampak","Kesiapan & Skalabilitas","Keamanan & Tata Kelola"];
+let thr = 6, sortK = "proj", sortDir = -1, filter = "all", q = "", open = new Set(), T = [];
+try{ const s = localStorage.getItem("thr10"); if(s) thr = +s; }catch(e){}
+document.getElementById("thr").value = thr;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const f2 = v => v==null? "–" : v.toFixed(2).replace(".",",");
+
+function evalTeam(t){
+  const rs = t.r.map(r=>{
+    let sw=0, sws=0, filled=0;
+    r.s.forEach((v,k)=>{ if(v!=null){ sw+=W[k]; sws+=W[k]*v; filled++; }});
+    return {n:r.n, s:r.s, filled, est: filled? sws/sw : null, lo: sws+(1-sw), hi: sws+(1-sw)*4, raw:sws};
+  });
+  const done = rs.filter(r=>r.filled>0), n = done.length;
+  const avg = n? done.reduce((a,r)=>a+r.est,0)/n : null;
+  const proj = n? avg/4*10 : null;
+  const lo = rs.reduce((a,r)=>a+r.lo,0)/12*10, hi = rs.reduce((a,r)=>a+r.hi,0)/12*10;
+  let dec = null, cert = null;
+  if(n){ dec = proj>=thr? "L":"T"; cert = (lo>=thr || hi<thr)? "final":"prov"; }
+  const flags=[];
+  if(done.some(r=>r.filled<6)) flags.push(["Penilaian parsial",""]);
+  if(n && cert==="prov" && Math.abs(proj-thr)<0.6) flags.push(["Margin tipis",""]);
+  if(n>=2){ const e=done.map(r=>r.est); if(Math.max(...e)-Math.min(...e)>1.0) flags.push(["Beda pendapat",""]); }
+  return {...t, note:(t.note||"").trim(), rs, n, avg, proj, lo, hi, dec, cert, flags};
+}
+function compute(){
+  T = DATA.map(evalTeam);
+  const ranked = T.filter(t=>t.n).sort((a,b)=>b.proj-a.proj);
+  ranked.forEach((t,i)=>t.rank=i+1);
+  T.forEach(t=>{ if(!t.n) t.rank=null; });
+}
+const decLabel = t => !t.n? "Belum dinilai" : t.dec==="L"? "Lulus":"Tidak lulus";
+const decClass = t => !t.n? "p-none" : t.dec==="L"? "p-pass":"p-fail";
+
+function render(){
+  compute();
+  document.getElementById("thrv").textContent = thr.toFixed(1).replace(".",",");
+  const S = {L:0,T:0,none:0,final:0,prov:0,risk:0,note:0};
+  T.forEach(t=>{ if(!t.n) S.none++; else { S[t.dec]++; S[t.cert]++; } if(t.flags.some(f=>f[1]!=="g")) S.risk++; if(t.note) S.note++; });
+  const scored = T.length - S.none;
+
+  // ring
+  const R=80, C=2*Math.PI*R, seg=[[S.L,"var(--mint)"],[S.T,"#E8786F"],[S.none,"rgba(255,255,255,.18)"]];
+  let off=0, rs=`<svg viewBox="0 0 190 190" aria-hidden="true"><circle cx="95" cy="95" r="${R}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="18"/>`;
+  seg.forEach(([v,c])=>{ const len=v/T.length*C; if(len>0) rs+=`<circle cx="95" cy="95" r="${R}" fill="none" stroke="${c}" stroke-width="18" stroke-dasharray="${Math.max(0,len-2)} ${C}" stroke-dashoffset="${-off}"/>`; off+=len; });
+  rs+=`</svg><div class="c"><b>${S.L}</b><span>tim lulus</span><span>dari ${scored} dinilai</span></div>`;
+  document.getElementById("ring").innerHTML = rs;
+  document.getElementById("rleg").innerHTML = [["Lulus",S.L,"var(--mint)"],["Tidak lulus",S.T,"#E8786F"],["Belum dinilai",S.none,"rgba(255,255,255,.3)"],["Total tim",T.length,"transparent"]]
+    .map(([l,v,c])=>`<div><i style="background:${c}"></i>${l}<b>${v}</b></div>`).join("");
+
+  const kp = [
+    ["all","var(--accent)","Total tim",T.length,`${scored} sudah dinilai ≥1 penilai`],
+    ["L","var(--pass)","Lulus",S.L,`${T.filter(t=>t.dec==="L"&&t.cert==="final").length} final, ${T.filter(t=>t.dec==="L"&&t.cert==="prov").length} sementara`],
+    ["T","var(--fail)","Tidak lulus",S.T,`${T.filter(t=>t.dec==="T"&&t.cert==="final").length} final, ${T.filter(t=>t.dec==="T"&&t.cert==="prov").length} sementara`],
+    ["none","var(--none)","Belum dinilai",S.none,"belum ada penilai mengisi"],
+    ["risk","var(--prov)","Bertanda risiko",S.risk,"prioritaskan penilai berikutnya"],
+    ["note","var(--accent)","Ada masukan",S.note,"catatan dari tim penilai"]
+  ];
+  document.getElementById("kpis").innerHTML = kp.map(([k,c,l,v,s])=>`<button type="button" class="kpi ${filter===k?"active":""}" style="--kc:${c}" data-f="${k}"><span>${l}</span><b>${v}</b><i>${s}</i></button>`).join("");
+  document.querySelectorAll(".kpi").forEach(b=>b.onclick=()=>{ filter=b.dataset.f; document.getElementById("fs").value=filter; render(); document.getElementById("tabel").scrollIntoView({behavior:"smooth",block:"start"}); });
+
+  // podium
+  const top = T.filter(t=>t.n).sort((a,b)=>b.proj-a.proj).slice(0,5);
+  document.getElementById("podium").innerHTML = top.map(t=>`<div class="pod"><div class="rank">${t.rank}</div><div style="min-width:0"><h3>${esc(t.tim)}</h3><p title="${esc(t.inov)}">${esc(t.inov)}</p><div class="sc">${f2(t.proj)} <small>/10 · ${t.n} penilai${t.cert==="prov"?" · sementara":""}</small></div></div></div>`).join("");
+
+  // chart
+  const CC = T.filter(t=>t.n).sort((a,b)=>b.proj-a.proj);
+  const L=150, Rr=20, top0=26, rh=22, w=620, h=top0+CC.length*rh+26;
+  const x = v => L + (v-2)/8*(w-L-Rr);
+  let s = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Total nilai dan rentang per tim">`;
+  for(let v=2; v<=10; v++) s+=`<line x1="${x(v)}" x2="${x(v)}" y1="${top0-6}" y2="${h-22}" stroke="var(--line)"/><text x="${x(v)}" y="${h-8}" text-anchor="middle">${v}</text>`;
+  s+=`<rect x="${x(thr)}" y="${top0-6}" width="${x(10)-x(thr)}" height="${h-22-top0+6}" fill="var(--pass-soft)" opacity=".55"/>`;
+  CC.forEach((t,i)=>{
+    const y = top0 + i*rh + rh/2, col = t.dec==="L"? "var(--pass)":"var(--fail)";
+    const nm = t.tim.length>22? t.tim.slice(0,21)+"…" : t.tim;
+    s+=`<text class="tn" x="${L-8}" y="${y+4}" text-anchor="end"><title>${esc(t.tim)}</title>${esc(nm)}</text>`;
+    s+=`<rect x="${x(t.lo)}" y="${y-4}" width="${Math.max(2,x(t.hi)-x(t.lo))}" height="8" rx="4" fill="var(--line)"/>`;
+    s+=`<circle cx="${x(t.proj)}" cy="${y}" r="5.5" fill="${col}" stroke="var(--surface)" stroke-width="1.5"><title>${esc(t.tim)}: ${f2(t.proj)} (rentang ${f2(t.lo)}–${f2(t.hi)})</title></circle>`;
+  });
+  s+=`<line x1="${x(thr)}" x2="${x(thr)}" y1="${top0-10}" y2="${h-22}" stroke="var(--accent)" stroke-width="2"/><text x="${x(thr)+4}" y="${top0-12}" style="fill:var(--accent);font-weight:600">ambang ${thr.toFixed(1).replace(".",",")}</text></svg>`;
+  document.getElementById("chart").innerHTML = s;
+
+  // raters
+  const RM = {};
+  DATA.forEach(t=>t.r.forEach(r=>{ if(!r.n) return; RM[r.n] ??= {a:0,d:0,p:0}; RM[r.n].a++; const f=r.s.filter(v=>v!=null).length; if(f===6) RM[r.n].d++; else if(f) RM[r.n].p++; }));
+  document.getElementById("raters").innerHTML = Object.entries(RM).sort((a,b)=>b[1].d/b[1].a - a[1].d/a[1].a).map(([n,v])=>
+    `<div class="rrow"><span>${esc(n)}${v.p?` <span class="muted">(+${v.p} parsial)</span>`:""}</span><span class="bar"><i style="width:${v.d/v.a*100}%"></i></span><span class="num" style="text-align:right">${v.d}/${v.a}</span></div>`).join("");
+
+  // table
+  let rows = T.filter(t=>{
+    if(filter==="risk"){ if(!t.flags.some(f=>f[1]!=="g")) return false; }
+    else if(filter==="note"){ if(!t.note) return false; }
+    else if(filter==="none"){ if(t.n) return false; }
+    else if(filter==="L"||filter==="T"){ if(t.dec!==filter) return false; }
+    else if(filter==="prov"||filter==="final"){ if(t.cert!==filter) return false; }
+    if(q){ const hay=(t.tim+" "+t.inov+" "+t.id+" "+t.note+" "+t.r.map(r=>r.n).join(" ")).toLowerCase(); if(!hay.includes(q)) return false; }
+    return true;
+  });
+  const key = t => sortK==="tim"? t.tim.toLowerCase() : sortK==="st"? (!t.n?2:t.dec==="L"?0:1) : sortK==="rank"? (t.rank ?? 999) : (t[sortK] ?? -1);
+  rows.sort((a,b)=>{ const A=key(a),B=key(b); return (A>B?1:A<B?-1:0)*sortDir; });
+  document.getElementById("countTxt").textContent = `Menampilkan ${rows.length} dari ${T.length} tim`;
+  document.getElementById("tb").innerHTML = rows.map(t=>{
+    const dots = t.rs.map(r=>`<span class="dot ${r.filled===6?"f":r.filled?"h":""}" title="${esc(r.n)}: ${r.filled}/6 kriteria"></span>`).join("");
+    const mcol = t.dec==="L"? "var(--pass)":"var(--fail)";
+    const main = `<tr class="row" data-id="${t.id}" tabindex="0" aria-expanded="${open.has(t.id)}">
+      <td class="r num muted">${t.rank ?? "–"}</td>
+      <td><div class="tname">${esc(t.tim)} <span class="muted num" style="font-weight:400;font-size:12px">#${t.id}</span></div><div class="tinov">${esc(t.inov)}</div></td>
+      <td style="white-space:nowrap"><span class="dots">${dots}</span> <span class="muted num">${t.n}/3</span></td>
+      <td class="r">${t.n? `<div class="score"><b>${f2(t.proj)}</b><span class="meter"><i style="width:${t.proj*10}%;background:${mcol}"></i><s style="left:${thr*10}%"></s></span></div>` : `<span class="muted">–</span>`}</td>
+      <td class="r num muted" style="white-space:nowrap">${t.n? f2(t.lo)+"–"+f2(t.hi) : "2,50–10,00"}</td>
+      <td><span class="pill ${decClass(t)}">${decLabel(t)}</span>${t.n?`<span class="cert">${t.cert==="final"?"final":"sementara"}</span>`:""}</td>
+      <td>${t.note? `<div class="fb"><div class="clip">${esc(t.note)}</div></div>` : `<div class="fb empty">Belum ada masukan</div>`}</td>
+      <td><div class="flags">${t.flags.map(f=>`<span class="flag ${f[1]}">${f[0]}</span>`).join("")}</div></td></tr>`;
+    if(!open.has(t.id)) return main;
+    const cards = t.rs.map((r,j)=>`<div class="rcard"><h4><span>Penilai ${j+1}: ${esc(r.n||"–")}</span><span class="num">${r.filled? f2(r.est):"belum"}</span></h4>
+      <table>${CRIT.map((c,k)=>`<tr><td>${c} <span class="muted">(${Math.round(W[k]*100)}%)</span></td><td class="r num">${r.s[k]??"–"}</td></tr>`).join("")}</table></div>`).join("");
+    return main + `<tr class="detail"><td colspan="8"><div class="dgrid">${cards}</div>${t.note?`<div class="fullnote"><b>Masukan tim penilai</b>${esc(t.note)}</div>`:""}</td></tr>`;
+  }).join("") || `<tr><td colspan="8" class="muted" style="text-align:center;padding:24px">Tidak ada tim yang cocok dengan filter ini.</td></tr>`;
+  document.querySelectorAll("tr.row").forEach(tr=>{
+    const tog=()=>{ const id=+tr.dataset.id; open.has(id)?open.delete(id):open.add(id); render(); };
+    tr.onclick=tog; tr.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();tog();} };
+  });
+  document.querySelectorAll("th[data-k]").forEach(th=>{
+    th.textContent = th.textContent.replace(/ [▲▼]$/,"") + (th.dataset.k===sortK? (sortDir>0?" ▲":" ▼"):"");
+  });
+}
+
+// ---------- Excel ----------
+function toast(msg){ const el=document.getElementById("toast"); el.textContent=msg; el.hidden=false; clearTimeout(toast.t); toast.t=setTimeout(()=>el.hidden=true,3500); }
+function buildWorkbook(){
+  compute();
+  const list = [...T].sort((a,b)=>(b.proj??-1)-(a.proj??-1));
+  const rows = list.map((t,i)=>({
+    "No": i+1,
+    "Nama Tim": t.tim,
+    "Judul Inovasi": t.inov,
+    "Total Nilai (Proyeksi /10)": t.n? Math.round(t.proj*100)/100 : null,
+    "Keputusan": decLabel(t),
+    "Masukan dari Tim Penilai": t.note || "-"
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws["!cols"] = [{wch:5},{wch:30},{wch:60},{wch:14},{wch:14},{wch:80}];
+  ws["!autofilter"] = {ref: ws["!ref"]};
+  const info = XLSX.utils.aoa_to_sheet([
+    ["Keterangan"],
+    ["Ambang lulus (skala maks. 10)", thr],
+    ["Total Nilai", "Rata-rata nilai penilai yang sudah mengisi ÷ 4 × 10"],
+    ["Keputusan", "Lulus jika Total Nilai ≥ ambang. Keputusan sementara dihitung sesuai hasilnya."],
+    ["Diunduh", new Date().toLocaleString("id-ID")]
+  ]);
+  info["!cols"]=[{wch:30},{wch:70}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Hasil Seleksi");
+  XLSX.utils.book_append_sheet(wb, info, "Keterangan");
+  return XLSX.write(wb, {bookType:"xlsx", type:"array"});
+}
+let DL = null;
+async function download(){
+  if(typeof XLSX==="undefined"){ toast("Pustaka Excel belum termuat. Periksa koneksi lalu coba lagi."); return; }
+  const buf = buildWorkbook();
+  const d = new Date(), stamp = d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
+  const filename = `Hasil_Seleksi_Proposal_2026_${stamp}.xlsx`;
+  const blob = new Blob([buf], {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+  if(DL){
+    try{ await DL.save({filename, data:blob}); toast("File Excel siap disimpan."); return; }
+    catch(e){ if(e && (e.code==="cancelled"||e.code==="declined")){ toast("Unduhan dibatalkan."); return; } }
+  }
+  try{
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1000);
+    toast("File Excel diunduh.");
+  }catch(e){ toast("Unduhan tidak dapat dijalankan di tampilan ini."); }
+}
+document.getElementById("dlTop").onclick = download;
+document.getElementById("dlTable").onclick = download;
+if(window.claude && typeof window.claude.use==="function"){ window.claude.use("downloads").then(d=>{ DL=d; }).catch(()=>{}); }
+
+document.getElementById("thr").oninput = e=>{ thr=+e.target.value; try{localStorage.setItem("thr10",thr);}catch(_){} render(); };
+document.getElementById("q").oninput = e=>{ q=e.target.value.trim().toLowerCase(); render(); };
+document.getElementById("fs").onchange = e=>{ filter=e.target.value; render(); };
+document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=(k==="tim"||k==="rank"||k==="st")?1:-1;} render(); });
+render();
+</script>
+
+</body>
+</html>
