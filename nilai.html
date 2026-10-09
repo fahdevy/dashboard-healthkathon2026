@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Form Penilaian Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EEF3F0; --surface:#FFFFFF; --ink:#142320; --muted:#586a64; --line:#D7E0DB; --soft:#E6EDE9;
+  --band:#0B3B36; --band-ink:#E8F5F1; --band-muted:#9CC4BA; --mint:#3FD1B5;
+  --accent:#0E6B5E; --accent-ink:#FFFFFF; --accent-soft:#D3ECE6;
+  --pass:#23804C; --pass-soft:#DAF1E2; --fail:#B5372F; --fail-soft:#F8E0DD;
+  --prog:#A36A0E; --prog-soft:#F7EAD0; --none:#6B7A74; --none-soft:#E3E9E6;
+  --shadow:0 1px 2px rgba(11,59,54,.06),0 8px 24px -12px rgba(11,59,54,.18);
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#0E1513; --surface:#162019; --ink:#E3ECE8; --muted:#95A59E; --line:#26332E; --soft:#1C2724;
+  --band:#0A2926; --band-ink:#E3F2EE; --band-muted:#86B1A6; --mint:#4FDCC0;
+  --accent:#4DBBA8; --accent-ink:#06231E; --accent-soft:#16352F;
+  --pass:#5CC285; --pass-soft:#153122; --fail:#EF8078; --fail-soft:#3A1B19;
+  --prog:#E2B060; --prog-soft:#3A2B12; --none:#8A968F; --none-soft:#222C29;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.5);
+}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;margin:0;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.015em;text-wrap:balance}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- header ---------- */
+.band{background:var(--band);color:var(--band-ink);padding:22px 16px 70px;position:relative;overflow:hidden}
+.band::before{content:"";position:absolute;inset:0;background:
+  repeating-linear-gradient(90deg,transparent 0 79px,rgba(255,255,255,.035) 79px 80px),
+  repeating-linear-gradient(0deg,transparent 0 79px,rgba(255,255,255,.035) 79px 80px);pointer-events:none}
+.wrap{max-width:1100px;margin:0 auto;position:relative}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;font-weight:600;color:var(--mint)}
+.pill{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;background:rgba(255,255,255,.1);color:var(--band-ink);border:0}
+.pill i{width:8px;height:8px;border-radius:50%;background:#9aa;display:inline-block}
+.pill.ok i{background:var(--mint)} .pill.warn i{background:#E2B060} .pill.err i{background:#EF8078}
+.pill.btn{cursor:pointer}
+.band h1{font-size:clamp(26px,5vw,42px);font-weight:800;line-height:1.05;margin:14px 0 8px}
+.band p{color:var(--band-muted);margin:0;max-width:62ch}
+.nav{display:flex;gap:6px;margin-top:20px;flex-wrap:wrap}
+.nav a{padding:8px 16px;border-radius:999px;color:var(--band-ink);text-decoration:none;font-weight:600;font-size:14px;background:rgba(255,255,255,.08)}
+.nav a[aria-current=page]{background:var(--mint);color:#08302b}
+main{max-width:1100px;margin:-48px auto 60px;padding:0 16px;position:relative}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.banner{border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.banner.warn{background:var(--prog-soft);color:var(--prog)} .banner.err{background:var(--fail-soft);color:var(--fail)}
+.banner.lock{background:var(--none-soft);color:var(--ink)}
+.banner button{margin-left:auto;border:1px solid currentColor;background:transparent;border-radius:999px;padding:3px 12px;font-weight:600;white-space:nowrap}
+
+/* ---------- beranda ---------- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.kpi{padding:14px 16px}
+.kpi b{display:block;font-family:var(--display);font-size:30px;line-height:1.1}
+.kpi span{font-size:13px;color:var(--muted)}
+.sec-h{display:flex;justify-content:space-between;align-items:baseline;margin:22px 4px 10px;gap:10px;flex-wrap:wrap}
+.sec-h h2{font-size:20px}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.person{padding:16px;text-align:left;width:100%;display:block;border:1px solid var(--line);background:var(--surface);border-radius:16px;box-shadow:var(--shadow);transition:transform .12s,border-color .12s}
+.person:hover{transform:translateY(-2px);border-color:var(--accent)}
+.person .top{display:flex;gap:12px;align-items:center}
+.av{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:16px;flex:none}
+.person b{display:block;font-size:16px;line-height:1.25}
+.person small{color:var(--muted)}
+.bar{height:8px;border-radius:99px;background:var(--soft);overflow:hidden;margin:14px 0 6px}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.person .meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+
+/* ---------- daftar tim ---------- */
+.me-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:16px;margin-bottom:14px}
+.me-head .grow{flex:1;min-width:200px}
+.me-head h2{font-size:22px}
+.linkbtn{background:none;border:0;color:var(--accent);font-weight:600;padding:4px 0;text-decoration:underline}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;min-height:38px}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip small{opacity:.75;font-weight:500;margin-left:4px}
+.search{flex:1;min-width:180px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 16px;min-height:40px}
+.list{display:grid;gap:10px}
+.team{display:grid;grid-template-columns:1fr auto;gap:8px 16px;padding:14px 16px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:14px;width:100%;text-align:left}
+button.team:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+.team .t1{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.team h3{font-size:16px;line-height:1.3;margin:2px 0}
+.team .j{color:var(--muted);font-size:13.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.team .act{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:9px 18px;font-weight:600;border:1px solid transparent;min-height:40px}
+.btn-p{background:var(--accent);color:var(--accent-ink)} .btn-p:hover{filter:brightness(1.08)}
+.btn-p[disabled]{opacity:.45;cursor:not-allowed;filter:none}
+.btn-o{background:var(--surface);border-color:var(--line)} .btn-o:hover{border-color:var(--accent)}
+.st{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 11px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.s-todo{background:var(--none-soft);color:var(--none)} .s-draft{background:var(--prog-soft);color:var(--prog)}
+.s-done{background:var(--pass-soft);color:var(--pass)} .s-lock{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.s-fail{background:var(--fail-soft);color:var(--fail)} .s-rev{background:#E9DDF7;color:#5B2E91}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .s-rev{background:#2E2142;color:#C9A8F0}}
+.empty{padding:36px 16px;text-align:center;color:var(--muted)}
+@media (max-width:700px){
+  .rtab thead{display:none}
+  .rtab,.rtab tbody{display:block}
+  .rtab tr{display:block;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .rtab td{display:block;border:0;padding:3px 0}
+  .rtab td[data-l]::before{content:attr(data-l);display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:4px}
+  .rtab td.idc{display:none}
+}
+@media (max-width:640px){.team{grid-template-columns:1fr}.team .act{flex-direction:row;align-items:center;justify-content:space-between}}
+
+/* ---------- ringkasan ---------- */
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--soft);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.rv{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;padding:2px 9px;border-radius:99px;margin:2px 4px 2px 0;background:var(--none-soft);color:var(--none)}
+.rv.me{outline:2px solid var(--accent)}
+.rv.d{background:var(--pass-soft);color:var(--pass)} .rv.p{background:var(--prog-soft);color:var(--prog)}
+
+/* ---------- panel penilaian ---------- */
+.scrim{position:fixed;inset:0;background:rgba(5,20,17,.55);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;top:0;right:0;bottom:0;width:min(760px,100%);background:var(--bg);z-index:41;transform:translateX(102%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(0,0,0,.25)}
+.sheet.on{transform:none}
+.sh-head{background:var(--band);color:var(--band-ink);padding:14px 16px 16px}
+.sh-head .row{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.sh-head h2{font-size:21px;line-height:1.2;margin:6px 0 4px}
+.sh-head p{margin:0;color:var(--band-muted);font-size:13.5px}
+.x{background:rgba(255,255,255,.12);color:var(--band-ink);border:0;width:38px;height:38px;border-radius:50%;font-size:20px;flex:none}
+.sh-body{flex:1;overflow-y:auto;padding:14px 16px 24px;-webkit-overflow-scrolling:touch}
+.info{padding:12px 14px;margin-bottom:12px;font-size:14px}
+.info .line{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.file{font-family:var(--mono);font-size:12.5px;background:var(--soft);padding:2px 8px;border-radius:6px;word-break:break-all}
+.crit{padding:14px;margin-bottom:12px}
+.crit-h{display:flex;gap:12px;align-items:flex-start}
+.kn{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;flex:none;font-family:var(--mono)}
+.crit-h b{display:block;font-size:16px;line-height:1.3}
+.crit-h small{color:var(--muted)}
+.crit .ket{margin:8px 0 12px;color:var(--muted);font-size:13.5px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.seg button{border:1.5px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 4px;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .1s}
+.seg button b{font-family:var(--display);font-size:24px;line-height:1}
+.seg button span{font-size:11.5px;color:var(--muted);margin-top:3px}
+.seg button:hover:not([disabled]){border-color:var(--accent)}
+.seg button[aria-checked=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg button[aria-checked=true] span{color:inherit;opacity:.85}
+.seg button[disabled]{cursor:default}
+.ind{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:13.5px;min-height:42px}
+.ind.none{background:var(--soft);color:var(--muted)}
+details.all{margin-top:8px;font-size:13px;color:var(--muted)}
+details.all summary{cursor:pointer;font-weight:600;color:var(--accent)}
+details.all div{margin:6px 0;display:flex;gap:8px} details.all div b{color:var(--ink);flex:none}
+.sh-foot{border-top:1px solid var(--line);background:var(--surface);padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.sh-foot .score{flex:1;min-width:150px}
+.sh-foot .score b{font-family:var(--display);font-size:26px;line-height:1}
+.sh-foot .score small{display:block;color:var(--muted);font-size:12.5px}
+.dots{display:flex;gap:4px;margin-top:4px}
+.dots i{width:18px;height:6px;border-radius:99px;background:var(--line)} .dots i.on{background:var(--accent)}
+.sh-foot .btns{display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:520px){.sh-foot .btns{width:100%}.sh-foot .btns .btn{flex:1}}
+
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:500;z-index:60;opacity:0;pointer-events:none;transition:all .2s;max-width:92vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%)}
+#toast.err{background:var(--fail);color:#fff}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <div class="topbar">
+      <span class="eyebrow">Healthkathon 2026 &middot; Seleksi Proposal</span>
+      <button class="pill btn" id="sync" type="button" aria-live="polite"><i></i><span id="syncT">Memuat...</span></button>
+    </div>
+    <h1>Form Penilaian Proposal</h1>
+    <p>Pilih nama Anda, nilai proposal yang ditugaskan dengan skala 1-4 untuk 6 kriteria, lalu simpan. Tanpa login.</p>
+    <nav class="nav" aria-label="Menu"><a href="#/" id="nHome">Penilai</a><a href="#/ringkasan" id="nSum">Ringkasan semua tim</a></nav>
+  </div>
+</header>
+<main id="app"></main>
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"></aside>
+<div id="toast" role="status"></div>
+
+<script>
+/*DATA_START*/
+const CFG={"api": "https://script.google.com/macros/s/AKfycbzUCSNR0ndfYf06OSptU6OaTK92mczCieVWuQHtT6CTw4731VDluukiVX8YAdMhTa9VBA/exec", "sp": "https://bpjskesehatano365-my.sharepoint.com/:f:/g/personal/reza_fahdevy_bpjs-kesehatan_go_id/IgANs0qjyaf8SqgFsG0hYDXqAYxWDK59eDr85C_s3AiC_IY?e=47TJun", "nilai": "05/10/2026", "submisi": "09/10/2026"};
+const POOL=["I Made Karistiawan", "Djaka Santosa", "Wahyu Satriyo Wibowo", "Aries Kurniwan", "Ulfah Nur Mukharomah", "Ardhy Widhiantoro", "Septian Firmansyah"];
+const CRIT=[{"n": "Relevansi Permasalahan", "w": 0.2, "ket": "Menilai seberapa penting dan nyata permasalahan, kejelasan problem statement, dan kesesuaian solusi dengan kebutuhan BPJS Kesehatan dalam program JKN.", "ind": ["Permasalahan tidak jelas, tidak penting, atau tidak relevan dengan program JKN/BPJS Kesehatan. Solusi tidak menjawab permasalahan yang diidentifikasi.", "Permasalahan cukup relevan, tetapi belum didukung pemahaman yang memadai terhadap kebutuhan atau proses bisnis. Solusi hanya menjawab sebagian permasalahan.", "Permasalahan jelas dan relevan dengan kebutuhan JKN/BPJS Kesehatan. Solusi menjawab sebagian besar permasalahan dan sesuai dengan proses bisnis serta ketentuan yang berlaku.", "Permasalahan sangat jelas, nyata, strategis, dan berdampak signifikan terhadap JKN/BPJS Kesehatan. Solusi secara tepat dan menyeluruh menjawab akar permasalahan serta sesuai dengan proses bisnis dan ketentuan yang berlaku."]}, {"n": "Kreativitas, Inovasi, dan Keunikan", "w": 0.15, "ket": "Menilai kebaruan, kreativitas solusi, serta nilai tambah penggunaan AI dibandingkan metode atau solusi yang sudah tersedia.", "ind": ["Solusi bersifat konvensional dan hampir tidak memiliki unsur inovasi. Penggunaan AI tidak memberikan nilai tambah yang jelas.", "Solusi memiliki unsur inovasi, tetapi masih menyerupai solusi yang sudah tersedia. Pemanfaatan AI memberikan nilai tambah yang terbatas.", "Solusi memiliki pendekatan yang kreatif dan inovatif. AI dimanfaatkan secara tepat untuk menghasilkan nilai tambah yang jelas dibandingkan pendekatan konvensional.", "Solusi memiliki pendekatan yang sangat inovatif dan berbeda secara signifikan dari solusi yang tersedia. Pemanfaatan AI memberikan nilai tambah yang kuat dan berpotensi menjadi pendekatan baru yang dapat diterapkan pada JKN."]}, {"n": "Kualitas Teknologi/ Teknis", "w": 0.2, "ket": "Menilai ketepatan pemilihan teknologi AI, kualitas rancangan dan model, kualitas data, integrasi sistem, serta kemampuan tim menjelaskan dan membuktikan pendekatan teknis.", "ind": ["Teknologi/model tidak sesuai dengan permasalahan. Rancangan teknis lemah, kualitas data tidak memadai, dan tim tidak mampu menjelaskan pendekatan teknis yang digunakan.", "Teknologi/model cukup sesuai, tetapi masih terdapat kelemahan pada data, model, arsitektur, integrasi, atau proses pengujian atau ada beberapa masalah teknis yang kurang teratasi. Penjelasan teknis masih terbatas.", "Teknologi/model sesuai dengan permasalahan. Data, arsitektur, model, dan proses pengujian dirancang dengan baik. Tim mampu menjelaskan pendekatan teknis dan hasil pengujian dengan jelas.", "Teknologi/model sangat tepat dan dirancang secara matang. Kualitas data, arsitektur, model, integrasi, pengujian, performa, dan reliability diperhatikan dengan baik. Tim mampu menjelaskan, membuktikan, dan mempertanggungjawabkan keputusan teknis secara mendalam."]}, {"n": "Efektivitas dan Dampak", "w": 0.2, "ket": "Menilai kemampuan solusi menghasilkan perbaikan yang nyata dan terukur terhadap proses, layanan, kualitas, efisiensi, atau manfaat program JKN.", "ind": ["Solusi tidak menunjukkan manfaat yang jelas dan tidak memberikan perbaikan berarti terhadap permasalahan. Dampak sulit dibuktikan.", "Solusi memberikan manfaat, tetapi dampaknya masih terbatas atau belum didukung ukuran keberhasilan yang jelas.", "Solusi memberikan perbaikan yang signifikan dan dapat diukur, misalnya peningkatan efisiensi, kecepatan, akurasi, kualitas layanan, atau pengurangan beban kerja.", "Solusi memberikan dampak yang sangat signifikan, terukur, dan relevan terhadap BPJS Kesehatan maupun peserta JKN. Manfaat didukung hasil pengujian, benchmark, atau proof of concept yang meyakinkan."]}, {"n": "Kesiapan Implementasi Produk dan Skalabilitas", "w": 0.15, "ket": "Menilai apakah solusi dapat dikembangkan dari prototype menjadi produk yang dapat digunakan secara nyata, dioperasikan, dipelihara, dan dikembangkan pada skala yang lebih luas.", "ind": ["Masih berupa konsep/ide. Prototype belum berfungsi atau belum menunjukkan kemampuan untuk diimplementasikan. Kebutuhan implementasi belum jelas.", "Prototype sudah dapat menunjukkan fungsi utama, tetapi masih membutuhkan banyak pengembangan sebelum dapat digunakan. Aspek integrasi, operasional, pemeliharaan, atau kebutuhan sumber daya belum jelas.", "Produk/prototype sudah berfungsi dengan baik dan memiliki rancangan implementasi yang jelas, termasuk integrasi, infrastruktur, operasional, pemeliharaan, dan kebutuhan sumber daya. Solusi berpotensi dikembangkan ke skala yang lebih luas.", "Produk sangat siap untuk diimplementasikan atau dipilotkan. Arsitektur, integrasi, infrastruktur, operasional, pemeliharaan, deployment, dan monitoring telah dipersiapkan dengan baik. Solusi dapat diskalakan ke unit, proses, atau jumlah pengguna yang lebih besar."]}, {"n": "Keamanan, Privasi, dan Tata Kelola", "w": 0.1, "ket": "Menilai kemampuan solusi mengelola risiko keamanan dan AI, melindungi data pribadi, serta memenuhi prinsip dan ketentuan yang berlaku.", "ind": ["Tidak memperhatikan keamanan, privasi, atau risiko penggunaan AI. Data dapat digunakan tanpa kontrol yang memadai dan terdapat risiko tinggi terhadap kebocoran atau penyalahgunaan data.", "Sudah memperhatikan keamanan dan privasi secara dasar, tetapi masih terdapat kelemahan pada pengamanan data, akses, penggunaan model, atau pengelolaan risiko AI.", "Keamanan, privasi, dan risiko AI telah diperhitungkan dalam rancangan. Terdapat pengendalian terhadap akses, penggunaan data, keamanan sistem, dan risiko model serta memperhatikan ketentuan yang berlaku.", "Keamanan, privasi, dan tata kelola telah menjadi bagian integral dari desain produk (privacy/security by design). Terdapat pengelolaan risiko AI, kontrol akses, perlindungan data, audit trail, pengelolaan model, monitoring, serta mekanisme penanganan insiden dan kepatuhan yang jelas."]}];
+const TEAMS=[{"id":"1987","tim":"ASTINA","inov":"ASTINA : PENGEMBANGAN ANALISIS SISTEM TRANSAKSI IDENTIFIKASI NILAI ANOMALI KLAIM ASURANSI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"1987_PROPOSAL_ASTINA.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Paul Donald P","s":[4,3,2,3,3,3]},{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]},{"n":"Ikhlasul Amalia","s":[4,4,4,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,4,3,3,3]}]},{"id":"1994","tim":"ArcXora","inov":"JKN Verify: Verifikasi Peristiwa Layanan untuk Deteksi Phantom Billing","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"1994_JKN_Verify_Healthkathon_2026_v3.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Tria Sofa Purnama","s":[4,3,3,4,4,4]},{"n":"Ikhlasul Amalia","s":[4,3,3,4,3,3]},{"n":"Husnun Nashir","s":[4,3,2,2,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,3,4,3,4]}]},{"id":"2021","tim":"Kapan ke kampus nya","inov":"Jejak JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2021_Jejak JKN.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Ikhlasul Amalia","s":[4,3,3,3,2,3]},{"n":"Husnun Nashir","s":[4,4,4,3,3,3]},{"n":"Arman Annas Putra","s":[4,4,4,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,2,3]}]},{"id":"2022","tim":"hai kamu iya kamu","inov":"JAGA-Klaim","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2022_JAGA-Klaim_Proposal_Healthkathon_2026.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Husnun Nashir","s":[4,3,3,3,3,3]},{"n":"Arman Annas Putra","s":[4,4,4,3,3,3]},{"n":"Djaka Santosa","s":[3,3,4,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,2,3]}]},{"id":"2052","tim":"Idea Space","inov":"SAFETING JKN : Sistem Deteksi Dini & Skoring Risiko Underwriting JKN","kat":"Efisiensi Risiko pada Peserta JKN","f":null,"fw":"Berkas revisi belum tersedia di folder proposals. Jangan menilai memakai proposal lama.","lk":0,"dec":"","fd":"","rv":"Hasil revisi, menggantikan proposal sebelumnya (Tidak lulus, flag 28/09/2026)","r":[{"n":"Aries Kurniwan","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2058","tim":"Kicau Mania","inov":"PERISAI Platform Evaluasi Resiko Integrasi Sistem AI untuk JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2058_PERISAI-Proposal.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Djaka Santosa","s":[3,2,2,2,2,1]},{"n":"I Made Karistiawan","s":[3,2,2,2,2,1]},{"n":"Agung Waluyo","s":[3,3,2,2,2,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2079","tim":"Ical Health UwU","inov":"CBG-SENTINEL, Asisten Verifikasi Kode Klaim INA-CBG Sebelum Klaim Dikirim","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2079_Proposal-CBG-Sentinel-Healthkathon-2026.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"I Made Karistiawan","s":[4,3,4,3,3,3]},{"n":"Agung Waluyo","s":[4,3,3,3,2,4]},{"n":"Paul Donald P","s":[4,3,3,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,4,4,3,3]}]},{"id":"2089","tim":"Clayton","inov":"NADI-JKN: Sistem analitik risiko untuk mendukung prioritas pemeriksaan fasilitas kesehatan.","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2089_FINAL-NADI-JKN-Healthkathon-2026 (1).pdf","fw":"","lk":1,"dec":"L","fd":"07/10/2026","rv":"","r":[{"n":"Agung Waluyo","s":[4,3,4,3,4,3]},{"n":"Paul Donald P","s":[4,2,3,3,3,2]},{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,3,3,4,3,3]}]},{"id":"2090","tim":"Null Pointer","inov":"Automated Engine untuk Deteksi Over-Limit dan Penggelembungan Klaim Obat JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2090_Proposal Healthkathon 2026 - BPJS Kesehatan.pdf.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Paul Donald P","s":[3,3,3,3,3,3]},{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]},{"n":"Ikhlasul Amalia","s":[4,4,3,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,4,4,3]}]},{"id":"2091","tim":"WNI Seumur Hidup","inov":"PANDU JKN — Sistem Multi-Agent AI untuk Kejelasan Kepesertaan, Status, dan Kesehatan Peserta JKN","kat":"Efisiensi Risiko pada Peserta JKN","f":"2091_Proposal Healthkathon BPJS - Tim WNI Seumur Hidup.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Tria Sofa Purnama","s":[4,4,3,3,2,3]},{"n":"Ikhlasul Amalia","s":[4,4,3,3,2,3]},{"n":"Husnun Nashir","s":[3,3,2,2,2,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,3,3,3,3]}]},{"id":"2105","tim":"Labda Sari","inov":"JKN CAPITA- GUARD AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2105_JKN CAPITA-GUARD AI.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Ikhlasul Amalia","s":[3,3,3,4,3,2]},{"n":"Husnun Nashir","s":[2,2,1,1,1,2]},{"n":"Arman Annas Putra","s":[4,3,3,3,3,2]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,3,4,4,3]}]},{"id":"2110","tim":"BastionGate","inov":"BastionGate: Health Claim Integrity Gateway","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2110_Proposal-BastionGate-for-JKN-Healthkathon-2026_submit.pdf","fw":"","lk":1,"dec":"T","fd":"28/09/2026","rv":"","r":[{"n":"Husnun Nashir","s":[3,2,2,2,2,3]},{"n":"Arman Annas Putra","s":[4,2,2,3,3,3]},{"n":"Djaka Santosa","s":[4,2,1,2,2,2]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,4,3,3,4]}]},{"id":"2114","tim":"Arsa AI","inov":"ARSA: JKN Risk Intelligence Platform","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2114_Arsa_AI_Submission.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Arman Annas Putra","s":[4,3,3,3,3,4]},{"n":"Djaka Santosa","s":[4,4,4,3,3,3]},{"n":"I Made Karistiawan","s":[3,4,4,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2127","tim":"SISOslo","inov":"SIMPUL (Sistem Identifikasi Modus Penyalahgunaan Utilisasi Layanan)","kat":"Efisiensi Risiko pada Peserta JKN","f":"2127_healthkathon-2026-si-tela-proposal-deck.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Djaka Santosa","s":[4,4,3,3,3,2]},{"n":"I Made Karistiawan","s":[4,3,3,3,3,3]},{"n":"Agung Waluyo","s":[3,4,4,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2133","tim":"Team","inov":"CAKRA Sistem AI Rekonsiliasi Resume Medis untuk Mencegah Anomali Klaim Faskes JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2133_CAKRA Sistem AI Rekonsiliasi Resume Medis untuk Mencegah Anomali Klaim Faskes JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Agung Waluyo","s":[4,3,3,2,3,3]},{"n":"Paul Donald P","s":[3,2,2,2,3,2]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,4,4,4,3]}]},{"id":"2156","tim":"Rapat RT Bahas Iuran BPJS Nunggak 3 Bulan","inov":"Riskora - Gatekeeper AI Pra-Purifikasi Dokumen Klaim JKN Berbasis Multi-Layer Neural Network","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2156_Healthkathon 2026_Proposal_Riskora.pdf","fw":"","lk":1,"dec":"L","fd":"07/10/2026","rv":"","r":[{"n":"Agung Waluyo","s":[3,3,2,2,1,3]},{"n":"Paul Donald P","s":[4,4,2,2,2,2]},{"n":"Tria Sofa Purnama","s":[3,3,3,3,3,2]},{"n":"Wahyu Satriyo Wibowo","s":[4,3,4,3,3,3]}]},{"id":"2160","tim":"AnoaByte","inov":"CLAIMGUARD AI: Sistem Deteksi Dini Phantom Billing Berbasis Analitik Data Multidimensi dan Risk Scor","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2160_CLAIMGUARDAI - Sistem Deteksi Dini Phantom Billing Berbasis Analitik Data Multidimensi dan Risk Scoring untuk Penguatan Verifikasi Klaim JKN.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Paul Donald P","s":[3,2,2,2,2,3]},{"n":"Tria Sofa Purnama","s":[4,3,3,2,3,3]},{"n":"Ikhlasul Amalia","s":[4,3,3,2,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,3,3,3,4,3]}]},{"id":"2163","tim":"Tokenemia","inov":"SatuPantau: Platform Integritas Layanan JKN Berbasis Smart Ticketing dan Agentic Multimodal AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2163_Proposal_Healthkathon2026_EfisiensiRisiko_SatuPantau.pdf","fw":"","lk":1,"dec":"T","fd":"28/09/2026","rv":"","r":[{"n":"Tria Sofa Purnama","s":[2,3,2,2,2,1]},{"n":"Ikhlasul Amalia","s":[2,1,2,2,2,1]},{"n":"Husnun Nashir","s":[2,3,4,1,2,1]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2180","tim":"TERSERAH","inov":"SIGAP, Smarter Protection for Sustainable JKN (Sistem Identifikasi & Analitik Risiko Anti-Penyalahgu","kat":"Efisiensi Risiko pada Peserta JKN","f":"2180_SIGAP-Smarter-Protection-for-Sustainable-JKN - terserah.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Ikhlasul Amalia","s":[3,3,2,3,2,3]},{"n":"Husnun Nashir","s":[3,2,2,3,2,2]},{"n":"Arman Annas Putra","s":[4,4,4,3,3,4]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2211","tim":"Helta","inov":"ClaimGuard AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2211_Proposal_ClaimGuardAI_Healthkathon2026.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Husnun Nashir","s":[4,4,4,4,4,3]},{"n":"Arman Annas Putra","s":[4,3,4,3,3,4]},{"n":"Djaka Santosa","s":[4,3,4,3,3,4]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,2,3]}]},{"id":"2217","tim":"MedAI Nexus","inov":"JELAS_Jejak Evaluasi Layanan dan Analisis Sinyal","kat":"Efisiensi Risiko pada Peserta JKN","f":"2217_JELAS_Pitch_Deck_Healthkathon_BPJS_2026_Efisiensi_Risiko_Peserta.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Arman Annas Putra","s":[4,3,3,3,3,3]},{"n":"Djaka Santosa","s":[3,3,3,2,2,3]},{"n":"I Made Karistiawan","s":[3,3,3,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2247","tim":"AKAR","inov":"JKN ObatGuard PRB","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2247_Proposal_Healthkathon_2026_ObatGuard_PRB.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Djaka Santosa","s":[3,2,2,3,2,2]},{"n":"I Made Karistiawan","s":[3,2,2,3,3,3]},{"n":"Agung Waluyo","s":[4,3,3,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,4,4,3,3]}]},{"id":"2257","tim":"Link Productive","inov":"BPJS Compliance Guard (BCG) — Smarter Protection for a Stronger JKN","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2257_Proposal_BPJS_Compliance_Guard_Healthkathon2026 (1).pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Agung Waluyo","s":[3,3,4,3,4,4]},{"n":"Paul Donald P","s":[3,2,2,2,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2259","tim":"Individual - Johannes HP Sipahutar SH,.CLA","inov":"JEJAK Kepatuhan","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2259_JEJAK_Kepatuhan_Proposal_Healthkathon2026.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Agung Waluyo","s":[3,3,1,2,1,3]},{"n":"Paul Donald P","s":[4,3,2,1,2,2]},{"n":"Tria Sofa Purnama","s":[3,3,2,2,2,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,2,3]}]},{"id":"2262","tim":"Hu Tao Supremacy","inov":"Nexus JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2262_NEXUS-JKN.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Paul Donald P","s":[4,3,3,4,3,3]},{"n":"Tria Sofa Purnama","s":[4,3,4,4,4,3]},{"n":"Ikhlasul Amalia","s":[4,3,3,4,4,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,4,3,3]}]},{"id":"2263","tim":"Infera","inov":"INFERA (Intelligent Fraud & Risk Analysis Agent) untuk Efisiensi Risiko Peserta BPJS Kesehatan","kat":"Efisiensi Risiko pada Peserta JKN","f":"2263_INFERA (INTELLIGENT FRAUD & RISK ANALYSIST AGENT) HEALTHKATHON 2026.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Tria Sofa Purnama","s":[4,4,4,3,4,3]},{"n":"Ikhlasul Amalia","s":[4,4,3,3,4,3]},{"n":"Husnun Nashir","s":[4,4,4,3,4,4]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,3,3,3,3]}]},{"id":"2269","tim":"CipHer","inov":"CLAIMGUARD: Smarter Duplicate Claim Detection for JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2269_Proposal_Healthkathon_2026_CLAIMGUARD_Emmanuel_Vito_Adventius_H.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Ikhlasul Amalia","s":[3,2,2,2,2,2]},{"n":"Husnun Nashir","s":[3,2,1,2,2,2]},{"n":"Arman Annas Putra","s":[3,3,3,2,2,2]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,2,3]}]},{"id":"2293","tim":"unmer","inov":"MIRA (Medical Insight & Reasoning Agent)","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2293_MIRA_Healthkathon_2026.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Husnun Nashir","s":[3,2,3,2,2,3]},{"n":"Arman Annas Putra","s":[3,3,3,2,2,2]},{"n":"Djaka Santosa","s":[4,3,2,3,2,2]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2356","tim":"Craving for Money","inov":"KlaimGuard AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2356_KlaimGuard AI â€” Proposal Healthkathon.pdf","fw":"","lk":1,"dec":"L","fd":"28/09/2026","rv":"","r":[{"n":"Arman Annas Putra","s":[4,3,3,3,3,2]},{"n":"Djaka Santosa","s":[3,3,3,3,3,3]},{"n":"I Made Karistiawan","s":[3,2,3,3,3,2]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,2,3]}]},{"id":"2381","tim":"Solid","inov":"Plafon: Deteksi Klaim yang Melebihi Kapasitas Fisik Fasilitas Kesehatan","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2381_Plafon â€” Healthkathon 2026.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Djaka Santosa","s":[4,4,3,4,2,3]},{"n":"I Made Karistiawan","s":[4,4,3,4,3,3]},{"n":"Agung Waluyo","s":[4,4,3,3,2,4]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2386","tim":"ProfHabibieBanggaSamaKita","inov":"PreClaim Guard - Detect Before Submit, Explain Before Reject","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2386_preclaim-guard-healthkathon-2026.pdf","fw":"","lk":1,"dec":"L","fd":"07/10/2026","rv":"","r":[{"n":"I Made Karistiawan","s":[4,3,4,3,3,4]},{"n":"Agung Waluyo","s":[3,2,2,1,1,3]},{"n":"Paul Donald P","s":[4,3,4,3,3,4]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,2,3]}]},{"id":"2387","tim":"Zidan Solo Hackathon","inov":"NALAR AI: Pemeringkat Klaim JKN Berbasis Selisih Rupiah untuk Efisiensi Risiko Fasilitas Kesehatan","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2387_NALAR-Proposal-Healthkathon-2026.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Agung Waluyo","s":[4,4,4,4,3,4]},{"n":"Paul Donald P","s":[4,4,4,4,3,4]},{"n":"Tria Sofa Purnama","s":[4,4,4,4,4,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,4,4,4,3]}]},{"id":"2392","tim":"Nusantara Sehat","inov":"GAPURA JKN — Graph Analytics Pemberi Kerja untuk Risiko & Audit","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2392_Proposal_Healthkathon2026_GAPURA_JKN.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Paul Donald P","s":[4,4,3,3,3,3]},{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]},{"n":"Ikhlasul Amalia","s":[4,4,3,3,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,4,4,3,4]}]},{"id":"2417","tim":"Trent","inov":"JKN Sentinel AI: One Claim, Three AI Lenses, One Human Decision","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2417_JKN_Sentinel_AI_Healthkathon_2026_Final.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]},{"n":"Ikhlasul Amalia","s":[4,4,3,3,3,4]},{"n":"Husnun Nashir","s":[4,3,3,2,2,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,4,4,4,3,4]}]},{"id":"2451","tim":"coba namanya ini aja","inov":"SiKePo: Sistem Investigasi Kelayakan Klaim dan Pola Overbilling berbasis AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2451_Proposal_SiKePo_Healthkathon2026.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Ikhlasul Amalia","s":[4,3,3,4,3,3]},{"n":"Husnun Nashir","s":[3,2,3,3,3,3]},{"n":"Arman Annas Putra","s":[4,4,4,4,3,3]},{"n":"Wahyu Satriyo Wibowo","s":[3,3,3,3,3,3]}]},{"id":"2487","tim":"LUNA","inov":"SERA — Service Evidence & Risk Assessment","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2487_SERA BY LUNA HEALTHKATHON 2026.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Husnun Nashir","s":[3,2,2,2,1,2]},{"n":"Arman Annas Putra","s":[3,3,2,2,2,2]},{"n":"Djaka Santosa","s":[3,2,2,2,2,2]},{"n":"Wahyu Satriyo Wibowo","s":[4,3,3,3,4,3]}]},{"id":"2178","tim":"KLIKSIMPUS","inov":"JKN RiskGuard - AI-Assisted Early Risk Detection & Decision Support for JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2178_Proposal Healthkathon 2026 Tim Klikmedis-1.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Arman Annas Putra","s":[4,3,2,2,2,3]},{"n":"Djaka Santosa","s":[3,3,2,2,2,3]},{"n":"I Made Karistiawan","s":[3,3,2,2,2,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,3,3,4,4,3]}]},{"id":"2241","tim":"Oziktrace","inov":"OzikTrace - Inovasi Anti-Fraud Pra-Klaim Berbasis AI Vision & Kriptografi Hibrida","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"revisi/[revisi]2241_Healthkathon2026_Faskes_OzikTrace_Proposal.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"Hasil revisi, menggantikan proposal sebelumnya (Tidak lulus, flag 28/09/2026)","r":[{"n":"Septian Firmansyah","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2382","tim":"FLdev","inov":"SENTRA JKN","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2382_SENTRA_JKN_Healthkathon_2026_Proposal.pdf","fw":"","lk":1,"dec":"T","fd":"07/10/2026","rv":"","r":[{"n":"I Made Karistiawan","s":[3,2,2,2,1,3]},{"n":"Agung Waluyo","s":[4,3,3,3,2,4]},{"n":"Paul Donald P","s":[3,3,3,2,2,3]},{"n":"Wahyu Satriyo Wibowo","s":[4,3,3,3,2,3]}]},{"id":"2129","tim":"Serenade Data","inov":"JKN ClaimGuard-Three-Way Verification","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2129_SerenadeData_ClaimGuard.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Agung Waluyo","s":[4,4,2,2,2,3]},{"n":"Paul Donald P","s":[4,3,2,2,2,3]},{"n":"Tria Sofa Purnama","s":[4,3,2,3,2,3]}]},{"id":"2140","tim":"The healers","inov":"JAGA-CLAIM : AI Pre-Claim Quality & Risk Assurance untuk JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2140_Proposal_JAGA-CLAIM_Healthkathon2026.pdf","fw":"","lk":1,"dec":"L","fd":"07/10/2026","rv":"","r":[{"n":"Paul Donald P","s":[4,3,3,2,2,3]},{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]},{"n":"Ikhlasul Amalia","s":[4,4,3,3,2,3]}]},{"id":"2154","tim":"Pathfinder","inov":"SINAPS: Deteksi Ring Kolusi Klaim JKN lewat Riwayat Peserta dan Jaringan Entitas","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2154_Proposal-Healthkathon-PathFinder.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]},{"n":"Ikhlasul Amalia","s":[4,4,3,3,3,2]},{"n":"Husnun Nashir","s":[4,3,3,2,2,2]}]},{"id":"2179","tim":"Masuk Final Asyraff Jadian","inov":"VERI-GUARD AI: Multi-Agentic System untuk Verifikasi Biometrik Real-Time dan Deteksi Dini Fraud Pese","kat":"Efisiensi Risiko pada Peserta JKN","f":"2179_PPT Lomba.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Ikhlasul Amalia","s":[4,4,3,4,3,4]},{"n":"Husnun Nashir","s":[4,3,3,3,3,3]},{"n":"Arman Annas Putra","s":[4,3,3,3,3,3]}]},{"id":"2286","tim":"2FA","inov":"JKN SENTRY: SYNDICATE & NETWORK TRAJECTORY RISK YIELD ENGINE","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2286_JKN Sentry Healtkathon 2026.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Husnun Nashir","s":[4,4,4,4,4,4]},{"n":"Arman Annas Putra","s":[4,3,3,3,3,3]},{"n":"Djaka Santosa","s":[4,3,3,3,3,3]}]},{"id":"2306","tim":"AIGO","inov":"SIMTOM (Sistem Identifikasi Manipulasi Transaksi dan Outlier Medis)","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2306_SIMTOM Healthkathon 2026 _ Bismillah AIGO Juara.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Arman Annas Putra","s":[4,3,2,2,2,3]},{"n":"Djaka Santosa","s":[3,3,2,2,2,2]},{"n":"I Made Karistiawan","s":[3,3,3,2,3,3]}]},{"id":"2329","tim":"Strolone","inov":"PROPOSAL DEZA ANNISA","kat":"Efisiensi Risiko pada Peserta JKN","f":"2329_PPT HEALTHKATON DEZA ANNISA (1).pdf","fw":"","lk":1,"dec":"T","fd":"07/10/2026","rv":"","r":[{"n":"Djaka Santosa","s":[2,1,1,1,1,1]},{"n":"I Made Karistiawan","s":[2,1,1,1,1,1]},{"n":"Agung Waluyo","s":[2,1,1,1,1,1]}]},{"id":"2414","tim":"Viralin","inov":"SAKTI JKN, Sistem AI untuk Verifikasi Silang dan Deteksi Ketidaksesuaian Klaim Pelayanan Kesehatan","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2414_Proposal Healthkathon 2026 - SAKTI JKN.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"I Made Karistiawan","s":[4,3,3,2,3,3]},{"n":"Agung Waluyo","s":[4,3,3,3,3,4]},{"n":"Paul Donald P","s":[4,3,4,3,3,3]}]},{"id":"2454","tim":"Sehat Bermanfaat","inov":"SUAR - Sistem Uji Anomali Risiko","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2454_SUAR-Healthkathon2026-Sehat-Bermanfaat.pdf","fw":"","lk":1,"dec":"L","fd":"07/10/2026","rv":"","r":[{"n":"Agung Waluyo","s":[4,4,4,4,4,4]},{"n":"Paul Donald P","s":[4,3,4,3,3,3]},{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]}]},{"id":"2459","tim":"AKN 6 Mantap Sekali","inov":"JKN Shield AI — Mesin Deteksi Fraud Klaim JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2459_JKN Shield AI - Proposal Healthkathon 2026_Nurul Fauzi _Rakyan Dewangga.pdf","fw":"","lk":1,"dec":"L","fd":"07/10/2026","rv":"","r":[{"n":"Paul Donald P","s":[4,4,4,3,4,3]},{"n":"Tria Sofa Purnama","s":[4,4,4,3,3,3]},{"n":"Ikhlasul Amalia","s":[4,4,4,3,4,3]}]},{"id":"2525","tim":"MICO","inov":"TERANG","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2525_TERANG-Healthkathon2026-Proposal.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]},{"n":"Ikhlasul Amalia","s":[4,4,3,4,3,4]},{"n":"Husnun Nashir","s":[4,3,2,3,2,3]}]},{"id":"2548","tim":"SUKMA","inov":"WASKLAIM – AI-Assisted Claim Risk Detection & Prioritization","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2548_Deck_WASKLAIM_BPJSHealthkathon_2026_Compress.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Ikhlasul Amalia","s":[3,3,3,3,2,2]},{"n":"Husnun Nashir","s":[4,3,3,3,3,3]},{"n":"Arman Annas Putra","s":[4,3,3,3,3,3]}]},{"id":"2556","tim":"Tim Gelombang Utara","inov":"BILL GATES - Gerbang Pintar Deteksi Klaim Ganda JKN Sebelum Terbayar","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2556_BILLGATES_Proposal Healthkathon 2026_Tim Gelombang Utara.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Husnun Nashir","s":[3,3,2,2,3,3]},{"n":"Arman Annas Putra","s":[3,3,3,3,3,3]},{"n":"Djaka Santosa","s":[3,2,2,2,2,2]}]},{"id":"2571","tim":"TUKANG ONLINE","inov":"Bantuan kesehatan pada kerja tukang harian lepas","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2571_Proposal_Final_TUKANG_ONLINE ( Tulen).pdf","fw":"","lk":1,"dec":"T","fd":"07/10/2026","rv":"","r":[{"n":"Arman Annas Putra","s":[4,1,1,2,1,1]},{"n":"Djaka Santosa","s":[1,1,1,1,1,1]},{"n":"I Made Karistiawan","s":[1,1,1,1,1,1]}]},{"id":"2584","tim":"JKN Trace","inov":"JKN Trace","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2584_BPJS.pdf","fw":"","lk":1,"dec":"T","fd":"30/09/2026","rv":"","r":[{"n":"Djaka Santosa","s":[3,3,2,2,2,2]},{"n":"I Made Karistiawan","s":[3,2,2,1,1,2]},{"n":"Agung Waluyo","s":[3,3,2,2,2,3]}]},{"id":"2607","tim":"Cah ora waras","inov":"Masalah & Urgensi","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2607_Panduan Pembuatan Proposal Peserta Healthkathon 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2640","tim":"IT Special Force","inov":"GARDA (Generative AI Risk Detection & Anallytic) Klaim JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2640_GARDA JKN.pdf","fw":"","lk":1,"dec":"L","fd":"30/09/2026","rv":"","r":[{"n":"Agung Waluyo","s":[4,4,4,3,4,4]},{"n":"Paul Donald P","s":[3,3,2,2,3,3]},{"n":"Tria Sofa Purnama","s":[4,4,3,3,3,3]}]},{"id":"2010","tim":"3Y","inov":"Healthkathon2026_EfisiensiRisiko_Tim3Y_Proposal","kat":"Efisiensi Risiko pada Peserta JKN","f":"2010_Healthkathon2026_EfisiensiRisiko_Tim3Y_Proposal.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Paul Donald P","s":[3,4,3,2,3,2]},{"n":"Tria Sofa Purnama","s":null},{"n":"Ikhlasul Amalia","s":[3,3,2,2,3,2]}]},{"id":"2256","tim":"Sentinel-JKN","inov":"SENTINEL-JKN: Otorisasi Cerdas Prospektif untuk Mencegah Inefisiensi Biaya Prosedur Katastropik JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2256_SENTINEL-JKN_Proposal.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Tria Sofa Purnama","s":null},{"n":"Ikhlasul Amalia","s":[4,3,null,null,null,null]},{"n":"Husnun Nashir","s":null}]},{"id":"2324","tim":"NEX.AI","inov":"JEIH: JKN Employer Intelligence Hub","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2324_Proposal.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ikhlasul Amalia","s":null},{"n":"Husnun Nashir","s":null},{"n":"Arman Annas Putra","s":null}]},{"id":"2340","tim":"My Hzays","inov":"BPJS Fraud Detector Engine","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2340_Healthkathon_2026_Fraud_Detector_Proposal.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Husnun Nashir","s":null},{"n":"Arman Annas Putra","s":null},{"n":"Djaka Santosa","s":[4,2,3,3,3,2]}]},{"id":"2405","tim":"Polkesraya Press","inov":"KlaimGuard AI: Verifikator Kelengkapan & Konsistensi Klaim Lintas Faskes","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2405_KlaimGuard AI - Proposal Healthkathon 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Arman Annas Putra","s":null},{"n":"Djaka Santosa","s":[4,3,3,3,2,2]},{"n":"I Made Karistiawan","s":null}]},{"id":"2703","tim":"Yolo Aje","inov":"Radar Kepatuhan: Penentu Sasaran Pemeriksaan Kepatuhan Pemberi Kerja Berbasis Rekonsiliasi Data","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2703_Proposal_Radar_Kepatuhan_Yolo_Aje_Healthkathon2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":[4,3,3,2,2,3]},{"n":"I Made Karistiawan","s":null},{"n":"Agung Waluyo","s":null}]},{"id":"2708","tim":"ErsyaTech","inov":"JEJAK JKN — Jejak Episode & Jaringan Anomali Klaim","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2708_PROPOSAL_JEJAK_JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Agung Waluyo","s":null},{"n":"Paul Donald P","s":[4,4,4,3,3,3]}]},{"id":"1985","tim":"Yaksa Guard","inov":"NADI JKN - Navigasi Analitik Deteksi dan Intervensi Risiko JKN","kat":"Efisiensi Risiko pada Peserta JKN","f":"1985_NADI JKN - Navigasi Analitik Deteksi dan Intervensi Risiko JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Agung Waluyo","s":null},{"n":"Paul Donald P","s":[4,3,2,2,2,2]},{"n":"Tria Sofa Purnama","s":null}]},{"id":"2024","tim":"E-JAK","inov":"AEGIS-Health: Agentic Risk Engine & Intelligent Surveillance for Healthcare","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2024_PROPOSAL_Tim EJAK_AEGIS-Health.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2081","tim":"Tracer6","inov":"AI JKN Claim Integrity (JCI)","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2081_AI-JKN-Claim-Integrity_Healthkathon2026_Tracer6.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2096","tim":"Healthection","inov":"WageFraud Intelligence","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2096_Proposal.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2143","tim":"Pixels","inov":"JKN-ClaimDNA","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2143_JKN ClaimDNA_20261002_222630_0000.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"Septian Firmansyah","s":null},{"n":"Aries Kurniwan","s":null}]},{"id":"2161","tim":"Cimol","inov":"MEDIGRAPH - AI-Powered Healthcare Claim Risk Intelligence","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2161_MEDIGRAPH_AI-Powered Healthcare Claim Risk Intelligence.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2168","tim":"RAEVA","inov":"Perisai JKN: Deteksi Dini Kecurangan Klaim JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2168_BPJS_Perisai JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Septian Firmansyah","s":null},{"n":"Aries Kurniwan","s":null}]},{"id":"2252","tim":"FYP (For Your Pasien)","inov":"SENTINEL JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2252_SENTINEL JKN Terintegrasi SPBE (terbaru).pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Djaka Santosa","s":null},{"n":"Aries Kurniwan","s":null}]},{"id":"2289","tim":"CODECURE","inov":"P-SAFE (PhantomSafe): Verifikasi Klaim BPJS Kesehatan Berbasis Risiko dengan Konfirmasi Pasien via W","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2289_PROPOSAL P-SAFE BY CODECURE.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2291","tim":"Digitalloka","inov":"Klarity - Sistem Prioritas Audit Klaim FKRTL Berbasis Pembanding Antar-Faskes","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2291_DigitalLoka - Proposal Klarity.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2297","tim":"Tiga is Three","inov":"JKN Guard","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2297_HealthKathon 2026, Detect Smarter, Protect JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2298","tim":"apa aja boleh","inov":"Tupiksa","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2298_Tupiksa_Efisiensi Risiko Pada Pemberi Kerja.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2308","tim":"Hilang Titik Koma Langsung Koma","inov":"AEGIS-JKN: Adaptive Evidence-Grounded Integrity System for JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2308_AEGIS-JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2360","tim":"Harapan Orang Tua","inov":"Agentic AI untuk Rekonsiliasi Upah, Kepesertaan, dan Iuran Pemberi Kerja","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2360_Doa Ibu_Proposal.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2373","tim":"Black Panther","inov":"CEK OBAT: Verifikasi dua sisi","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2373_CEK OBAT_Verifikasi Dua Sisi_.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2380","tim":"KNIME Community ID","inov":"KLAIM-SIGAP: Prioritisasi Audit Risiko Manipulasi Klaim Nonkapitasi","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2380_KLAIM-SIGAP Healthkathon 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2389","tim":"CERDIK-JKN","inov":"CERDIK-JKN: Cerdas Deteksi Indikasi Kecurangan Klaim JKN. Solusi yang difokuskan","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2389_Proposal_CERDIK-JKN_Healthkathon2026_041026_sign.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ardhy Widhiantoro","s":null},{"n":"Aries Kurniwan","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2408","tim":"kata bu lia harus ikut","inov":"JKN-SecOps","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2408_JKN-SecOps.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2415","tim":"SALAM SEJAHTERA","inov":"CARE-SHIELD (Comprehensive Analytics & Risk Evaluation Shield)","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2415_Proposal Healthkathon Final.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2424","tim":"Last Dance","inov":"JKN Integrity Trace sebagai Sistem Pendukung Keputusan untuk Deteksi Dini Potensi Phantom","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2424_Last Dance_JKN Integrity Trace sebagai Sistem Pendukung Keputusan untuk Deteksi Dini Potensi Phantom Billing pada Klaim JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2436","tim":"DMD Sentrix","inov":"FraudGuard AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2436_PROPOSAL INOVASI DIGITAL BPJS KESEHATAN HEALTHKATHON 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2460","tim":"Perawat Center","inov":"Pasien Pintar: JKN Smart Risk – Solusi Preventif & Efisiensi Risiko Layanan Berulang","kat":"Efisiensi Risiko pada Peserta JKN","f":"2460_Pasien Pintar JKN Smart Risk â€“ Solusi Preventif & Efisiensi Risiko Layanan Berulang.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2501","tim":"Lina Z","inov":"STABIL PRB","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2501_STABIL PRB ( healthkathon ) dr. Lina Z.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ardhy Widhiantoro","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2505","tim":"Goyang Sehat","inov":"Deteksi Perusahaaan Tidak Patuh dengan Conformal Selection Berbatas False Discovery Rate (FDR) pada","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2505_SEPADAN - Proposal Healthkathon 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2552","tim":"HEALTHNOVA","inov":"JKN EmployGuard","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2552_JKN_EMPLOYGUARD_AI_Compliance_for BPJS_revision final.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2568","tim":"SI-DANDANG","inov":"JAGA-KODE : Sistem Analitik dan Guardrail AI untuk Konsistensi Kode Diagnosis dan Tindakan","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2568_TIM SI DANDANG JAGA KODE.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Djaka Santosa","s":null},{"n":"Aries Kurniwan","s":null}]},{"id":"2622","tim":"Kimi No Nawa","inov":"Bambang - GARDA JKN (Natural Two Ways Communication AI Voice Agent)","kat":"Efisiensi Risiko pada Peserta JKN","f":"2622_Bambang GARDA JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2631","tim":"Kres.id","inov":"Indonesia Sehat Terpusat (SinyalJKN)","kat":"Efisiensi Risiko pada Peserta JKN","f":"2631_SinyalJKN_Proposal_Healthkathon2026_v2.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2648","tim":"Belum ada sih","inov":"ClaimGuard JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2648_ClaimGuard JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2654","tim":"Team Kzkf","inov":"SELARAS Triangulasi Integritas Iuran JKN Berbasis AI","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2654_SELARAS_Pitch_Deck_Healthkathon_2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ardhy Widhiantoro","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2674","tim":"Mencoba Ambis namun Tipes","inov":"ClaimGuard JKN: Sistem Deteksi Dini Fragmentasi Klaim JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2674_KlaimGuard JKN Sistem Deteksi Dini Fragmentasi Klaim JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2697","tim":"Lumora","inov":"JKN PayShield","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2697_JKN PayShield Team Lumora.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2710","tim":"sacrificethequeen","inov":"JKN TRUSTMESH","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2710_JKN_TRUSTMESH.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2736","tim":"SayNo_toTipuTipu","inov":"RxGuard","kat":"Efisiensi Risiko pada Peserta JKN","f":"2736_RxGuard.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Septian Firmansyah","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2738","tim":"Onco Team","inov":"ONCO-Dose AI: Pengembangan AI-Based  Clinical Decision Support System (CDSS)  untuk Verifikasi Dosis","kat":"Efisiensi Risiko pada Peserta JKN","f":"2738_ONCO-Dose AI - Healthkathon BPJS - Jihan Istiqomah - MFK UGM.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Djaka Santosa","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2758","tim":"Habis ini Colonist","inov":"Proposal Healthkathon 2026_SPECTRA JKN_Habis ini Catan_Universitas Brawijaya","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2758_Proposal Healthkathon 2026_SPECTRA JKN_Habis ini Catan_Universitas  Brawijaya.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Djaka Santosa","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2759","tim":"Tim Supernova","inov":"KlaimKembar: Dashboard Prioritas Pemeriksaan Repeat Billing pada Klaim Fisioterapi Rawat Jalan JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2759_Proposal KlaimKembar_Healthkathon2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2774","tim":"timfilkom","inov":"smart care","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2774_Proposal_SmartCare Gate.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ardhy Widhiantoro","s":null},{"n":"Djaka Santosa","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2776","tim":"Ridi","inov":"WageLens Silang-cek upah BPJS dan basis PPh 21 untuk mendeteksi ketidaksesuaian iuran lebih dini","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2776_WageLens_Proposal_Healthkathon2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"Septian Firmansyah","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2781","tim":"Tim FraudGuard","inov":"FraudGuard JKN: Engine Deteksi Anomali Cerdas untuk Efisiensi Klaim Upcoding & Unbundling","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2781_Proposal Healthkathon 2026_FraudGuardJKN_Muhammad Rakha Andira-compressed.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2785","tim":"KlaimSiaga","inov":"KlaimSiaga: Prioritas Audit Klaim Faskes JKN untuk Deteksi Dini Upcoding dan Inflated Bills","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2785_KlaimSiaga-Proposal-Healthkathon2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2786","tim":"BUMI Health Catalyst","inov":"JALUR: Jaringan Analitik Lintasan Rujukan untuk Audit Integritas Rujukan JKN di Era RBKP","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2786_JALUR_Healthkathon2026-3.pptx.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2795","tim":"tiba tiba heketon","inov":"KartuGuard: Radar Anomali Penyalahgunaan Identitas Peserta JKN","kat":"Efisiensi Risiko pada Peserta JKN","f":"2795_KartuGuard - Proposal Healthkathon 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2797","tim":"Mind2Impact","inov":"LIFE JKN","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2797_Mind2Impact_LIFE_JKN_Proposal_Healthkathon_2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2803","tim":"Scispace team","inov":"INOVASI DIGITAL KEFARMASIAN SIFAK-JKN Sistem Identifikasi Klaim Fiktif Obat dan Alat Kesehatan","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2803_Proposal_SIFAK_JKN-Final.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2807","tim":"Apayak","inov":"Integrated Fraud Prevention System","kat":"Efisiensi Risiko pada Peserta JKN","f":"2807_Integrated Fraud Prevention System_Healthkathon_compressed.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2808","tim":"JKN ID-SENTINEL","inov":"JKN ID-SENTINEL: AI-Powered Identity Integrity & Early Warning for JKN","kat":"Efisiensi Risiko pada Peserta JKN","f":"2808_Proposal_JKN ID-SENTINEL.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2815","tim":"IT","inov":"Deteksi Penggelembungan Tagihan Obat dan Alkes  Berbasis Explainable AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2815_Proposal_PriceGuard_JKN_Healthkathon2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2816","tim":"Dewangga","inov":"SehatJKN Preventif","kat":"Efisiensi Risiko pada Peserta JKN","f":"2816_SehatJKN Preventif - Proposal Healthkathon BPJS 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Ardhy Widhiantoro","s":null},{"n":"Septian Firmansyah","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2818","tim":"Clover","inov":"KlaimLens","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2818_KlaimLens_Proposal_Healthkathon_2026.pdf-1_compressed.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2823","tim":"govtrans6","inov":"Claim Integrity Radar","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2823_tim govtrans8.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2828","tim":"Kompetitor","inov":"Dual-Source Claim Verification: menghadirkan suara pasien dalam verifikasi klaim JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2828_Proposal Hackathon Dual Verification System.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2831","tim":"Abcd","inov":"KlaimNexus","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2831_KlaimNexus.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2839","tim":"Nawasena","inov":"VeriKlaim AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2839_VeriKlaim_AI_Healthkathon_2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2845","tim":"kelompok 9","inov":"JKN Workforce Monitor","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2845_Kelompok 9_Aqmal Abdillah Makmur_JKN Workforce Monitor_Proposal Healthkathon 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2850","tim":"Tim Pantang Menyerah","inov":"Proposal Inovasi CekKlaim Sistem Pemeriksaan Awal Potensi Penagihan Ulang Klaim JKN Berbasis Pencoco","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2850_Proposal Inovasi CekKlaim Sistem Pemeriksaan Awal Potensi Penagihan Ulang Klaim JKN Berbasis Pencocokan Data.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2852","tim":"TranspemGo","inov":"JEJAK JKN: Sistem Penelusuran Bukti Layanan untuk Deteksi Dini Klaim Fiktif pada Program JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2852_JEJAK_JKN_Healthkathon2026 (1).pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2853","tim":"Info KRS","inov":"SeeKlaim: Deteksi dini klaim berisiko untuk melindungi dana JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2853_SeeKlaim Deteksi dini klaim berisiko untuk melindungi dana JKN.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2855","tim":"Kanjuruhan 4","inov":"Rekonsiliasi Kepesertaan Pekerja dalam Program Jaminan Kesehatan Nasional","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2855_Proposal_PekerjaTerjaga_Healthkathon_2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Ardhy Widhiantoro","s":null}]},{"id":"2856","tim":"Kelompok Dua Tranformasi Pemerintahan","inov":"SIPEKA: Sistem Informasi Pekerja, Kepesertaan, dan Aduan","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2856_Proposal_SIPEKA_Healthkathon_2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2864","tim":"Tim Hebat","inov":"Healthkathon","kat":"Efisiensi Risiko pada Peserta JKN","f":"2864_PTTD_Propo HealthKathon.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"1993","tim":"AyikTech","inov":"CLAIMGUARD AI – Evidence-Based Claim Risk Detection","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"1993_CLAIMGUARD_AI_Healthkathon_2026_Final.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2076","tim":"REIIIXX","inov":"MedTrack","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2076_MedTrack (1).pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Aries Kurniwan","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2189","tim":"Alamak","inov":"KlaimGuard: Deteksi Dini Fraud Upcoding & Unbundling Klaim JKN Berbasis Machine Learning","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2189_Healthkaton2026_Tim_Alamak.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"I Made Karistiawan","s":null}]},{"id":"2278","tim":"Unlimited","inov":"ARAH JKN: Asisten Rute Akses Kesehatan Berbasis AI untuk Efisiensi Pelayanan JKN","kat":"Efisiensi Risiko pada Peserta JKN","f":"2278_Proposal Healthackathon_Unlimited.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2312","tim":"Walet","inov":"HealthVision","kat":"Efisiensi Risiko pada Peserta JKN","f":"2312_HealthVision_v3.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2531","tim":"Lunaris Venya","inov":"LUMINA -Layanan Utama Monitoring Integritas Klaim & Deteksi Anomali Fasilitas Kesehatan JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2531_Lumina - Efisiensi Risiko Fasilitas Kesehatan (Healthkathon 2026) - Final.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2602","tim":"Mill Lane","inov":"KlaimSiaga: Asisten Triase Klaim JKN Berbasis Machine Learning dan Explainable AI","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2602_Proposal_Healthkathon2026_KlaimSiaga_Faskes.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"I Made Karistiawan","s":null},{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2739","tim":"CollsCode","inov":"Deteksi Fraud Identitas Peserta JKN Menggunakan Validasi Kemustahilan Spasial-Temporal","kat":"Efisiensi Risiko pada Peserta JKN","f":"2739_Nexus-ID_JKN___Healthkathon_2026_20261008021158.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Djaka Santosa","s":null},{"n":"Ardhy Widhiantoro","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2742","tim":"SMILE","inov":"RADAR : Risk-base Alert for Detecting Anomalous Reporting","kat":"Efisiensi Risiko pada Pemberi Kerja","f":"2742_RADAR â€“ Proposal Healthkathon 2026 (1) (1).pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Djaka Santosa","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2820","tim":"Smart Triage Alkhairaat","inov":"Smart Triase JKN","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2820_PROPOSAL INOVASI HEALTHKATHON 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2862","tim":"Power Ranger Merah","inov":"BuktiLayan","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2862_BuktiLayan â€” Proposal Healthkathon 2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Djaka Santosa","s":null},{"n":"Wahyu Satriyo Wibowo","s":null}]},{"id":"2878","tim":"PTTD 666","inov":"JejakLayan - Berkas boleh lengkap, tapi apakah layanannya benar-benar terjadi?","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2878_Proposal Healthkathon 2026_JejakLayan_PTTD 666.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Septian Firmansyah","s":null},{"n":"Ulfah Nur Mukharomah","s":null}]},{"id":"2882","tim":"PUSAKO","inov":"PRISMA-JKN: Triase Klaim Berbasis Aturan, Machine Learning, dan Agen AI untuk Efisiensi Risiko Pelay","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2882_Proposal Healthkathon 2026 Prisma JKN (Tim Pusako).pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Aries Kurniwan","s":null},{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Djaka Santosa","s":null}]},{"id":"2884","tim":"SaiWork","inov":"SMARTPROTEK","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2884_smart_protek.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"Septian Firmansyah","s":null},{"n":"Aries Kurniwan","s":null}]},{"id":"2886","tim":"Kumar","inov":"SIDIK: Sistem Investigasi & Deteksi Integritas Klaim","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2886_SIDIK_TimKumar_Healthkathon2026.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Wahyu Satriyo Wibowo","s":null},{"n":"I Made Karistiawan","s":null},{"n":"Septian Firmansyah","s":null}]},{"id":"2895","tim":"AxiomJKN","inov":"Pembongkaran Services Unbundling JKN Melalui Association Rule Mining dan Deteksi Temporal","kat":"Efisiensi Risiko pada Fasilitas Kesehatan","f":"2895_Axiom-Unbundle_JKN___Healthkathon_2026_20261008010530.pdf","fw":"","lk":0,"dec":"","fd":"","rv":"","r":[{"n":"Septian Firmansyah","s":null},{"n":"Ulfah Nur Mukharomah","s":null},{"n":"Ardhy Widhiantoro","s":null}]}];
+/*DATA_END*/
+</script>
+<script>
+"use strict";
+const W=[.20,.15,.20,.20,.15,.10];
+const LVL=["Kurang","Cukup","Baik","Sangat baik"];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const raw=s=>s.reduce((a,v,k)=>a+(v!=null?W[k]*v:0),0);
+const sc10=s=>raw(s)/4*10;
+const fmt=n=>n==null?"-":n.toFixed(2).replace(".",",");
+const slug=n=>n.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const ini=n=>n.split(" ").filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const EMPTY=()=>[null,null,null,null,null,null];
+const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+
+/* ---------- state ---------- */
+const TB=Object.fromEntries(TEAMS.map(t=>[t.id,t]));
+const key=(id,n)=>id+"|"+n;
+let SV={};                       // nilai dari server: key -> {s,t}
+let LOCKED=new Set(TEAMS.filter(t=>t.lk).map(t=>t.id));
+let CONN="load";                 // load | ok | local | err
+let lastSync=null, DRAW=null;    // DRAW: {id,n,s,dirty}
+const LOCAL=!CFG.api;
+if(LOCAL){ const L=lsGet("nilai_local")||{}; SV=L; }
+
+const eff=(t,r)=>{ const v=SV[key(t.id,r.n)]; return v?v.s:(r.s||EMPTY()); };
+const nFill=s=>s.filter(v=>v!=null).length;
+function info(t){
+  const rs=t.r.map(r=>{const s=eff(t,r);return {n:r.n,s,f:nFill(s),raw:raw(s)}});
+  const N=rs.length, done=rs.filter(r=>r.f===6).length, started=rs.filter(r=>r.f>0).length;
+  const total=N?rs.reduce((a,r)=>a+r.raw,0)/(4*N)*10:null;
+  return {rs,N,done,started,total,complete:N>0&&done===N};
+}
+const isLocked=t=>LOCKED.has(t.id);
+function teamState(t){            // status global tim
+  const i=info(t);
+  if(isLocked(t)) return {k:"lock",label:"Terkunci",cls:"s-lock",i};
+  if(i.complete) return {k:"done",label:"Selesai",cls:"s-done",i};
+  if(i.started) return {k:"draft",label:`Dalam proses ${i.done}/${i.N}`,cls:"s-draft",i};
+  return {k:"todo",label:"Belum dinilai",cls:"s-todo",i};
+}
+function myState(t,name){         // status untuk satu penilai
+  const r=t.r.find(x=>x.n===name), s=eff(t,r), f=nFill(s);
+  if(isLocked(t)) return {k:"lock",f,s};
+  return {k:f===6?"done":f>0?"draft":"todo",f,s};
+}
+const decLabel=t=>t.dec==="L"?"Lulus":t.dec==="T"?"Tidak lulus":"";
+
+/* ---------- koneksi ---------- */
+function setConn(c){ CONN=c; const el=$("#sync"); el.className="pill btn "+({ok:"ok",local:"warn",err:"err",load:""}[c]);
+  const tm=lastSync?lastSync.toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit"}):"";
+  $("#syncT").textContent={load:"Memuat...",ok:"Tersambung"+(tm?" · "+tm:""),local:"Mode uji (belum tersambung)",err:"Gagal terhubung · ketuk untuk coba lagi"}[c]; }
+async function apiGet(){ const r=await fetch(CFG.api+(CFG.api.includes("?")?"&":"?")+"action=all&_="+Date.now()); if(!r.ok) throw new Error("http "+r.status); return r.json(); }
+async function apiPost(b){ const r=await fetch(CFG.api,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(b)}); if(!r.ok) throw new Error("http "+r.status); return r.json(); }
+
+async function load(silent){
+  if(LOCAL){ setConn("local"); render(); return; }
+  if(!silent) setConn("load");
+  try{
+    const d=await apiGet();
+    SV={}; (d.rows||[]).forEach(r=>{SV[key(r.id,r.n)]={s:r.s,t:r.t}});
+    (d.locked||[]).forEach(i=>LOCKED.add(String(i)));
+    lastSync=new Date(); setConn("ok");
+    syncSeed(d);                 // lengkapi server dengan nilai awal & kunci (idempoten)
+  }catch(e){ console.warn(e); setConn("err"); }
+  if(!DRAW) render();
+}
+async function syncSeed(d){
+  const have=new Set((d.rows||[]).map(r=>key(r.id,r.n)));
+  const rows=[]; TEAMS.forEach(t=>t.r.forEach(r=>{ if(r.s&&!have.has(key(t.id,r.n))) rows.push({id:t.id,n:r.n,s:r.s}); }));
+  const srvLocked=new Set((d.locked||[]).map(String));
+  const lock=TEAMS.filter(t=>t.lk&&!srvLocked.has(t.id)).map(t=>t.id);
+  if(!rows.length&&!lock.length) return;
+  try{ const r=await apiPost({action:"seed",rows,lock});
+    if(r.ok){ rows.forEach(x=>{ if(!SV[key(x.id,x.n)]) SV[key(x.id,x.n)]={s:x.s,t:r.t}; }); if(!DRAW) render(); } }catch(e){ console.warn("seed",e); }
+}
+async function saveRow(id,n,s){
+  if(LOCAL){ SV[key(id,n)]={s,t:new Date().toISOString()}; lsSet("nilai_local",SV); return; }
+  const r=await apiPost({action:"save",id,n,s});
+  if(!r.ok){ if(r.err==="locked") LOCKED.add(id); throw new Error(r.err||"gagal"); }
+  SV[key(id,n)]={s:r.row.s,t:r.row.t}; lastSync=new Date(); setConn("ok");
+}
+
+/* ---------- toast ---------- */
+let tt; function toast(m,err){ const e=$("#toast"); e.textContent=m; e.className="on"+(err?" err":""); clearTimeout(tt); tt=setTimeout(()=>e.className="",err?4500:2400); }
+
+/* ---------- router ---------- */
+let F={filter:"todo",q:""}, SUM={st:"all",q:""};
+function route(){ const h=location.hash.replace(/^#\/?/,""); const p=h.split("/");
+  if(p[0]==="p"&&POOL.concat(otherNames()).find(n=>slug(n)===p[1])) return {v:"me",name:POOL.concat(otherNames()).find(n=>slug(n)===p[1])};
+  if(p[0]==="ringkasan") return {v:"sum"};
+  return {v:"home"}; }
+const otherNames=()=>[...new Set(TEAMS.flatMap(t=>t.r.map(r=>r.n)))].filter(n=>!POOL.includes(n)).sort();
+function render(){
+  const R=route();
+  $("#nHome").removeAttribute("aria-current"); $("#nSum").removeAttribute("aria-current");
+  if(R.v==="sum") $("#nSum").setAttribute("aria-current","page"); else $("#nHome").setAttribute("aria-current","page");
+  let h=banners();
+  h+= R.v==="me"?viewMe(R.name): R.v==="sum"?viewSum(): viewHome();
+  $("#app").innerHTML=h; bind(R);
+}
+function banners(){
+  let h="";
+  if(LOCAL) h+=`<div class="banner warn" role="alert"><div><b>Mode uji.</b> Penyimpanan bersama belum disambungkan, nilai yang Anda simpan hanya tersimpan di browser ini dan tidak terlihat penilai lain.</div></div>`;
+  if(CONN==="err") h+=`<div class="banner err" role="alert"><div><b>Gagal terhubung ke penyimpanan.</b> Data yang tampil bisa belum terbaru dan nilai belum bisa disimpan.</div><button type="button" data-act="retry">Coba lagi</button></div>`;
+  return h;
+}
+window.addEventListener("hashchange",()=>{ closeSheet(true); render(); window.scrollTo(0,0); });
+
+/* ---------- beranda ---------- */
+function viewHome(){
+  const S={todo:0,draft:0,done:0,lock:0}; let slots=0,fill=0;
+  TEAMS.forEach(t=>{ S[teamState(t).k]++; if(!isLocked(t)) t.r.forEach(r=>{slots++; if(nFill(eff(t,r))===6) fill++;}); });
+  const open=slots-fill;
+  const card=n=>{ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); const open=mine.filter(t=>!isLocked(t));
+    const done=open.filter(t=>myState(t,n).k==="done").length, lock=mine.length-open.length;
+    const pct=open.length?Math.round(done/open.length*100):100;
+    return `<button class="person" data-go="${slug(n)}"><div class="top"><div class="av">${esc(ini(n))}</div><div><b>${esc(n)}</b><small>${mine.length} tim ditugaskan</small></div></div>
+    <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    <div class="meta"><span>${done} dari ${open.length} selesai</span><span>${lock?lock+" terkunci":open.length-done+" sisa"}</span></div></button>`; };
+  const oth=otherNames();
+  return `<div class="kpis">
+    <div class="card kpi"><b>${TEAMS.length}</b><span>Total tim</span></div>
+    <div class="card kpi"><b>${S.done+S.lock}</b><span>Penilaian lengkap</span></div>
+    <div class="card kpi"><b>${S.draft}</b><span>Dalam proses</span></div>
+    <div class="card kpi"><b>${S.todo}</b><span>Belum dinilai</span></div>
+    <div class="card kpi"><b>${open}</b><span>Penilaian individu tersisa</span></div></div>
+  <div class="sec-h"><h2>Siapa Anda?</h2><span class="muted">Pilih nama untuk melihat tim yang perlu Anda nilai</span></div>
+  <div class="people">${POOL.map(card).join("")}</div>
+  ${oth.length?`<div class="sec-h"><h2>Penilai lainnya</h2><span class="muted">Penilai yang tercatat di Kertas Kerja tahap awal</span></div><div class="people">${oth.map(card).join("")}</div>`:""}`;
+}
+
+/* ---------- daftar tim milik penilai ---------- */
+function viewMe(name){
+  const mine=TEAMS.filter(t=>t.r.some(r=>r.n===name));
+  const cnt={todo:0,done:0,lock:0,all:mine.length};
+  mine.forEach(t=>{ const k=myState(t,name).k; if(k==="done")cnt.done++; else if(k==="lock")cnt.lock++; else cnt.todo++; });
+  let list=mine.filter(t=>{ const k=myState(t,name).k;
+    if(F.filter==="todo"&&!(k==="todo"||k==="draft")) return false;
+    if(F.filter==="done"&&k!=="done") return false;
+    if(F.filter==="lock"&&k!=="lock") return false;
+    if(F.q){ const q=F.q.toLowerCase(); if(!(t.tim+" "+t.inov+" "+t.id).toLowerCase().includes(q)) return false; }
+    return true; });
+  const open=cnt.todo+cnt.done, pct=open?Math.round(cnt.done/open*100):100;
+  const ch=(k,l,n)=>`<button class="chip" data-f="${k}" aria-pressed="${F.filter===k}">${l}<small>${n}</small></button>`;
+  return `<div class="card me-head"><div class="av">${esc(ini(name))}</div><div class="grow"><h2>${esc(name)}</h2>
+    <div class="muted">${cnt.done} dari ${open} penilaian selesai${cnt.lock?` · ${cnt.lock} tim terkunci`:""}</div>
+    <div class="bar" style="max-width:360px"><i style="width:${pct}%"></i></div></div>
+    <a class="linkbtn" href="#/">Bukan Anda? Ganti nama</a></div>
+  <div class="tools"><div class="chips" role="group" aria-label="Filter">${ch("todo","Perlu dinilai",cnt.todo)}${ch("done","Selesai",cnt.done)}${cnt.lock?ch("lock","Terkunci",cnt.lock):""}${ch("all","Semua",cnt.all)}</div>
+    <input class="search" id="q" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(F.q)}" aria-label="Cari tim"></div>
+  <div class="list">${list.length?list.map(t=>teamRow(t,name)).join(""):`<div class="card empty">${F.filter==="todo"&&!F.q?"Semua tim Anda sudah dinilai. Terima kasih!":"Tidak ada tim yang cocok."}</div>`}</div>`;
+}
+function teamRow(t,name){
+  const m=myState(t,name), lock=m.k==="lock";
+  const st=lock?`<span class="st s-lock">&#128274; Terkunci${t.dec?" · "+decLabel(t):""}</span>`
+    :m.k==="done"?`<span class="st s-done">&#10003; Selesai · ${fmt(sc10(m.s))}</span>`
+    :m.k==="draft"?`<span class="st s-draft">Draft ${m.f}/6</span>`:`<span class="st s-todo">Belum dinilai</span>`;
+  const btn=lock?"Lihat":m.k==="done"?"Ubah":m.k==="draft"?"Lanjutkan":"Nilai";
+  return `<button class="team" data-open="${t.id}" data-n="${esc(name)}"><div><div class="t1"><span class="num">#${t.id}</span><span>${esc(t.kat.replace("Efisiensi Risiko pada ",""))}</span>${t.rv?`<span class="st s-rev">Hasil revisi</span>`:""}</div>
+    <h3>${esc(t.tim)}</h3><div class="j">${esc(t.inov)}</div></div>
+    <div class="act">${st}<span class="btn ${m.k==="todo"||m.k==="draft"?"btn-p":"btn-o"}">${btn}</span></div></button>`;
+}
+
+/* ---------- ringkasan ---------- */
+function viewSum(){
+  const rows=TEAMS.map(t=>({t,s:teamState(t)}));
+  const tot={all:rows.length}; rows.forEach(r=>tot[r.s.k]=(tot[r.s.k]||0)+1);
+  const list=rows.filter(r=>(SUM.st==="all"||r.s.k===SUM.st)&&(!SUM.q||(r.t.tim+" "+r.t.inov+" "+r.t.id).toLowerCase().includes(SUM.q.toLowerCase())));
+  const opt=(k,l)=>`<option value="${k}"${SUM.st===k?" selected":""}>${l} (${tot[k]||0})</option>`;
+  const load=[...POOL,...otherNames()].map(n=>{ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); const op=mine.filter(t=>!isLocked(t)); const d=op.filter(t=>myState(t,n).k==="done").length;
+    return `<tr><td>${esc(n)}</td><td class="num">${mine.length}</td><td class="num">${d}</td><td class="num">${op.length-d}</td></tr>`; }).join("");
+  return `<div class="tools"><select class="search" id="sst" aria-label="Filter status">${opt("all","Semua tim")}${opt("todo","Belum dinilai")}${opt("draft","Dalam proses")}${opt("done","Selesai")}${opt("lock","Terkunci")}</select>
+    <input class="search" id="sq" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(SUM.q)}" aria-label="Cari tim"></div>
+  <div class="card tablewrap"><table class="rtab"><thead><tr><th>ID</th><th>Tim</th><th>Status</th><th>Penilai</th><th>Skor akhir</th></tr></thead><tbody>
+  ${list.map(({t,s})=>`<tr><td class="num idc">${t.id}</td><td><b>#${t.id} ${esc(t.tim)}</b>${t.rv?` <span class="st s-rev">Hasil revisi</span>`:""}<div class="muted" style="font-size:13px;max-width:46ch">${esc(t.inov)}</div></td>
+   <td data-l="Status"><span class="st ${s.cls}">${s.k==="lock"?"&#128274; ":""}${s.label}</span>${t.lk&&t.dec?`<div class="muted" style="font-size:12.5px;margin-top:4px">${decLabel(t)} · flag ${esc(t.fd)}</div>`:""}</td>
+   <td data-l="Penilai">${s.i.rs.map(r=>`<span class="rv ${r.f===6?"d":r.f>0?"p":""}" title="${r.f}/6 kriteria terisi">${r.f===6?"&#10003;":r.f>0?"&#9684;":"&#9675;"} ${esc(r.n)}</span>`).join("")||'<span class="muted">-</span>'}</td>
+   <td class="num" data-l="Skor akhir">${s.i.complete||t.lk?fmt(s.i.total):'<span class="muted">-</span>'}</td></tr>`).join("")||`<tr><td colspan="5" class="empty">Tidak ada tim yang cocok.</td></tr>`}
+  </tbody></table></div>
+  <div class="sec-h"><h2>Beban per penilai</h2><span class="muted">Tim terkunci tidak dihitung</span></div>
+  <div class="card tablewrap"><table><thead><tr><th>Penilai</th><th>Ditugaskan</th><th>Selesai</th><th>Sisa</th></tr></thead><tbody>${load}</tbody></table></div>
+  <p class="muted" style="font-size:13px;margin:12px 4px">Skor akhir tampil setelah semua penilai tim mengisi lengkap. Nilai per penilai tidak ditampilkan agar penilaian tetap independen.</p>`;
+}
+
+function bind(R){
+  document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ F={filter:"todo",q:""}; lsSet("nilai_me",b.dataset.go); location.hash="#/p/"+b.dataset.go; });
+  document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{ F.filter=b.dataset.f; render(); });
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openSheet(b.dataset.open,b.dataset.n));
+  document.querySelectorAll("[data-act=retry]").forEach(b=>b.onclick=()=>load());
+  const q=$("#q"); if(q) q.oninput=e=>{ F.q=e.target.value; const p=e.target.selectionStart; render(); const n=$("#q"); n.focus(); n.setSelectionRange(p,p); };
+  const sq=$("#sq"); if(sq) sq.oninput=e=>{ SUM.q=e.target.value; const p=e.target.selectionStart; render(); const n=$("#sq"); n.focus(); n.setSelectionRange(p,p); };
+  const ss=$("#sst"); if(ss) ss.onchange=e=>{ SUM.st=e.target.value; render(); };
+}
+$("#sync").onclick=()=>{ if(!LOCAL) load(); };
+
+/* ---------- panel penilaian ---------- */
+function nextTodo(from,name){ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===name)&&!isLocked(t)&&myState(t,name).k!=="done");
+  const i=mine.findIndex(t=>t.id===from); return mine.find((t,j)=>t.id!==from&&j>i)||mine.find(t=>t.id!==from)||null; }
+function openSheet(id,name){
+  const t=TB[id], r=t.r.find(x=>x.n===name), lock=isLocked(t);
+  DRAW={id,n:name,s:eff(t,r).slice(),orig:eff(t,r).slice(),dirty:false,lock,busy:false};
+  drawSheet(); $("#sheet").classList.add("on"); $("#scrim").classList.add("on"); document.body.style.overflow="hidden";
+  $("#sheet .x").focus();
+}
+function closeSheet(force){
+  if(!DRAW) return true;
+  if(!force&&DRAW.dirty&&!confirm("Ada perubahan yang belum disimpan. Tutup tanpa menyimpan?")) return false;
+  DRAW=null; $("#sheet").classList.remove("on"); $("#scrim").classList.remove("on"); document.body.style.overflow=""; return true;
+}
+$("#scrim").onclick=()=>{ if(closeSheet()) render(); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&DRAW){ if(closeSheet()) render(); } });
+window.addEventListener("beforeunload",e=>{ if(DRAW&&DRAW.dirty){ e.preventDefault(); e.returnValue=""; } });
+
+function drawSheet(){
+  const D=DRAW, t=TB[D.id], i=info(t), lock=D.lock;
+  const filled=nFill(D.s), full=filled===6, my=full?sc10(D.s):null;
+  const row=SV[key(D.id,D.n)];
+  const fileInfo=t.f?`<div class="line"><span class="muted">Berkas proposal:</span><span class="file">${esc(t.f.replace(/^revisi\//,""))}</span></div>`:"";
+  const nxt=nextTodo(D.id,D.n);
+  $("#sheet").innerHTML=`
+  <div class="sh-head"><div class="row"><div><div class="eyebrow">#${esc(t.id)} · ${esc(t.kat)}</div><h2 id="shT">${esc(t.tim)}</h2><p>${esc(t.inov)}</p></div>
+    <button class="x" type="button" aria-label="Tutup" data-x>&times;</button></div></div>
+  <div class="sh-body">
+    ${lock?`<div class="banner lock"><div>&#128274; <b>Penilaian dikunci.</b> Tim ini sudah diflag di sistem${t.fd?` (${esc(t.fd)})`:""}${t.dec?` dengan keputusan <b>${decLabel(t)}</b>`:""}, sehingga nilai tidak dapat diubah.</div></div>`:""}
+    ${t.fw?`<div class="banner err"><div><b>Perhatian:</b> ${esc(t.fw)}</div></div>`:""}
+    <div class="card info">
+      ${t.rv?`<div class="line"><span class="st s-rev">Hasil revisi</span><span class="muted">${esc(t.rv)}</span></div>`:""}
+      ${fileInfo}
+      <div class="line" style="margin-top:6px">${CFG.sp?`<a class="btn btn-o" href="${esc(CFG.sp)}" target="_blank" rel="noopener">Buka folder proposal (SharePoint)</a>`:""}</div>
+      <div class="line" style="margin-top:8px"><span class="muted">Penilai tim ini:</span>${i.rs.map(r=>`<span class="rv ${r.f===6?"d":r.f>0?"p":""}${r.n===D.n?" me":""}">${r.f===6?"&#10003;":r.f>0?"&#9684;":"&#9675;"} ${esc(r.n)}${r.n===D.n?" (Anda)":""}</span>`).join("")}</div>
+    </div>
+    ${CRIT.map((c,k)=>critHtml(c,k,D.s[k],lock)).join("")}
+  </div>
+  <div class="sh-foot"><div class="score"><b class="num">${my!=null?fmt(my):"-"}</b><small>${full?"Skor Anda (skala 10)":`Terisi ${filled} dari 6 kriteria`}</small>
+      <div class="dots">${D.s.map(v=>`<i class="${v!=null?"on":""}"></i>`).join("")}</div>
+      ${row&&row.t?`<small>Tersimpan ${new Date(row.t).toLocaleString("id-ID",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}</small>`:""}</div>
+    <div class="btns">${lock?`<button class="btn btn-o" data-x type="button">Tutup</button>`:
+      `<button class="btn btn-o" data-save="close" type="button" ${D.dirty&&!D.busy?"":"disabled"}>Simpan</button>
+       ${nxt?`<button class="btn btn-p" data-save="next" type="button" ${D.dirty&&!D.busy?"":"disabled"}>Simpan &amp; berikutnya</button>`:`<button class="btn btn-p" data-save="close" type="button" ${D.dirty&&!D.busy?"":"disabled"}>${D.busy?"Menyimpan...":"Simpan"}</button>`}`}</div></div>`;
+  // ikat event
+  const sh=$("#sheet");
+  sh.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{ if(closeSheet()) render(); });
+  sh.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ if(D.lock) return; const k=+b.dataset.k, v=+b.dataset.v;
+    D.s[k]=v; D.dirty=D.s.some((x,j)=>x!==D.orig[j]); const top=sh.querySelector(".sh-body").scrollTop; drawSheet(); sh.querySelector(".sh-body").scrollTop=top;
+    const nb=sh.querySelector(`.seg[data-k="${k}"] button[data-v="${v}"]`); if(nb) nb.focus({preventScroll:true}); });
+  sh.querySelectorAll("[data-save]").forEach(b=>b.onclick=()=>doSave(b.dataset.save));
+}
+function critHtml(c,k,val,lock){
+  return `<div class="card crit"><div class="crit-h"><div class="kn">${k+1}</div><div><b>${esc(c.n)}</b><small>Bobot ${Math.round(c.w*100)}%</small></div></div>
+  <p class="ket">${esc(c.ket)}</p>
+  <div class="seg" role="radiogroup" aria-label="${esc(c.n)}" data-k="${k}">${[1,2,3,4].map(v=>`<button type="button" role="radio" aria-checked="${val===v}" data-k="${k}" data-v="${v}" ${lock?"disabled":""}><b>${v}</b><span>${LVL[v-1]}</span></button>`).join("")}</div>
+  <div class="ind ${val==null?"none":""}">${val==null?"Pilih nilai 1-4 untuk melihat indikatornya.":`<b>Nilai ${val}:</b> ${esc(c.ind[val-1])}`}</div>
+  <details class="all"><summary>Lihat semua indikator</summary>${c.ind.map((x,j)=>`<div><b>${j+1}</b><span>${esc(x)}</span></div>`).join("")}</details></div>`;
+}
+async function doSave(mode){
+  const D=DRAW; if(!D||D.busy||!D.dirty) return;
+  D.busy=true; drawSheet();
+  const id=D.id,n=D.n,s=D.s.slice(); const nxt=nextTodo(id,n);
+  try{
+    await saveRow(id,n,s);
+    toast(nFill(s)===6?"Nilai tersimpan":"Draft tersimpan ("+nFill(s)+"/6 kriteria)");
+    D.orig=s.slice(); D.dirty=false; D.busy=false;
+    if(mode==="next"&&nxt){ DRAW=null; openSheet(nxt.id,n); render(); }
+    else { closeSheet(true); render(); }
+  }catch(e){
+    D.busy=false; drawSheet();
+    toast(String(e.message)==="locked"?"Tim ini sudah terkunci, nilai tidak dapat diubah.":"Gagal menyimpan. Periksa koneksi lalu coba lagi.",true);
+  }
+}
+
+/* ---------- mulai ---------- */
+(function init(){
+  if(!location.hash){ const me=lsGet("nilai_me"); if(me&&POOL.concat(otherNames()).some(n=>slug(n)===me)) location.replace("#/p/"+me); }
+  render(); load();
+  setInterval(()=>{ if(!document.hidden&&!DRAW) load(true); },60000);
+})();
+</script>
+</body>
+</html>
