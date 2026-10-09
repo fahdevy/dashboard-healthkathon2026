@@ -332,11 +332,11 @@ function viewHome(){
   TEAMS.forEach(t=>{ S[teamState(t).k]++; if(!isLocked(t)) t.r.forEach(r=>{slots++; if(nFill(eff(t,r))===6) fill++;}); });
   const open=slots-fill;
   const card=n=>{ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); const open=mine.filter(t=>!isLocked(t));
-    const done=open.filter(t=>myState(t,n).k==="done").length, lock=mine.length-open.length;
-    const pct=open.length?Math.round(done/open.length*100):100;
+    const w=workload(n), done=w.done, lock=w.lock;
+    const pct=w.all?Math.round(done/w.all*100):100;
     return `<button class="person" data-go="${slug(n)}"><div class="top"><div class="av">${esc(ini(n))}</div><div><b>${esc(n)}</b><small>${mine.length} tim ditugaskan</small></div></div>
     <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
-    <div class="meta"><span>${done} dari ${open.length} selesai</span><span>${lock?lock+" terkunci":open.length-done+" sisa"}</span></div></button>`; };
+    <div class="meta"><span>${done} dari ${w.all} sudah dinilai</span><span>${w.all-done} sisa</span></div></button>`; };
   const oth=otherNames();
   return `<div class="kpis">
     <div class="card kpi"><b>${TEAMS.length}</b><span>Total tim</span></div>
@@ -360,10 +360,10 @@ function viewMe(name){
     if(F.filter==="lock"&&k!=="lock") return false;
     if(F.q){ const q=F.q.toLowerCase(); if(!(t.tim+" "+t.inov+" "+t.id).toLowerCase().includes(q)) return false; }
     return true; });
-  const open=cnt.todo+cnt.done, pct=open?Math.round(cnt.done/open*100):100;
+  const W_=workload(name), pct=W_.all?Math.round(W_.done/W_.all*100):100;
   const ch=(k,l,n)=>`<button class="chip" data-f="${k}" aria-pressed="${F.filter===k}">${l}<small>${n}</small></button>`;
   return `<div class="card me-head"><div class="av">${esc(ini(name))}</div><div class="grow"><h2>${esc(name)}</h2>
-    <div class="muted">${cnt.done} dari ${open} penilaian selesai${cnt.lock?` · ${cnt.lock} tim terkunci`:""}</div>
+    <div class="muted">${W_.done} dari ${W_.all} tim sudah dinilai${W_.lock?` (${W_.lock} di tim terkunci)`:""} · ${W_.all-W_.done} sisa</div>
     <div class="bar" style="max-width:360px"><i style="width:${pct}%"></i></div></div>
     <a class="linkbtn" href="#/">Bukan Anda? Ganti nama</a></div>
   <div class="tools"><div class="chips" role="group" aria-label="Filter">${ch("todo","Perlu dinilai",cnt.todo)}${ch("done","Selesai",cnt.done)}${cnt.lock?ch("lock","Terkunci",cnt.lock):""}${ch("all","Semua",cnt.all)}</div>
@@ -387,8 +387,10 @@ function viewSum(){
   const tot={all:rows.length}; rows.forEach(r=>tot[r.s.k]=(tot[r.s.k]||0)+1);
   const list=rows.filter(r=>(SUM.st==="all"||r.s.k===SUM.st)&&(!SUM.q||(r.t.tim+" "+r.t.inov+" "+r.t.id).toLowerCase().includes(SUM.q.toLowerCase())));
   const opt=(k,l)=>`<option value="${k}"${SUM.st===k?" selected":""}>${l} (${tot[k]||0})</option>`;
-  const load=[...POOL,...otherNames()].map(n=>{ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); const op=mine.filter(t=>!isLocked(t)); const d=op.filter(t=>myState(t,n).k==="done").length;
-    return `<tr><td>${esc(n)}</td><td class="num">${mine.length}</td><td class="num">${d}</td><td class="num">${op.length-d}</td></tr>`; }).join("");
+  const PN=[...POOL,...otherNames()], LD=PN.map(n=>workload(n));
+  const sum=k=>LD.reduce((a,x)=>a+x[k],0);
+  const load=LD.map((x,i)=>`<tr><td>${esc(PN[i])}</td><td class="num">${x.all}</td><td class="num">${x.done}${x.lock?` <span class="muted" style="font-size:12px">(${x.lock} terkunci)</span>`:""}</td><td class="num">${x.prog}</td><td class="num">${x.none}</td></tr>`).join("")
+    +`<tr style="font-weight:700"><td>Total</td><td class="num">${sum("all")}</td><td class="num">${sum("done")}</td><td class="num">${sum("prog")}</td><td class="num">${sum("none")}</td></tr>`;
   return `<div class="tools"><select class="search" id="sst" aria-label="Filter status">${opt("all","Semua tim")}${opt("todo","Belum dinilai")}${opt("draft","Dalam proses")}${opt("done","Selesai")}${opt("lock","Terkunci")}</select>
     <input class="search" id="sq" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(SUM.q)}" aria-label="Cari tim"></div>
   <div class="card tablewrap"><table class="rtab"><thead><tr><th>ID</th><th>Tim</th><th>Status</th><th>Penilai</th><th>Skor akhir</th></tr></thead><tbody>
@@ -397,11 +399,16 @@ function viewSum(){
    <td data-l="Penilai">${s.i.rs.map(r=>`<span class="rv ${r.f===6?"d":r.f>0?"p":""}" title="${r.f}/6 kriteria terisi">${r.f===6?"&#10003;":r.f>0?"&#9684;":"&#9675;"} ${esc(r.n)}</span>`).join("")||'<span class="muted">-</span>'}</td>
    <td class="num" data-l="Skor akhir">${s.i.complete||t.lk?fmt(s.i.total):'<span class="muted">-</span>'}</td></tr>`).join("")||`<tr><td colspan="5" class="empty">Tidak ada tim yang cocok.</td></tr>`}
   </tbody></table></div>
-  <div class="sec-h"><h2>Beban per penilai</h2><span class="muted">Tim terkunci tidak dihitung</span></div>
-  <div class="card tablewrap"><table><thead><tr><th>Penilai</th><th>Ditugaskan</th><th>Selesai</th><th>Sisa</th></tr></thead><tbody>${load}</tbody></table></div>
-  <p class="muted" style="font-size:13px;margin:12px 4px">Skor akhir tampil setelah semua penilai tim mengisi lengkap. Nilai per penilai tidak ditampilkan agar penilaian tetap independen.</p>`;
+  <div class="sec-h"><h2>Beban per penilai</h2><span class="muted">Ditugaskan = Sudah dinilai + Dalam proses + Belum dinilai</span></div>
+  <div class="card tablewrap"><table><thead><tr><th>Penilai</th><th>Ditugaskan</th><th>Sudah dinilai</th><th>Dalam proses</th><th>Belum dinilai</th></tr></thead><tbody>${load}</tbody></table></div>
+  <p class="muted" style="font-size:13px;margin:12px 4px">"Sudah dinilai" mencakup nilai dari Kertas Kerja dan nilai yang diisi lewat form ini; "terkunci" = tim sudah diflag di sistem. Tim revisi dinilai ulang oleh penilai baru. Skor akhir tampil setelah semua penilai tim mengisi lengkap. Nilai per penilai tidak ditampilkan agar penilaian tetap independen.</p>`;
 }
 
+function workload(n){   // satu penilai: tim terkunci memakai nilai dari Kertas Kerja dan dihitung sebagai sudah dinilai
+  const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); let done=0,lock=0,prog=0;
+  mine.forEach(t=>{ const m=myState(t,n); if(m.f===6){ done++; if(isLocked(t)) lock++; } else if(!isLocked(t)&&m.f>0) prog++; });
+  return {all:mine.length,done,lock,prog,none:mine.length-done-prog};
+}
 function bind(R){
   document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{ F={filter:"todo",q:""}; lsSet("nilai_me",b.dataset.go); location.hash="#/p/"+b.dataset.go; });
   document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{ F.filter=b.dataset.f; render(); });
