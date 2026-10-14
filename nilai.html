@@ -259,7 +259,7 @@ function info(t){
   return {rs,N,done,started,total,complete:N>0&&done===N};
 }
 const isLocked=t=>LOCKED.has(t.id);
-const hasProposal=t=>Boolean(String(t.f||"").trim()&&!String(t.fw||"").trim());
+const hasProposal=t=>t.allowMissingProposal===true||Boolean(String(t.f||"").trim()&&!String(t.fw||"").trim());
 function teamState(t){            // status global tim
   const i=info(t);
   if(isLocked(t)) return {k:"lock",label:"Terkunci",cls:"s-lock",i};
@@ -423,7 +423,7 @@ function teamRow(t,name){
     :m.k==="done"?`<span class="st s-done">&#10003; Selesai · ${fmt(sc10(m.s))}</span>`
     :blocked?`<span class="st s-fail">Berkas belum tersedia</span>`:m.k==="draft"?`<span class="st s-draft">Draft ${m.f}/6</span>`:`<span class="st s-todo">Belum dinilai</span>`;
   const btn=lock||blocked?"Lihat status":m.k==="done"?"Ubah":m.k==="draft"?"Lanjutkan":"Nilai";
-  return `<button class="team" data-open="${t.id}" data-n="${esc(name)}"><div><div class="t1"><span class="num">#${t.id}</span><span>${esc(t.kat.replace("Efisiensi Risiko pada ",""))}</span>${t.rv?`<span class="st s-rev">Hasil revisi</span>`:""}</div>
+  return `<button class="team" data-open="${t.id}" data-n="${esc(name)}"><div><div class="t1"><span class="num">#${t.id}</span><span>${esc(t.kat.replace("Efisiensi Risiko pada ",""))}</span>${t.allowMissingProposal&&!String(t.f||"").trim()?`<span class="st s-draft">Penilaian dibuka tanpa file</span>`:""}${t.rv?`<span class="st s-rev">Hasil revisi</span>`:""}</div>
     <h3>${esc(t.tim)}</h3><div class="j">${esc(t.inov)}</div></div>
     <div class="act">${st}<span class="btn ${m.k==="todo"||m.k==="draft"?"btn-p":"btn-o"}">${btn}</span></div></button>`;
 }
@@ -493,6 +493,7 @@ function drawSheet(){
   const filled=nFill(D.s), full=filled===6, my=full?sc10(D.s):null;
   const row=SV[key(D.id,D.n)];
   const fileInfo=t.f?`<div class="line"><span class="muted">Berkas proposal:</span><span class="file">${esc(t.f.replace(/^revisi\//,""))}</span></div>`:"";
+  const proposalWarning=t.allowMissingProposal&&!String(t.f||"").trim()?"File proposal tidak tersedia. Atas arahan pemilik, penilaian ID 2822 tetap dibuka. Gunakan informasi yang benar-benar dapat diakses dan jangan menebak isi dokumen.":t.fw;
   const nxt=nextTodo(D.id,D.n);
   $("#sheet").innerHTML=`
   <div class="sh-head"><div class="row"><div><div class="eyebrow">#${esc(t.id)} · ${esc(t.kat)}</div><h2 id="shT">${esc(t.tim)}</h2><p>${esc(t.inov)}</p></div>
@@ -500,7 +501,7 @@ function drawSheet(){
   <div class="sh-body"><div class="split"><div class="pane" id="paneA">
     ${lock?`<div class="banner lock"><div>&#128274; <b>Penilaian dikunci.</b> Tim ini sudah diflag di sistem${t.fd?` (${esc(t.fd)})`:""}${t.dec?` dengan keputusan <b>${decLabel(t)}</b>`:""}, sehingga nilai tidak dapat diubah.</div></div>`:""}
     ${blocked?`<div class="banner warn"><div><b>Penilaian ditahan.</b> File proposal belum tersedia dan nilai baru tidak dapat disimpan. Laporkan ke administrator agar file dipulihkan dan status roster diperbarui.</div></div>`:""}
-    ${t.fw?`<div class="banner err"><div><b>Perhatian:</b> ${esc(t.fw)}</div></div>`:""}
+    ${proposalWarning?`<div class="banner ${t.allowMissingProposal?"warn":"err"}"><div><b>Perhatian:</b> ${esc(proposalWarning)}</div></div>`:""}
     <div class="card info">
       ${t.rv?`<div class="line"><span class="st s-rev">Hasil revisi</span><span class="muted">${esc(t.rv)}</span></div>`:""}
       ${fileInfo}

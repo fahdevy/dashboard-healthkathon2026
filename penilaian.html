@@ -165,6 +165,20 @@ tr.detail td{background:var(--soft);padding:16px}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--band);color:var(--band-ink);padding:10px 16px;border-radius:10px;font-size:13px;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 .fchip{display:inline-flex;flex-direction:column;align-items:flex-start;font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px;line-height:1.25;white-space:nowrap}.fchip small{font-weight:600;font-size:9.5px;opacity:.85}.fchip.fon{background:#E7F0EA;color:#0F7A44;border:1px solid #9AD1B4}.fchip.foff{background:#FFF3D6;color:#9C6500;border:1px solid #F0E0A8}
 .katchip{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}.katchip.k-fk{background:#E7EFFB;color:#1C4E86;border:1px solid #BCD6F5}.katchip.k-pj{background:#E5F4EE;color:#0F7A44;border:1px solid #A6DBC0}.katchip.k-pk{background:#F1EAFB;color:#6B3FA0;border:1px solid #D6C2EF}.katgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.katcard{border:1px solid var(--line,#e5e7eb);border-radius:12px;padding:14px 16px;background:var(--surface,#fff);border-top:4px solid #1C4E86}.katcard.k-pj{border-top-color:#0F7A44}.katcard.k-pk{border-top-color:#6B3FA0}.katcard .kt{font-size:13px;font-weight:700;color:var(--ink,#1f2937)}.katcard .kn{font-size:30px;font-weight:800;color:var(--ink,#111);line-height:1.1;margin:4px 0}.katcard .kn small{font-size:12px;font-weight:600;color:var(--muted,#6b7280)}.katcard .krow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}.katcard .kb{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:8px}.katcard .kb.fon{background:#E7F0EA;color:#0F7A44}.katcard .kb.foff{background:#FFF3D6;color:#9C6500}.katcard .km{font-size:11.5px;color:var(--muted,#6b7280);font-weight:600}
+.live-summary{margin:22px auto 18px;max-width:1340px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 24px;box-shadow:var(--shadow)}
+.live-summary-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.live-summary-kicker{margin:0 0 5px;color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+.live-summary-head h2{margin:0;font-size:23px}
+.live-summary-head .sub{margin:5px 0 0;max-width:72ch}
+.live-summary-status{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--muted)}
+.live-summary-status i{width:8px;height:8px;border-radius:50%;background:#D49B38;display:inline-block}
+.live-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}
+.live-summary-item{border:1px solid var(--line);border-radius:13px;padding:14px 16px;background:var(--soft)}
+.live-summary-item span{display:block;color:var(--muted);font-size:12px;font-weight:700}
+.live-summary-item strong{display:block;margin-top:3px;color:var(--ink);font-size:34px;line-height:1.15}
+.live-summary-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;color:var(--muted);font-size:11.5px}
+.snapshot-disclaimer{margin:0 0 16px;padding:11px 14px;border:1px solid #e7d9b1;border-radius:11px;background:#fff9e9;color:#745817;font-size:12px}
+@media(max-width:650px){.live-summary{padding:17px}.live-summary-grid{grid-template-columns:1fr}.live-summary-item strong{font-size:30px}}
 </style>
 </head>
 <body>
@@ -174,8 +188,8 @@ tr.detail td{background:var(--soft);padding:16px}
     <div>
       <div class="eyebrow">Healthkathon 2026 · Seleksi Proposal Inovasi AI</div>
       <h1>Dashboard Hasil Penilaian Proposal</h1>
-      <p>Nilai ditampilkan sesuai kondisi riil dan dikonversi ke skala 10. Keputusan Lulus atau Tidak Lulus hanya ditetapkan untuk peserta yang sudah dinilai oleh seluruh penilainya.</p>
-      <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid var(--band-muted);color:var(--band-ink);padding:6px 13px;border-radius:999px;font:600 12.5px var(--body,sans-serif)">Flag di sistem: 47 tim sudah terflag (batch 28 September, 30 September &amp; 7 Oktober 2026) &nbsp;&middot;&nbsp; data nilai diperbarui 14 Oktober 2026 &nbsp;&middot;&nbsp; data submisi diperbarui 12 Oktober 2026</div>
+      <p>Kartu ringkasan di bawah membaca GSheet setelah endpoint terbit. Rincian per tim, grafik, nilai, dan catatan pada halaman ini merupakan snapshot statis per tanggal yang tercantum.</p>
+      <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid var(--band-muted);color:var(--band-ink);padding:6px 13px;border-radius:999px;font:600 12.5px var(--body,sans-serif)">Snapshot rincian: 47 tim terflag (batch 28 September, 30 September &amp; 7 Oktober 2026) &nbsp;&middot;&nbsp; nilai per 14 Oktober 2026 &nbsp;&middot;&nbsp; submisi per 12 Oktober 2026</div>
       <div id="livepill" role="status" aria-live="polite" style="display:inline-flex;align-items:center;gap:8px;margin:8px 0 0 0;background:rgba(255,255,255,.08);border:1px solid var(--band-muted);color:var(--band-ink);padding:5px 13px;border-radius:999px;font:600 12.5px var(--body,sans-serif)"><i id="liveDot" style="width:8px;height:8px;border-radius:50%;background:#E2B060;display:inline-block"></i><span id="liveTxt">Snapshot statis</span></div>
       <div class="hero-actions">
         <button class="btn btn-mint" id="dlTop" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>Unduh Excel</button>
@@ -190,6 +204,23 @@ tr.detail td{background:var(--soft);padding:16px}
 </section>
 
 <main class="wrap">
+  <section class="live-summary" id="publicSummary" aria-label="Ringkasan agregat realtime" aria-live="polite">
+    <div class="live-summary-head">
+      <div>
+        <p class="live-summary-kicker">Ringkasan publik · Google Sheet</p>
+        <h2>Progres penilaian saat ini</h2>
+        <p class="sub">Hanya angka agregat yang ditampilkan. Pembaruan otomatis setiap 60 detik; berkas yang belum dapat dinilai tetap masuk hitungan belum selesai.</p>
+      </div>
+      <div class="live-summary-status" role="status"><i id="summaryDot"></i><span id="summaryStatus">Menghubungkan ke GSheet...</span></div>
+    </div>
+    <div class="live-summary-grid">
+      <div class="live-summary-item"><span>Total proposal</span><strong id="summaryTotal">-</strong></div>
+      <div class="live-summary-item"><span>Selesai dinilai</span><strong id="summaryCompleted">-</strong></div>
+      <div class="live-summary-item"><span>Belum selesai</span><strong id="summaryIncomplete">-</strong></div>
+    </div>
+    <div class="live-summary-foot"><span>Tidak memuat nama tim, reviewer, nilai kriteria, atau catatan.</span><span id="summaryUpdated">Memuat ringkasan...</span></div>
+  </section>
+  <div class="snapshot-disclaimer"><strong>Catatan:</strong> Rincian tim, grafik, nilai dan catatan pada bagian berikut tetap berupa snapshot statis per tanggal yang tercantum, bukan data realtime.</div>
   <section class="kpis" id="kpis" aria-label="Ringkasan status"></section>
 
   <section class="panel" id="katrecap">
@@ -226,15 +257,13 @@ tr.detail td{background:var(--soft);padding:16px}
         <ol>
           <li><b>Nilai riil.</b> Total nilai adalah akumulasi skor yang benar-benar sudah masuk, tanpa proyeksi atau perkiraan.</li>
           <li><b>Selesai dinilai</b> bila seluruh penilai yang ditugaskan sudah mengisi 6 kriteria. Hasilnya final: Lulus bila total nilai ≥ ambang, selain itu Tidak Lulus.</li>
-          <li><b>Belum selesai penilaian</b> hanya untuk tugas yang aktif, tidak terkunci, dan berkasnya tersedia, tetapi masih ada penilai yang belum mengisi.</li>
-          <li><b>Terkunci</b> dikecualikan dari hitungan tugas aktif dan tidak masuk status belum selesai.</li>
-          <li><b>Berkas tertahan</b> dikecualikan dari progres aktif sampai proposal dapat diakses.</li>
-          <li><b>Belum dinilai</b> berarti belum ada nilai sama sekali pada tugas yang masih aktif.</li>
+          <li><b>Belum selesai penilaian</b> bila masih ada satu atau lebih penilai yang belum melengkapi 6 kriteria.</li>
+          <li><b>Belum dinilai</b> bila belum ada skor. Semua assignment yang belum lengkap masuk hitungan belum selesai.</li>
         </ol>
       </div>
       <div class="panel">
         <h2>Progres penilai</h2>
-        <p class="sub" style="margin-top:-8px">Tugas aktif yang selesai dibanding alokasi yang dapat dinilai. Tugas terkunci dan berkas tertahan ditampilkan terpisah.</p>
+        <p class="sub" style="margin-top:-8px">Jumlah penilaian lengkap dibanding seluruh assignment reviewer. Setiap assignment yang belum lengkap dihitung belum selesai.</p>
         <div class="raters" id="raters"></div>
       </div>
     </div>
@@ -250,9 +279,7 @@ tr.detail td{background:var(--soft);padding:16px}
           <option value="done">Selesai dinilai</option>
           <option value="L">Lulus</option>
           <option value="T">Tidak lulus</option>
-          <option value="prog">Belum selesai penilaian</option>
-          <option value="locked">Terkunci, dikecualikan</option>
-          <option value="blocked">Berkas tertahan</option>
+          <option value="pending">Belum selesai</option>
           <option value="note">Ada masukan penilai</option>
           <option value="flagged">Sudah diflag di sistem</option>
           <option value="notflagged">Belum diflag di sistem</option>
@@ -294,7 +321,7 @@ const revInfo=t=>{const r=REVISI[String(t.id)];return r?`Hasil revisi, mengganti
 const META={"nilai": "14/10/2026", "submisi": "12/10/2026"};
 const FLAGGED=new Set([1987, 1994, 2021, 2022, 2079, 2090, 2091, 2105, 2110, 2114, 2127, 2163, 2180, 2211, 2217, 2247, 2356, 2387, 2263, 2262, 2392, 2286, 2417, 2179, 2381, 2525, 2451, 2640, 2414, 2154, 2548, 2160, 2178, 2129, 2293, 2556, 2058, 2269, 2584, 2459, 2454, 2089, 2140, 2386, 2156, 2571, 2329]);
 const BLOCKED_IDS=new Set(["2769", "2822"]);
-const LOCKED_IDS=new Set(["1987", "1994", "2021", "2022", "2058", "2079", "2089", "2090", "2091", "2105", "2110", "2114", "2127", "2129", "2140", "2154", "2156", "2160", "2163", "2178", "2179", "2180", "2211", "2217", "2247", "2259", "2262", "2263", "2269", "2286", "2293", "2306", "2329", "2356", "2381", "2382", "2386", "2387", "2392", "2414", "2417", "2451", "2454", "2459", "2487", "2525", "2548", "2556", "2571", "2584", "2640"]);const FLAGDATE={"1987": "28/09/2026", "1994": "28/09/2026", "2021": "28/09/2026", "2022": "28/09/2026", "2079": "28/09/2026", "2090": "28/09/2026", "2091": "28/09/2026", "2105": "28/09/2026", "2110": "28/09/2026", "2114": "28/09/2026", "2127": "28/09/2026", "2163": "28/09/2026", "2180": "28/09/2026", "2211": "28/09/2026", "2217": "28/09/2026", "2247": "28/09/2026", "2356": "28/09/2026", "2387": "30/09/2026", "2263": "30/09/2026", "2262": "30/09/2026", "2392": "30/09/2026", "2286": "30/09/2026", "2417": "30/09/2026", "2179": "30/09/2026", "2381": "30/09/2026", "2525": "30/09/2026", "2451": "30/09/2026", "2640": "30/09/2026", "2414": "30/09/2026", "2154": "30/09/2026", "2548": "30/09/2026", "2160": "30/09/2026", "2178": "30/09/2026", "2129": "30/09/2026", "2293": "30/09/2026", "2556": "30/09/2026", "2058": "30/09/2026", "2269": "30/09/2026", "2584": "30/09/2026", "2459": "07/10/2026", "2454": "07/10/2026", "2089": "07/10/2026", "2140": "07/10/2026", "2386": "07/10/2026", "2156": "07/10/2026", "2571": "07/10/2026", "2329": "07/10/2026"};const flagDate=t=>FLAGDATE[String(t.id)]||"";const FLAGDEC={"1987": "L", "1994": "L", "2021": "L", "2022": "L", "2079": "L", "2090": "L", "2091": "L", "2105": "L", "2110": "T", "2114": "L", "2127": "L", "2163": "T", "2180": "L", "2211": "L", "2217": "L", "2247": "L", "2356": "L", "2387": "L", "2263": "L", "2262": "L", "2392": "L", "2286": "L", "2417": "L", "2179": "L", "2381": "L", "2525": "L", "2451": "L", "2640": "L", "2414": "L", "2154": "L", "2548": "L", "2160": "L", "2178": "T", "2129": "T", "2293": "T", "2556": "T", "2058": "T", "2269": "T", "2584": "T", "2459": "L", "2454": "L", "2089": "L", "2140": "L", "2386": "L", "2156": "L", "2571": "T", "2329": "T"};const FLAG_DATE="28/09/2026";
+const LOCKED_IDS=new Set(["1987", "1994", "2021", "2022", "2058", "2079", "2089", "2090", "2091", "2105", "2110", "2114", "2127", "2129", "2140", "2154", "2156", "2160", "2163", "2178", "2179", "2180", "2211", "2217", "2247", "2262", "2263", "2269", "2286", "2293", "2329", "2356", "2381", "2386", "2387", "2392", "2414", "2417", "2451", "2454", "2459", "2525", "2548", "2556", "2571", "2584", "2640"]);const FLAGDATE={"1987": "28/09/2026", "1994": "28/09/2026", "2021": "28/09/2026", "2022": "28/09/2026", "2079": "28/09/2026", "2090": "28/09/2026", "2091": "28/09/2026", "2105": "28/09/2026", "2110": "28/09/2026", "2114": "28/09/2026", "2127": "28/09/2026", "2163": "28/09/2026", "2180": "28/09/2026", "2211": "28/09/2026", "2217": "28/09/2026", "2247": "28/09/2026", "2356": "28/09/2026", "2387": "30/09/2026", "2263": "30/09/2026", "2262": "30/09/2026", "2392": "30/09/2026", "2286": "30/09/2026", "2417": "30/09/2026", "2179": "30/09/2026", "2381": "30/09/2026", "2525": "30/09/2026", "2451": "30/09/2026", "2640": "30/09/2026", "2414": "30/09/2026", "2154": "30/09/2026", "2548": "30/09/2026", "2160": "30/09/2026", "2178": "30/09/2026", "2129": "30/09/2026", "2293": "30/09/2026", "2556": "30/09/2026", "2058": "30/09/2026", "2269": "30/09/2026", "2584": "30/09/2026", "2459": "07/10/2026", "2454": "07/10/2026", "2089": "07/10/2026", "2140": "07/10/2026", "2386": "07/10/2026", "2156": "07/10/2026", "2571": "07/10/2026", "2329": "07/10/2026"};const flagDate=t=>FLAGDATE[String(t.id)]||"";const FLAGDEC={"1987": "L", "1994": "L", "2021": "L", "2022": "L", "2079": "L", "2090": "L", "2091": "L", "2105": "L", "2110": "T", "2114": "L", "2127": "L", "2163": "T", "2180": "L", "2211": "L", "2217": "L", "2247": "L", "2356": "L", "2387": "L", "2263": "L", "2262": "L", "2392": "L", "2286": "L", "2417": "L", "2179": "L", "2381": "L", "2525": "L", "2451": "L", "2640": "L", "2414": "L", "2154": "L", "2548": "L", "2160": "L", "2178": "T", "2129": "T", "2293": "T", "2556": "T", "2058": "T", "2269": "T", "2584": "T", "2459": "L", "2454": "L", "2089": "L", "2140": "L", "2386": "L", "2156": "L", "2571": "T", "2329": "T"};const FLAG_DATE="28/09/2026";
 let thr = 7, sortK = "total", sortDir = -1, filter = "all", q = "", open = new Set(), T = [];
 try{ const s = localStorage.getItem("thr10"); if(s) thr = +s; }catch(e){}
 document.getElementById("thr").value = thr;
@@ -329,30 +356,28 @@ function compute(){
 function raterProgress(teams=T){
   const out=Object.create(null);
   teams.forEach(t=>t.rs.forEach(r=>{
-    if(!out[r.n]) out[r.n]={a:0,d:0,p:0,locked:0,blocked:0};
-    const x=out[r.n];
-    if(t.locked){x.locked++;return;}
-    if(t.blocked){x.blocked++;return;}
-    x.a++; if(r.filled===6)x.d++; else if(r.filled)x.p++;
+    if(!out[r.n]) out[r.n]={a:0,d:0};
+    const x=out[r.n]; x.a++;
+    if(r.filled===6)x.d++;
   }));
   return out;
 }
-const stLabel = t => t.st==="L"? "Lulus" : t.st==="T"? "Tidak lulus" : t.st==="locked"? "Terkunci" : t.st==="blocked"? "Berkas tertahan" : (t.started? "Belum selesai penilaian" : "Belum dinilai");
-const stClass = t => t.st==="L"? "p-pass" : t.st==="T"? "p-fail" : t.st==="locked"? "p-lock" : t.st==="blocked"? "p-blocked" : "p-prog";
+const stLabel = t => t.st==="L"? "Lulus" : t.st==="T"? "Tidak lulus" : (t.started? "Belum selesai penilaian" : "Belum dinilai");
+const stClass = t => t.st==="L"? "p-pass" : t.st==="T"? "p-fail" : "p-prog";
 
 function render(){
   compute();
   document.getElementById("thrv").textContent = thr.toFixed(1).replace(".",",");
-  const S = {L:0,T:0,prog:0,locked:0,blocked:0,note:0,done:0,none:0};
-  T.forEach(t=>{ S[t.st]++; if(t.complete) S.done++; if(t.note) S.note++; if(t.st==="prog"&&!t.started) S.none++; });
-  const pendingPairs=T.filter(t=>t.st==="prog").reduce((n,t)=>n+Math.max(0,t.N-t.done),0);
+  const S = {L:0,T:0,note:0,done:0,pending:0};
+  T.forEach(t=>{ if(t.st==="L")S.L++; else if(t.st==="T")S.T++; if(t.complete)S.done++; else S.pending++; if(t.note)S.note++; });
+  const pendingPairs=T.reduce((n,t)=>n+t.rs.filter(r=>r.filled<6).length,0);
 
-  const R=80, C=2*Math.PI*R, seg=[[S.L,"var(--mint)"],[S.T,"#E8786F"],[S.prog,"#E2B060"],[S.locked,"var(--none)"],[S.blocked,"#8B744D"]];
+  const R=80, C=2*Math.PI*R, seg=[[S.done,"var(--mint)"],[S.pending,"#E2B060"]];
   let off=0, rs=`<svg viewBox="0 0 190 190" aria-hidden="true"><circle cx="95" cy="95" r="${R}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="18"/>`;
   seg.forEach(([v,c])=>{ const len=v/T.length*C; if(len>0) rs+=`<circle cx="95" cy="95" r="${R}" fill="none" stroke="${c}" stroke-width="18" stroke-dasharray="${Math.max(0,len-2)} ${C}" stroke-dashoffset="${-off}"/>`; off+=len; });
   rs+=`</svg><div class="c"><b>${S.done}</b><span>selesai dinilai</span><span>dari ${T.length} peserta</span></div>`;
   document.getElementById("ring").innerHTML = rs;
-  document.getElementById("rleg").innerHTML = [["Lulus",S.L,"var(--mint)"],["Tidak lulus",S.T,"#E8786F"],["Belum selesai aktif",S.prog,"#E2B060"],["Terkunci",S.locked,"var(--none)"],["Berkas tertahan",S.blocked,"#8B744D"],["Total peserta",T.length,"transparent"]]
+  document.getElementById("rleg").innerHTML = [["Selesai dinilai",S.done,"var(--mint)"],["Belum selesai",S.pending,"#E2B060"],["Total peserta",T.length,"transparent"]]
     .map(([l,v,c])=>`<div><i style="background:${c}"></i>${l}<b>${v}</b></div>`).join("");
 
   const kp = [
@@ -360,13 +385,11 @@ function render(){
     ["done","var(--accent)","Selesai dinilai",S.done,"oleh seluruh penilai"],
     ["L","var(--pass)","Lulus",S.L,"hasil akhir"],
     ["T","var(--fail)","Tidak lulus",S.T,"hasil akhir"],
-    ["prog","var(--prog)","Belum selesai (aktif)",S.prog,`${pendingPairs} tugas penilai belum lengkap · ${S.none} tim belum mulai`],
-    ["locked","var(--none)","Terkunci",S.locked,"dikecualikan dari tugas aktif"],
-    ["blocked","#8B744D","Berkas tertahan",S.blocked,"dikecualikan dari progres aktif"],
+    ["pending","var(--prog)","Belum selesai",S.pending,`${pendingPairs} assignment reviewer belum lengkap`],
     ["note","var(--accent)","Ada masukan",S.note,"catatan dari tim penilai"]
   ];
   document.getElementById("kpis").innerHTML = kp.map(([k,c,l,v,s])=>`<button type="button" class="kpi ${filter===k?"active":""}" style="--kc:${c}" data-f="${k}"><span>${l}</span><b>${v}</b><i>${s}</i></button>`).join("");
-  const _kb=KATLIST.map(kl=>{const it=T.filter(t=>katOf(t)===kl);const tot=it.length,fl=it.filter(t=>FLAGGED.has(t.id)).length,lu=it.filter(t=>t.st==="L").length,ti=it.filter(t=>t.st==="T").length,pr=it.filter(t=>t.st==="prog").length,lk=it.filter(t=>t.st==="locked").length,bl=it.filter(t=>t.st==="blocked").length;return `<div class="katcard ${katClass(kl)}"><div class="kt">${katShort(kl)}</div><div class="kn">${tot}<small> proposal</small></div><div class="krow"><span class="kb fon">Sudah diflag ${fl}</span><span class="kb foff">Belum diflag ${tot-fl}</span></div><div class="km">Lulus ${lu} · Tidak ${ti} · Aktif belum selesai ${pr} · Terkunci ${lk} · Berkas tertahan ${bl}</div></div>`;}).join("");document.getElementById("katbox").innerHTML=_kb;
+  const _kb=KATLIST.map(kl=>{const it=T.filter(t=>katOf(t)===kl);const tot=it.length,fl=it.filter(t=>FLAGGED.has(t.id)).length,done=it.filter(t=>t.complete).length,pending=tot-done;return `<div class="katcard ${katClass(kl)}"><div class="kt">${katShort(kl)}</div><div class="kn">${tot}<small> proposal</small></div><div class="krow"><span class="kb fon">Sudah diflag ${fl}</span><span class="kb foff">Belum diflag ${tot-fl}</span></div><div class="km">Selesai ${done} · Belum selesai ${pending}</div></div>`;}).join("");document.getElementById("katbox").innerHTML=_kb;
   document.querySelectorAll(".kpi").forEach(b=>b.onclick=()=>{ filter=b.dataset.f; document.getElementById("fs").value=filter; render(); document.getElementById("tabel").scrollIntoView({behavior:"smooth",block:"start"}); });
 
   const fin = T.filter(t=>t.complete).sort((a,b)=>b.total-a.total);
@@ -388,11 +411,9 @@ function render(){
 
   const RM = raterProgress();
   document.getElementById("raters").innerHTML = Object.entries(RM).sort((a,b)=>(b[1].a?b[1].d/b[1].a:1)-(a[1].a?a[1].d/a[1].a:1) || b[1].a-a[1].a).map(([n,v])=>{
-    const pct=v.a?100*v.d/v.a:100, excluded=[];
-    if(v.locked) excluded.push(`${v.locked} terkunci`);
-    if(v.blocked) excluded.push(`${v.blocked} berkas tertahan`);
-    const meta=excluded.length?excluded.join(" · "):"semua tugas dapat dinilai";
-    return `<div class="rrow"><span>${esc(n)}${v.p?` <span class="muted">(+${v.p} parsial)</span>`:""}<small class="r-meta">${meta}</small></span><span class="bar"><i style="width:${pct}%"></i></span><span class="num" style="text-align:right">${v.d}/${v.a}</span></div>`;
+    const pct=v.a?100*v.d/v.a:0, remaining=Math.max(0,v.a-v.d);
+    const meta=remaining?`${remaining} belum selesai`:"semua tugas selesai";
+    return `<div class="rrow"><span>${esc(n)}<small class="r-meta">${meta}</small></span><span class="bar"><i style="width:${pct}%"></i></span><span class="num" style="text-align:right">${v.d}/${v.a}</span></div>`;
   }).join("");
 
   let rows = T.filter(t=>{
@@ -400,11 +421,12 @@ function render(){
     else if(filter==="flagged"){ if(!FLAGGED.has(t.id)) return false; }
     else if(filter==="notflagged"){ if(FLAGGED.has(t.id)) return false; }
     else if(filter==="done"){ if(!t.complete) return false; }
+    else if(filter==="pending"){ if(t.complete) return false; }
     else if(filter!=="all" && t.st!==filter) return false;
     if(q){ const hay=(t.tim+" "+t.inov+" "+t.id+" "+t.note+" "+t.rs.map(r=>r.n).join(" ")).toLowerCase(); if(!hay.includes(q)) return false; }
     return true;
   });
-  const key = t => sortK==="tim"? t.tim.toLowerCase() : sortK==="st"? ({L:0,T:1,prog:2,locked:3,blocked:4})[t.st] : sortK==="rank"? (t.rank ?? 999) : sortK==="done"? t.done/t.N : t[sortK];
+  const key = t => sortK==="tim"? t.tim.toLowerCase() : sortK==="st"? ({L:0,T:1,prog:2,locked:2,blocked:2})[t.st] : sortK==="rank"? (t.rank ?? 999) : sortK==="done"? t.done/t.N : t[sortK];
   rows.sort((a,b)=>{ const A=key(a),B=key(b); return (A>B?1:A<B?-1:0)*sortDir || (b.total-a.total); });
   document.getElementById("countTxt").textContent = `Menampilkan ${rows.length} dari ${T.length} peserta`;
   document.getElementById("tb").innerHTML = rows.map(t=>{
@@ -416,7 +438,7 @@ function render(){
       <td><span class="katchip ${katClass(katOf(t))}">${katShort(katOf(t))}</span></td>
       <td style="white-space:nowrap"><span class="dots">${dots}</span> <span class="muted num">${t.done}/${t.N}</span></td>
       <td class="r"><div class="score ${t.complete?"":"run"}"><b>${f2(t.total)}</b><span class="meter"><i style="width:${t.total*10}%;background:${mcol}"></i><s style="left:${thr*10}%"></s></span>${t.complete?"":"<small>nilai berjalan</small>"}</div></td>
-      <td><span class="pill ${stClass(t)}">${stLabel(t)}</span>${t.complete?`<span class="cert">hasil akhir</span>`:`<span class="cert">${t.st==="locked"?"terkunci; tidak masuk tugas aktif":t.st==="blocked"?"berkas tertahan; tidak masuk tugas aktif":t.N===0?"belum ada penilai ditugaskan":`${t.N-t.done} dari ${t.N} penilai belum selesai`}</span>`}</td>
+      <td><span class="pill ${stClass(t)}">${stLabel(t)}</span>${t.complete?`<span class="cert">hasil akhir</span>`:`<span class="cert">${t.N===0?"belum ada penilai ditugaskan":`${t.N-t.done} dari ${t.N} penilai belum selesai`}</span>`}</td>
       <td>${FLAGGED.has(t.id)?`<span class="fchip fon">Sudah diflag<small>${flagDate(t)}</small></span>`:`<span class="fchip foff">Belum diflag</span>`}</td>
       <td>${t.note? `<div class="fb"><div class="clip">${esc(t.note)}</div></div>` : `<div class="fb empty">Belum ada masukan</div>`}</td></tr>`;
     if(!open.has(t.id)) return main;
@@ -446,7 +468,7 @@ function buildWorkbook(){
     "Keputusan": stLabel(t),
     "Status Flag Sistem": FLAGGED.has(t.id)?"Sudah Terflag di Sistem":"Belum Terflag Sistem",
     "Tgl Eksekusi Flag": FLAGGED.has(t.id)?flagDate(t):"-",
-    "Progres Penilaian": `${t.done}/${t.N} penilai selesai${t.locked?" (terkunci; dikecualikan dari progres aktif)":t.blocked?" (berkas tertahan; dikecualikan dari progres aktif)":""}`,
+    "Progres Penilaian": `${t.done}/${t.N} penilai selesai`,
     "Masukan dari Tim Penilai": t.note || "-",
     "Keterangan": revInfo(t) || "-"
   }));
@@ -457,9 +479,8 @@ function buildWorkbook(){
     ["Keterangan"],
     ["Ambang lulus (skala 10)", thr],
     ["Total Nilai", "Jumlah nilai berbobot seluruh penilai ÷ (4 × jumlah penilai) × 10, nilai riil tanpa proyeksi"],
-    ["Keputusan", "Lulus/Tidak lulus bila seluruh penilai selesai atau ada keputusan flag resmi. Belum selesai/Belum dinilai hanya untuk tugas aktif. Terkunci dan berkas tertahan dikecualikan dari progres aktif."],
-    ["Tugas terkunci", "Assignment pada tab Kunci/keputusan final tidak dihitung sebagai tugas belum selesai."],
-    ["Berkas tertahan", "Proposal tidak tersedia atau memiliki peringatan; assignment dikecualikan dari progres aktif sampai berkas dapat diakses."],
+    ["Keputusan", "Lulus/Tidak lulus bila penilaian selesai atau ada keputusan flag resmi. Semua assignment yang belum lengkap masuk hitungan belum selesai."],
+    ["Progres penilaian", "Assignment selesai bila seluruh 6 kriteria terisi; assignment tanpa skor lengkap dihitung belum selesai."],
     ["Status Flag Sistem", "Sudah Terflag di Sistem = keputusan sudah dieksekusi (flag) di database sistem. Total 47 tim terflag; tim yang mengajukan revisi dikembalikan menjadi belum terflag. Belum Terflag Sistem = belum ada eksekusi flag."],
     ["Tanggal eksekusi flag", "28/09/2026 (17 tim), 30/09/2026 (22 tim), 07/10/2026 (8 tim)"],
     ["Revisi proposal", "Proposal revisi menggantikan data lama: status kembali Belum dinilai dan Belum Terflag Sistem; lihat kolom Keterangan"],
@@ -500,18 +521,53 @@ document.getElementById("fs").onchange = e=>{ filter=e.target.value; render(); }
 document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=(k==="tim"||k==="rank"||k==="st")?1:-1;} render(); });
 
 /*LIVE_API*/const NILAI_API="";/*LIVE_END*/
-/* Snapshot saja. Feed skor publik dinonaktifkan; tim terflag tetap terkunci. */
+const SUMMARY_API="https://script.google.com/macros/s/AKfycbwFj9bHqQrkxBCnQRCDa2AHAfzEB9KF0M1Sx16X60FpIWmVzkLE54Xc6vb_g8sHlZ6tzA/exec";
+const SUMMARY_REFRESH_MS=60000;
+function requestPublicSummary(){
+  return new Promise((resolve,reject)=>{
+    const callback="__hkSummary_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8);
+    const script=document.createElement("script"); let settled=false;
+    const timer=setTimeout(()=>finish(new Error("timeout")),15000);
+    function finish(err,data){if(settled)return;settled=true;clearTimeout(timer);try{delete window[callback];}catch(_){};script.remove();err?reject(err):resolve(data);}
+    window[callback]=data=>finish(null,data);
+    script.onerror=()=>finish(new Error("load"));
+    script.src=SUMMARY_API+"?action=publicSummary&callback="+encodeURIComponent(callback)+"&_="+Date.now();
+    document.head.appendChild(script);
+  });
+}
+function updatePublicSummary(){
+  const status=document.getElementById("summaryStatus"), dot=document.getElementById("summaryDot");
+  const updated=document.getElementById("summaryUpdated");
+  if(status)status.textContent="Memperbarui...";
+  if(dot)dot.style.background="#D49B38";
+  requestPublicSummary().then(data=>{
+    const total=Number(data&&data.totalTeams), completed=Number(data&&data.completedTeams), incomplete=Number(data&&data.incompleteTeams);
+    if(!data||data.ok!==true||![total,completed,incomplete].every(Number.isInteger)||total<0||completed<0||incomplete<0||completed+incomplete!==total)throw new Error("invalid_summary");
+    document.getElementById("summaryTotal").textContent=total.toLocaleString("id-ID");
+    document.getElementById("summaryCompleted").textContent=completed.toLocaleString("id-ID");
+    document.getElementById("summaryIncomplete").textContent=incomplete.toLocaleString("id-ID");
+    if(status)status.textContent="Tersambung · ringkasan live";
+    if(dot)dot.style.background="#2FBF9F";
+    if(updated){const d=new Date(data.updatedAt);updated.textContent="Data dibaca "+(Number.isNaN(d.getTime())?"baru saja":new Intl.DateTimeFormat("id-ID",{dateStyle:"short",timeStyle:"medium",timeZone:"Asia/Jakarta"}).format(d))+" WIB · refresh 60 detik";}
+  }).catch(()=>{
+    if(status)status.textContent="Ringkasan live belum tersedia";
+    if(dot)dot.style.background="#C54B4B";
+    if(updated)updated.textContent="Perlu deploy endpoint publicSummary pada Apps Script.";
+  });
+}
+if(typeof window!=="undefined"&&window.location&&window.location.protocol){updatePublicSummary();setInterval(updatePublicSummary,SUMMARY_REFRESH_MS);}
+/* Snapshot saja. Feed skor publik dinonaktifkan sampai akses live yang aman ditetapkan. */
 const LIVE = {ok:false, when:null, err:false, n:0};
 function liveUI(){
   const box=document.getElementById("livepill"); if(!box) return;
   document.getElementById("liveDot").style.background = "#E2B060";
-  document.getElementById("liveTxt").textContent = `Snapshot statis · data nilai per ${META.nilai||"tanggal tidak tersedia"}`;
+  document.getElementById("liveTxt").textContent = `Rincian snapshot · nilai per ${META.nilai||"tanggal tidak tersedia"}`;
 }
 const LIVEP = Promise.resolve();
 window.__liveStart = () => Promise.resolve();
 window.getHasil = () => {
   compute();
-  const map={}; T.forEach(t=>{ map[String(t.id)]={total:t.total,N:t.N,started:t.started,label:stLabel(t),flagged:FLAGGED.has(t.id),locked:t.locked,blocked:t.blocked,fdate:flagDate(t)}; });
+  const map={}; T.forEach(t=>{ map[String(t.id)]={total:t.total,N:t.N,started:t.started,label:stLabel(t),flagged:FLAGGED.has(t.id),fdate:flagDate(t)}; });
   return {live:false, when:META.nilai||"", snapshot:true, map};
 };
 render();
