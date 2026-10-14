@@ -112,7 +112,7 @@ button{font:inherit;cursor:pointer}
 .formula em{color:var(--mint);font-style:normal}
 .method ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13px}
 .raters{display:flex;flex-direction:column;gap:9px}
-.rrow{display:grid;grid-template-columns:minmax(0,1fr) 100px 44px;gap:10px;align-items:center;font-size:12.5px}
+.rrow{display:grid;grid-template-columns:minmax(0,1fr) 100px 44px;gap:10px;align-items:center;font-size:12.5px}.r-meta{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
 .bar{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
 .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--mint))}
 
@@ -145,7 +145,7 @@ tr.row:hover td{background:var(--soft)}
 .p-pass{background:var(--pass-soft);color:var(--pass)}
 .p-fail{background:var(--fail-soft);color:var(--fail)}
 .p-prog{background:var(--prog-soft);color:var(--prog)}
-.p-prog::before{background:transparent;border:1.5px solid currentColor}
+.p-prog::before{background:transparent;border:1.5px solid currentColor}.p-lock{background:var(--none-soft);color:var(--none)}.p-blocked{background:var(--prog-soft);color:var(--prog)}
 .cert{display:block;font-size:11px;color:var(--muted);margin-top:4px}
 .dots{display:inline-flex;gap:4px;vertical-align:middle}
 .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--accent)}
@@ -226,12 +226,15 @@ tr.detail td{background:var(--soft);padding:16px}
         <ol>
           <li><b>Nilai riil.</b> Total nilai adalah akumulasi skor yang benar-benar sudah masuk, tanpa proyeksi atau perkiraan.</li>
           <li><b>Selesai dinilai</b> bila seluruh penilai yang ditugaskan sudah mengisi 6 kriteria. Hasilnya final: Lulus bila total nilai ≥ ambang, selain itu Tidak Lulus.</li>
-          <li><b>Belum selesai penilaian</b> bila masih ada penilai yang belum mengisi. Nilainya masih berjalan dan akan bertambah, sehingga belum diberi keputusan.</li>
+          <li><b>Belum selesai penilaian</b> hanya untuk tugas yang aktif, tidak terkunci, dan berkasnya tersedia, tetapi masih ada penilai yang belum mengisi.</li>
+          <li><b>Terkunci</b> dikecualikan dari hitungan tugas aktif dan tidak masuk status belum selesai.</li>
+          <li><b>Berkas tertahan</b> dikecualikan dari progres aktif sampai proposal dapat diakses.</li>
+          <li><b>Belum dinilai</b> berarti belum ada nilai sama sekali pada tugas yang masih aktif.</li>
         </ol>
       </div>
       <div class="panel">
         <h2>Progres penilai</h2>
-        <p class="sub" style="margin-top:-8px">Jumlah proposal yang sudah dinilai lengkap dari total alokasi.</p>
+        <p class="sub" style="margin-top:-8px">Tugas aktif yang selesai dibanding alokasi yang dapat dinilai. Tugas terkunci dan berkas tertahan ditampilkan terpisah.</p>
         <div class="raters" id="raters"></div>
       </div>
     </div>
@@ -248,6 +251,8 @@ tr.detail td{background:var(--soft);padding:16px}
           <option value="L">Lulus</option>
           <option value="T">Tidak lulus</option>
           <option value="prog">Belum selesai penilaian</option>
+          <option value="locked">Terkunci, dikecualikan</option>
+          <option value="blocked">Berkas tertahan</option>
           <option value="note">Ada masukan penilai</option>
           <option value="flagged">Sudah diflag di sistem</option>
           <option value="notflagged">Belum diflag di sistem</option>
@@ -287,7 +292,9 @@ const KATLIST=['Efisiensi Risiko pada Fasilitas Kesehatan','Efisiensi Risiko pad
 const REVISI={"2241": {"prev_dec": "Tidak lulus", "prev_date": "28/09/2026", "prev_inov": "OzikTrace-Mengunci Kebocoran Klaim Sebelum Terjadi", "prev_total": null}, "2052": {"prev_dec": "Tidak lulus", "prev_date": "28/09/2026", "prev_inov": "SAFETING JKN : Sistem Deteksi Dini & Skoring Risiko Underwriting", "prev_total": null}, "2259": {"prev_dec": "Tidak lulus", "prev_date": "30/09/2026", "prev_inov": "JEJAK Kepatuhan"}, "2306": {"prev_dec": "Tidak lulus", "prev_date": "30/09/2026", "prev_inov": "SIMTOM (Sistem Identifikasi Manipulasi Transaksi dan Outlier Medis)"}, "2382": {"prev_dec": "Tidak lulus", "prev_date": "07/10/2026", "prev_inov": "SENTRA JKN"}, "2487": {"prev_dec": "Tidak lulus", "prev_date": "30/09/2026", "prev_inov": "SERA — Service Evidence & Risk Assessment"}};
 const revInfo=t=>{const r=REVISI[String(t.id)];return r?`Hasil revisi, menggantikan proposal sebelumnya (${r.prev_dec}${r.prev_date?', flag '+r.prev_date:''})`:'';};
 const META={"nilai": "14/10/2026", "submisi": "12/10/2026"};
-const FLAGGED=new Set([1987, 1994, 2021, 2022, 2079, 2090, 2091, 2105, 2110, 2114, 2127, 2163, 2180, 2211, 2217, 2247, 2356, 2387, 2263, 2262, 2392, 2286, 2417, 2179, 2381, 2525, 2451, 2640, 2414, 2154, 2548, 2160, 2178, 2129, 2293, 2556, 2058, 2269, 2584, 2459, 2454, 2089, 2140, 2386, 2156, 2571, 2329]);const FLAGDATE={"1987": "28/09/2026", "1994": "28/09/2026", "2021": "28/09/2026", "2022": "28/09/2026", "2079": "28/09/2026", "2090": "28/09/2026", "2091": "28/09/2026", "2105": "28/09/2026", "2110": "28/09/2026", "2114": "28/09/2026", "2127": "28/09/2026", "2163": "28/09/2026", "2180": "28/09/2026", "2211": "28/09/2026", "2217": "28/09/2026", "2247": "28/09/2026", "2356": "28/09/2026", "2387": "30/09/2026", "2263": "30/09/2026", "2262": "30/09/2026", "2392": "30/09/2026", "2286": "30/09/2026", "2417": "30/09/2026", "2179": "30/09/2026", "2381": "30/09/2026", "2525": "30/09/2026", "2451": "30/09/2026", "2640": "30/09/2026", "2414": "30/09/2026", "2154": "30/09/2026", "2548": "30/09/2026", "2160": "30/09/2026", "2178": "30/09/2026", "2129": "30/09/2026", "2293": "30/09/2026", "2556": "30/09/2026", "2058": "30/09/2026", "2269": "30/09/2026", "2584": "30/09/2026", "2459": "07/10/2026", "2454": "07/10/2026", "2089": "07/10/2026", "2140": "07/10/2026", "2386": "07/10/2026", "2156": "07/10/2026", "2571": "07/10/2026", "2329": "07/10/2026"};const flagDate=t=>FLAGDATE[String(t.id)]||"";const FLAGDEC={"1987": "L", "1994": "L", "2021": "L", "2022": "L", "2079": "L", "2090": "L", "2091": "L", "2105": "L", "2110": "T", "2114": "L", "2127": "L", "2163": "T", "2180": "L", "2211": "L", "2217": "L", "2247": "L", "2356": "L", "2387": "L", "2263": "L", "2262": "L", "2392": "L", "2286": "L", "2417": "L", "2179": "L", "2381": "L", "2525": "L", "2451": "L", "2640": "L", "2414": "L", "2154": "L", "2548": "L", "2160": "L", "2178": "T", "2129": "T", "2293": "T", "2556": "T", "2058": "T", "2269": "T", "2584": "T", "2459": "L", "2454": "L", "2089": "L", "2140": "L", "2386": "L", "2156": "L", "2571": "T", "2329": "T"};const FLAG_DATE="28/09/2026";
+const FLAGGED=new Set([1987, 1994, 2021, 2022, 2079, 2090, 2091, 2105, 2110, 2114, 2127, 2163, 2180, 2211, 2217, 2247, 2356, 2387, 2263, 2262, 2392, 2286, 2417, 2179, 2381, 2525, 2451, 2640, 2414, 2154, 2548, 2160, 2178, 2129, 2293, 2556, 2058, 2269, 2584, 2459, 2454, 2089, 2140, 2386, 2156, 2571, 2329]);
+const BLOCKED_IDS=new Set(["2769", "2822"]);
+const LOCKED_IDS=new Set(["1987", "1994", "2021", "2022", "2058", "2079", "2089", "2090", "2091", "2105", "2110", "2114", "2127", "2129", "2140", "2154", "2156", "2160", "2163", "2178", "2179", "2180", "2211", "2217", "2247", "2259", "2262", "2263", "2269", "2286", "2293", "2306", "2329", "2356", "2381", "2382", "2386", "2387", "2392", "2414", "2417", "2451", "2454", "2459", "2487", "2525", "2548", "2556", "2571", "2584", "2640"]);const FLAGDATE={"1987": "28/09/2026", "1994": "28/09/2026", "2021": "28/09/2026", "2022": "28/09/2026", "2079": "28/09/2026", "2090": "28/09/2026", "2091": "28/09/2026", "2105": "28/09/2026", "2110": "28/09/2026", "2114": "28/09/2026", "2127": "28/09/2026", "2163": "28/09/2026", "2180": "28/09/2026", "2211": "28/09/2026", "2217": "28/09/2026", "2247": "28/09/2026", "2356": "28/09/2026", "2387": "30/09/2026", "2263": "30/09/2026", "2262": "30/09/2026", "2392": "30/09/2026", "2286": "30/09/2026", "2417": "30/09/2026", "2179": "30/09/2026", "2381": "30/09/2026", "2525": "30/09/2026", "2451": "30/09/2026", "2640": "30/09/2026", "2414": "30/09/2026", "2154": "30/09/2026", "2548": "30/09/2026", "2160": "30/09/2026", "2178": "30/09/2026", "2129": "30/09/2026", "2293": "30/09/2026", "2556": "30/09/2026", "2058": "30/09/2026", "2269": "30/09/2026", "2584": "30/09/2026", "2459": "07/10/2026", "2454": "07/10/2026", "2089": "07/10/2026", "2140": "07/10/2026", "2386": "07/10/2026", "2156": "07/10/2026", "2571": "07/10/2026", "2329": "07/10/2026"};const flagDate=t=>FLAGDATE[String(t.id)]||"";const FLAGDEC={"1987": "L", "1994": "L", "2021": "L", "2022": "L", "2079": "L", "2090": "L", "2091": "L", "2105": "L", "2110": "T", "2114": "L", "2127": "L", "2163": "T", "2180": "L", "2211": "L", "2217": "L", "2247": "L", "2356": "L", "2387": "L", "2263": "L", "2262": "L", "2392": "L", "2286": "L", "2417": "L", "2179": "L", "2381": "L", "2525": "L", "2451": "L", "2640": "L", "2414": "L", "2154": "L", "2548": "L", "2160": "L", "2178": "T", "2129": "T", "2293": "T", "2556": "T", "2058": "T", "2269": "T", "2584": "T", "2459": "L", "2454": "L", "2089": "L", "2140": "L", "2386": "L", "2156": "L", "2571": "T", "2329": "T"};const FLAG_DATE="28/09/2026";
 let thr = 7, sortK = "total", sortDir = -1, filter = "all", q = "", open = new Set(), T = [];
 try{ const s = localStorage.getItem("thr10"); if(s) thr = +s; }catch(e){}
 document.getElementById("thr").value = thr;
@@ -305,31 +312,47 @@ function evalTeam(t){
   const sum = rs.reduce((a,r)=>a+r.raw,0);
   const total = N? sum/(4*N)*10 : 0;
   let complete = N>0 && done===N;
-  let st = complete? (total>=thr? "L":"T") : "prog";
-  const locked = FLAGDEC[String(t.id)];
-  if(locked){ st = locked; complete = true; }
-  return {...t, note:(t.note||"").trim(), rs, N, done, started, sum, total, complete, st, locked:!!locked};
+  const id=String(t.id), decision=FLAGDEC[id]||null;
+  const locked=LOCKED_IDS.has(id)||!!decision, blocked=BLOCKED_IDS.has(id);
+  let st = "prog";
+  if(decision){ st=decision; complete=true; }
+  else if(complete) st=total>=thr?"L":"T";
+  else if(locked) st="locked";
+  else if(blocked) st="blocked";
+  return {...t, note:(t.note||"").trim(), rs, N, done, started, sum, total, complete, st, locked, blocked, decision};
 }
 function compute(){
   T = DATA.map(evalTeam);
   T.filter(t=>t.complete).sort((a,b)=>b.total-a.total).forEach((t,i)=>t.rank=i+1);
   T.forEach(t=>{ if(!t.complete) t.rank=null; });
 }
-const stLabel = t => t.st==="L"? "Lulus" : t.st==="T"? "Tidak lulus" : (t.started? "Belum selesai penilaian" : "Belum dinilai");
-const stClass = t => t.st==="L"? "p-pass" : t.st==="T"? "p-fail" : "p-prog";
+function raterProgress(teams=T){
+  const out=Object.create(null);
+  teams.forEach(t=>t.rs.forEach(r=>{
+    if(!out[r.n]) out[r.n]={a:0,d:0,p:0,locked:0,blocked:0};
+    const x=out[r.n];
+    if(t.locked){x.locked++;return;}
+    if(t.blocked){x.blocked++;return;}
+    x.a++; if(r.filled===6)x.d++; else if(r.filled)x.p++;
+  }));
+  return out;
+}
+const stLabel = t => t.st==="L"? "Lulus" : t.st==="T"? "Tidak lulus" : t.st==="locked"? "Terkunci" : t.st==="blocked"? "Berkas tertahan" : (t.started? "Belum selesai penilaian" : "Belum dinilai");
+const stClass = t => t.st==="L"? "p-pass" : t.st==="T"? "p-fail" : t.st==="locked"? "p-lock" : t.st==="blocked"? "p-blocked" : "p-prog";
 
 function render(){
   compute();
   document.getElementById("thrv").textContent = thr.toFixed(1).replace(".",",");
-  const S = {L:0,T:0,prog:0,note:0,done:0,none:0};
-  T.forEach(t=>{ S[t.st]++; if(t.complete) S.done++; if(t.note) S.note++; if(!t.started) S.none++; });
+  const S = {L:0,T:0,prog:0,locked:0,blocked:0,note:0,done:0,none:0};
+  T.forEach(t=>{ S[t.st]++; if(t.complete) S.done++; if(t.note) S.note++; if(t.st==="prog"&&!t.started) S.none++; });
+  const pendingPairs=T.filter(t=>t.st==="prog").reduce((n,t)=>n+Math.max(0,t.N-t.done),0);
 
-  const R=80, C=2*Math.PI*R, seg=[[S.L,"var(--mint)"],[S.T,"#E8786F"],[S.prog,"#E2B060"]];
+  const R=80, C=2*Math.PI*R, seg=[[S.L,"var(--mint)"],[S.T,"#E8786F"],[S.prog,"#E2B060"],[S.locked,"var(--none)"],[S.blocked,"#8B744D"]];
   let off=0, rs=`<svg viewBox="0 0 190 190" aria-hidden="true"><circle cx="95" cy="95" r="${R}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="18"/>`;
   seg.forEach(([v,c])=>{ const len=v/T.length*C; if(len>0) rs+=`<circle cx="95" cy="95" r="${R}" fill="none" stroke="${c}" stroke-width="18" stroke-dasharray="${Math.max(0,len-2)} ${C}" stroke-dashoffset="${-off}"/>`; off+=len; });
   rs+=`</svg><div class="c"><b>${S.done}</b><span>selesai dinilai</span><span>dari ${T.length} peserta</span></div>`;
   document.getElementById("ring").innerHTML = rs;
-  document.getElementById("rleg").innerHTML = [["Lulus",S.L,"var(--mint)"],["Tidak lulus",S.T,"#E8786F"],["Belum selesai",S.prog,"#E2B060"],["Total peserta",T.length,"transparent"]]
+  document.getElementById("rleg").innerHTML = [["Lulus",S.L,"var(--mint)"],["Tidak lulus",S.T,"#E8786F"],["Belum selesai aktif",S.prog,"#E2B060"],["Terkunci",S.locked,"var(--none)"],["Berkas tertahan",S.blocked,"#8B744D"],["Total peserta",T.length,"transparent"]]
     .map(([l,v,c])=>`<div><i style="background:${c}"></i>${l}<b>${v}</b></div>`).join("");
 
   const kp = [
@@ -337,11 +360,13 @@ function render(){
     ["done","var(--accent)","Selesai dinilai",S.done,"oleh seluruh penilai"],
     ["L","var(--pass)","Lulus",S.L,"hasil akhir"],
     ["T","var(--fail)","Tidak lulus",S.T,"hasil akhir"],
-    ["prog","var(--prog)","Belum selesai",S.prog,`${S.none} belum dinilai sama sekali`],
+    ["prog","var(--prog)","Belum selesai (aktif)",S.prog,`${pendingPairs} tugas penilai belum lengkap · ${S.none} tim belum mulai`],
+    ["locked","var(--none)","Terkunci",S.locked,"dikecualikan dari tugas aktif"],
+    ["blocked","#8B744D","Berkas tertahan",S.blocked,"dikecualikan dari progres aktif"],
     ["note","var(--accent)","Ada masukan",S.note,"catatan dari tim penilai"]
   ];
   document.getElementById("kpis").innerHTML = kp.map(([k,c,l,v,s])=>`<button type="button" class="kpi ${filter===k?"active":""}" style="--kc:${c}" data-f="${k}"><span>${l}</span><b>${v}</b><i>${s}</i></button>`).join("");
-  const _kb=KATLIST.map(kl=>{const it=T.filter(t=>katOf(t)===kl);const tot=it.length,fl=it.filter(t=>FLAGGED.has(t.id)).length,lu=it.filter(t=>t.st==="L").length,ti=it.filter(t=>t.st==="T").length,pr=it.filter(t=>t.st==="prog").length;return `<div class="katcard ${katClass(kl)}"><div class="kt">${katShort(kl)}</div><div class="kn">${tot}<small> proposal</small></div><div class="krow"><span class="kb fon">Sudah diflag ${fl}</span><span class="kb foff">Belum diflag ${tot-fl}</span></div><div class="km">Lulus ${lu} · Tidak ${ti} · Belum selesai ${pr}</div></div>`;}).join("");document.getElementById("katbox").innerHTML=_kb;
+  const _kb=KATLIST.map(kl=>{const it=T.filter(t=>katOf(t)===kl);const tot=it.length,fl=it.filter(t=>FLAGGED.has(t.id)).length,lu=it.filter(t=>t.st==="L").length,ti=it.filter(t=>t.st==="T").length,pr=it.filter(t=>t.st==="prog").length,lk=it.filter(t=>t.st==="locked").length,bl=it.filter(t=>t.st==="blocked").length;return `<div class="katcard ${katClass(kl)}"><div class="kt">${katShort(kl)}</div><div class="kn">${tot}<small> proposal</small></div><div class="krow"><span class="kb fon">Sudah diflag ${fl}</span><span class="kb foff">Belum diflag ${tot-fl}</span></div><div class="km">Lulus ${lu} · Tidak ${ti} · Aktif belum selesai ${pr} · Terkunci ${lk} · Berkas tertahan ${bl}</div></div>`;}).join("");document.getElementById("katbox").innerHTML=_kb;
   document.querySelectorAll(".kpi").forEach(b=>b.onclick=()=>{ filter=b.dataset.f; document.getElementById("fs").value=filter; render(); document.getElementById("tabel").scrollIntoView({behavior:"smooth",block:"start"}); });
 
   const fin = T.filter(t=>t.complete).sort((a,b)=>b.total-a.total);
@@ -361,10 +386,14 @@ function render(){
   s+=`<line x1="${x(thr)}" x2="${x(thr)}" y1="${top0-10}" y2="${h-22}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/><text x="${x(thr)+4}" y="${top0-12}" style="fill:var(--accent);font-weight:600">ambang ${thr.toFixed(1).replace(".",",")}</text></svg>`;
   document.getElementById("chart").innerHTML = s;
 
-  const RM = {};
-  T.forEach(t=>t.rs.forEach(r=>{ RM[r.n] ??= {a:0,d:0,p:0}; RM[r.n].a++; if(r.filled===6) RM[r.n].d++; else if(r.filled) RM[r.n].p++; }));
-  document.getElementById("raters").innerHTML = Object.entries(RM).sort((a,b)=>b[1].d/b[1].a - a[1].d/a[1].a || b[1].a-a[1].a).map(([n,v])=>
-    `<div class="rrow"><span>${esc(n)}${v.p?` <span class="muted">(+${v.p} parsial)</span>`:""}</span><span class="bar"><i style="width:${v.d/v.a*100}%"></i></span><span class="num" style="text-align:right">${v.d}/${v.a}</span></div>`).join("");
+  const RM = raterProgress();
+  document.getElementById("raters").innerHTML = Object.entries(RM).sort((a,b)=>(b[1].a?b[1].d/b[1].a:1)-(a[1].a?a[1].d/a[1].a:1) || b[1].a-a[1].a).map(([n,v])=>{
+    const pct=v.a?100*v.d/v.a:100, excluded=[];
+    if(v.locked) excluded.push(`${v.locked} terkunci`);
+    if(v.blocked) excluded.push(`${v.blocked} berkas tertahan`);
+    const meta=excluded.length?excluded.join(" · "):"semua tugas dapat dinilai";
+    return `<div class="rrow"><span>${esc(n)}${v.p?` <span class="muted">(+${v.p} parsial)</span>`:""}<small class="r-meta">${meta}</small></span><span class="bar"><i style="width:${pct}%"></i></span><span class="num" style="text-align:right">${v.d}/${v.a}</span></div>`;
+  }).join("");
 
   let rows = T.filter(t=>{
     if(filter==="note"){ if(!t.note) return false; }
@@ -375,7 +404,7 @@ function render(){
     if(q){ const hay=(t.tim+" "+t.inov+" "+t.id+" "+t.note+" "+t.rs.map(r=>r.n).join(" ")).toLowerCase(); if(!hay.includes(q)) return false; }
     return true;
   });
-  const key = t => sortK==="tim"? t.tim.toLowerCase() : sortK==="st"? ({L:0,T:1,prog:2})[t.st] : sortK==="rank"? (t.rank ?? 999) : sortK==="done"? t.done/t.N : t[sortK];
+  const key = t => sortK==="tim"? t.tim.toLowerCase() : sortK==="st"? ({L:0,T:1,prog:2,locked:3,blocked:4})[t.st] : sortK==="rank"? (t.rank ?? 999) : sortK==="done"? t.done/t.N : t[sortK];
   rows.sort((a,b)=>{ const A=key(a),B=key(b); return (A>B?1:A<B?-1:0)*sortDir || (b.total-a.total); });
   document.getElementById("countTxt").textContent = `Menampilkan ${rows.length} dari ${T.length} peserta`;
   document.getElementById("tb").innerHTML = rows.map(t=>{
@@ -387,7 +416,7 @@ function render(){
       <td><span class="katchip ${katClass(katOf(t))}">${katShort(katOf(t))}</span></td>
       <td style="white-space:nowrap"><span class="dots">${dots}</span> <span class="muted num">${t.done}/${t.N}</span></td>
       <td class="r"><div class="score ${t.complete?"":"run"}"><b>${f2(t.total)}</b><span class="meter"><i style="width:${t.total*10}%;background:${mcol}"></i><s style="left:${thr*10}%"></s></span>${t.complete?"":"<small>nilai berjalan</small>"}</div></td>
-      <td><span class="pill ${stClass(t)}">${stLabel(t)}</span>${t.complete?`<span class="cert">hasil akhir</span>`:`<span class="cert">${t.N===0?"belum ada penilai ditugaskan":`${t.N-t.done} dari ${t.N} penilai belum selesai`}</span>`}</td>
+      <td><span class="pill ${stClass(t)}">${stLabel(t)}</span>${t.complete?`<span class="cert">hasil akhir</span>`:`<span class="cert">${t.st==="locked"?"terkunci; tidak masuk tugas aktif":t.st==="blocked"?"berkas tertahan; tidak masuk tugas aktif":t.N===0?"belum ada penilai ditugaskan":`${t.N-t.done} dari ${t.N} penilai belum selesai`}</span>`}</td>
       <td>${FLAGGED.has(t.id)?`<span class="fchip fon">Sudah diflag<small>${flagDate(t)}</small></span>`:`<span class="fchip foff">Belum diflag</span>`}</td>
       <td>${t.note? `<div class="fb"><div class="clip">${esc(t.note)}</div></div>` : `<div class="fb empty">Belum ada masukan</div>`}</td></tr>`;
     if(!open.has(t.id)) return main;
@@ -417,7 +446,7 @@ function buildWorkbook(){
     "Keputusan": stLabel(t),
     "Status Flag Sistem": FLAGGED.has(t.id)?"Sudah Terflag di Sistem":"Belum Terflag Sistem",
     "Tgl Eksekusi Flag": FLAGGED.has(t.id)?flagDate(t):"-",
-    "Progres Penilaian": `${t.done}/${t.N} penilai selesai`,
+    "Progres Penilaian": `${t.done}/${t.N} penilai selesai${t.locked?" (terkunci; dikecualikan dari progres aktif)":t.blocked?" (berkas tertahan; dikecualikan dari progres aktif)":""}`,
     "Masukan dari Tim Penilai": t.note || "-",
     "Keterangan": revInfo(t) || "-"
   }));
@@ -428,7 +457,9 @@ function buildWorkbook(){
     ["Keterangan"],
     ["Ambang lulus (skala 10)", thr],
     ["Total Nilai", "Jumlah nilai berbobot seluruh penilai ÷ (4 × jumlah penilai) × 10, nilai riil tanpa proyeksi"],
-    ["Keputusan", "Lulus/Tidak lulus hanya bila seluruh penilai sudah mengisi 6 kriteria. Belum selesai penilaian = sebagian penilai sudah mengisi; Belum dinilai = belum ada nilai."],
+    ["Keputusan", "Lulus/Tidak lulus bila seluruh penilai selesai atau ada keputusan flag resmi. Belum selesai/Belum dinilai hanya untuk tugas aktif. Terkunci dan berkas tertahan dikecualikan dari progres aktif."],
+    ["Tugas terkunci", "Assignment pada tab Kunci/keputusan final tidak dihitung sebagai tugas belum selesai."],
+    ["Berkas tertahan", "Proposal tidak tersedia atau memiliki peringatan; assignment dikecualikan dari progres aktif sampai berkas dapat diakses."],
     ["Status Flag Sistem", "Sudah Terflag di Sistem = keputusan sudah dieksekusi (flag) di database sistem. Total 47 tim terflag; tim yang mengajukan revisi dikembalikan menjadi belum terflag. Belum Terflag Sistem = belum ada eksekusi flag."],
     ["Tanggal eksekusi flag", "28/09/2026 (17 tim), 30/09/2026 (22 tim), 07/10/2026 (8 tim)"],
     ["Revisi proposal", "Proposal revisi menggantikan data lama: status kembali Belum dinilai dan Belum Terflag Sistem; lihat kolom Keterangan"],
@@ -480,7 +511,7 @@ const LIVEP = Promise.resolve();
 window.__liveStart = () => Promise.resolve();
 window.getHasil = () => {
   compute();
-  const map={}; T.forEach(t=>{ map[String(t.id)]={total:t.total,N:t.N,started:t.started,label:stLabel(t),flagged:FLAGGED.has(t.id),fdate:flagDate(t)}; });
+  const map={}; T.forEach(t=>{ map[String(t.id)]={total:t.total,N:t.N,started:t.started,label:stLabel(t),flagged:FLAGGED.has(t.id),locked:t.locked,blocked:t.blocked,fdate:flagDate(t)}; });
   return {live:false, when:META.nilai||"", snapshot:true, map};
 };
 render();
