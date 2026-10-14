@@ -176,7 +176,7 @@ tr.detail td{background:var(--soft);padding:16px}
       <h1>Dashboard Hasil Penilaian Proposal</h1>
       <p>Nilai ditampilkan sesuai kondisi riil dan dikonversi ke skala 10. Keputusan Lulus atau Tidak Lulus hanya ditetapkan untuk peserta yang sudah dinilai oleh seluruh penilainya.</p>
       <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid var(--band-muted);color:var(--band-ink);padding:6px 13px;border-radius:999px;font:600 12.5px var(--body,sans-serif)">Flag di sistem: 47 tim sudah terflag (batch 28 September, 30 September &amp; 7 Oktober 2026) &nbsp;&middot;&nbsp; data nilai diperbarui 9 Oktober 2026 &nbsp;&middot;&nbsp; data submisi diperbarui 12 Oktober 2026</div>
-      <div id="livepill" role="status" aria-live="polite" style="display:none;margin:8px 0 0 0"><button id="liveBtn" type="button" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid var(--band-muted);color:var(--band-ink);padding:5px 13px;border-radius:999px;font:600 12.5px var(--body,sans-serif);cursor:pointer"><i id="liveDot" style="width:8px;height:8px;border-radius:50%;background:#9aa;display:inline-block"></i><span id="liveTxt">Memuat nilai terbaru...</span></button></div>
+      <div id="livepill" role="status" aria-live="polite" style="display:inline-flex;align-items:center;gap:8px;margin:8px 0 0 0;background:rgba(255,255,255,.08);border:1px solid var(--band-muted);color:var(--band-ink);padding:5px 13px;border-radius:999px;font:600 12.5px var(--body,sans-serif)"><i id="liveDot" style="width:8px;height:8px;border-radius:50%;background:#E2B060;display:inline-block"></i><span id="liveTxt">Snapshot statis</span></div>
       <div class="hero-actions">
         <button class="btn btn-mint" id="dlTop" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>Unduh Excel</button>
         <div class="thrbox"><label for="thr">Ambang lulus</label><input id="thr" type="range" min="2.5" max="10" step="0.1" value="7"><b id="thrv">7,0</b></div>
@@ -468,44 +468,24 @@ document.getElementById("q").oninput = e=>{ q=e.target.value.trim().toLowerCase(
 document.getElementById("fs").onchange = e=>{ filter=e.target.value; render(); };
 document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=(k==="tim"||k==="rank"||k==="st")?1:-1;} render(); });
 
-/*LIVE_API*/const NILAI_API="https://script.google.com/macros/s/AKfycbzUCSNR0ndfYf06OSptU6OaTK92mczCieVWuQHtT6CTw4731VDluukiVX8YAdMhTa9VBA/exec";/*LIVE_END*/
-/* Nilai langsung dari form penilaian (nilai.html -> Google Sheet). Tim terflag TIDAK ditimpa (aturan flag mengunci keputusan). */
+/*LIVE_API*/const NILAI_API="";/*LIVE_END*/
+/* Snapshot saja. Feed skor publik dinonaktifkan; tim terflag tetap terkunci. */
 const LIVE = {ok:false, when:null, err:false, n:0};
-function liveStamp(d){ const p=x=>String(x).padStart(2,"0"); return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}.${p(d.getMinutes())}`; }
 function liveUI(){
-  const box=document.getElementById("livepill"); if(!box||!box.style) return; if(!NILAI_API){ box.style.display="none"; return; }
-  box.style.display="";
-  document.getElementById("liveDot").style.background = LIVE.ok? "var(--mint)" : LIVE.err? "#EF8078" : "#E2B060";
-  document.getElementById("liveTxt").textContent = LIVE.ok? `Nilai langsung dari form penilaian · diperbarui ${liveStamp(LIVE.when)}`
-    : LIVE.err? "Gagal memuat nilai terbaru, menampilkan data per "+(META.nilai||"-")+" · ketuk untuk coba lagi" : "Memuat nilai terbaru...";
+  const box=document.getElementById("livepill"); if(!box) return;
+  document.getElementById("liveDot").style.background = "#E2B060";
+  document.getElementById("liveTxt").textContent = `Snapshot statis · data nilai per ${META.nilai||"tanggal tidak tersedia"}`;
 }
-async function loadLive(){
-  if(!NILAI_API) return;
-  try{
-    const r = await fetch(NILAI_API+(NILAI_API.includes("?")?"&":"?")+"action=all&_="+Date.now());
-    if(!r.ok) throw new Error("http "+r.status);
-    const d = await r.json(); if(!d.ok) throw new Error("respons tidak valid");
-    const m = {}; (d.rows||[]).forEach(x=>{ m[String(x.id)+"|"+String(x.n).trim()] = x.s; });
-    let n=0;
-    DATA.forEach(t=>{
-      if(FLAGGED.has(t.id)) return;                       // terflag: nilai & keputusan terkunci
-      t.r.forEach(rv=>{ if(!rv.n) return; const s=m[String(t.id)+"|"+String(rv.n).trim()]; if(s && s.length===6){ rv.s=s.map(v=>v==null?null:+v); n++; } });
-    });
-    LIVE.ok=true; LIVE.err=false; LIVE.when=new Date(); LIVE.n=n;
-  }catch(e){ console.warn("live nilai:", e); LIVE.ok=false; LIVE.err=true; }
-  liveUI(); render();
-}
-const LIVEP = new Promise(res=>{ window.__liveStart = ()=>loadLive().then(res); });
-window.getHasil = () => LIVEP.then(()=>{
+const LIVEP = Promise.resolve();
+window.__liveStart = () => Promise.resolve();
+window.getHasil = () => {
   compute();
   const map={}; T.forEach(t=>{ map[String(t.id)]={total:t.total,N:t.N,started:t.started,label:stLabel(t),flagged:FLAGGED.has(t.id),fdate:flagDate(t)}; });
-  return {live:LIVE.ok, when:LIVE.when?liveStamp(LIVE.when):"", map};
-});
-document.getElementById("liveBtn").onclick=()=>{ LIVE.ok=false; LIVE.err=false; liveUI(); loadLive(); };
+  return {live:false, when:META.nilai||"", snapshot:true, map};
+};
 render();
 if(typeof window!=="undefined" && window.location && window.location.protocol){   // di luar browser (build/verify via node) lewati pemuatan live
-  liveUI(); window.__liveStart();
-  setInterval(()=>{ if(!document.hidden) loadLive(); }, 90000);
+  liveUI();
 }
 </script>
 
