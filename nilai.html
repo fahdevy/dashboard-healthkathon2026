@@ -246,6 +246,7 @@ let SV={};
 let LOCKED=new Set();
 let CONN="auth";
 let AUTH_USER=null;
+let AUTH_ROLE="reviewer";
 let AUTH_TOKEN=(function(){try{return sessionStorage.getItem("healthkathon_reviewer_session")||""}catch(e){return ""}})();
 let lastSync=null, DRAW=null;
 
@@ -258,17 +259,21 @@ function info(t){
   return {rs,N,done,started,total,complete:N>0&&done===N};
 }
 const isLocked=t=>LOCKED.has(t.id);
+const hasProposal=t=>Boolean(String(t.f||"").trim()&&!String(t.fw||"").trim());
 function teamState(t){            // status global tim
   const i=info(t);
   if(isLocked(t)) return {k:"lock",label:"Terkunci",cls:"s-lock",i};
   if(i.complete) return {k:"done",label:"Selesai",cls:"s-done",i};
+  if(!hasProposal(t)) return {k:"blocked",label:"Berkas belum tersedia",cls:"s-fail",i};
   if(i.started) return {k:"draft",label:`Dalam proses ${i.done}/${i.N}`,cls:"s-draft",i};
   return {k:"todo",label:"Belum dinilai",cls:"s-todo",i};
 }
 function myState(t,name){         // status untuk satu penilai
   const r=t.r.find(x=>x.n===name), s=eff(t,r), f=nFill(s);
   if(isLocked(t)) return {k:"lock",f,s};
-  return {k:f===6?"done":f>0?"draft":"todo",f,s};
+  if(f===6) return {k:"done",f,s};
+  if(!hasProposal(t)) return {k:"blocked",f,s};
+  return {k:f>0?"draft":"todo",f,s};
 }
 const decLabel=t=>t.dec==="L"?"Lulus":t.dec==="T"?"Tidak lulus":"";
 
@@ -278,7 +283,7 @@ function setConn(c){ CONN=c; const el=$("#sync"); el.className="pill btn "+({ok:
   $("#syncT").textContent={auth:"Login diperlukan",load:"Memuat...",ok:"Tersambung"+(tm?" · "+tm:""),local:"Mode uji (belum tersambung)",err:"Gagal terhubung · ketuk untuk coba lagi"}[c]||"Login diperlukan"; }
 async function apiPost(b){ if(!CFG.api) throw new Error("api_unconfigured"); const r=await fetch(CFG.api,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(b),cache:"no-store",credentials:"omit"}); if(!r.ok) throw new Error("http "+r.status); return r.json(); }
 function clearSessionState(){
-  AUTH_TOKEN=""; AUTH_USER=null; TEAMS=[]; POOL=[]; TB=Object.create(null); SV={}; LOCKED=new Set(); DRAW=null;
+  AUTH_TOKEN=""; AUTH_USER=null; AUTH_ROLE="reviewer"; TEAMS=[]; POOL=[]; TB=Object.create(null); SV={}; LOCKED=new Set(); DRAW=null;
   try{sessionStorage.removeItem("healthkathon_reviewer_session")}catch(e){}
 }
 async function loginUser(event){
@@ -292,7 +297,7 @@ async function loginUser(event){
     if(!AUTH_USER) throw new Error("read_failed");
   }catch(e){
     const currentMsg=$("#loginError");
-    if(currentMsg) currentMsg.textContent=e.message==="invalid_credentials"?"Nama penilai atau password tidak sesuai.":"Login belum berhasil. Periksa koneksi atau hubungi administrator.";
+    if(currentMsg) currentMsg.textContent=e.message==="invalid_credentials"?"Nama pengguna atau password tidak sesuai.":"Login belum berhasil. Periksa koneksi atau hubungi administrator.";
   }finally{button.disabled=false; button.textContent="Masuk";}
 }
 async function logout(){
@@ -308,7 +313,7 @@ async function load(silent){
       if(d.err==="session_expired"){clearSessionState();setConn("auth");render();toast("Sesi berakhir. Silakan masuk kembali.",true);return;}
       throw new Error(d.err||"read_failed");
     }
-    AUTH_USER=d.reviewer; POOL=[AUTH_USER]; TEAMS=d.teams||[]; TB=Object.fromEntries(TEAMS.map(t=>[String(t.id),t]));
+    AUTH_ROLE=d.role==="admin"?"admin":"reviewer"; AUTH_USER=d.reviewer; POOL=AUTH_ROLE==="admin"?(d.reviewers||[]):[AUTH_USER]; TEAMS=d.teams||[]; TB=Object.fromEntries(TEAMS.map(t=>[String(t.id),t]));
     SV={}; (d.rows||[]).forEach(r=>{SV[key(r.id,r.n)]={s:r.s,t:r.t}});
     LOCKED=new Set((d.locked||[]).map(String));
     lastSync=new Date(); setConn("ok");
@@ -350,9 +355,9 @@ function render(){
   $("#app").innerHTML=h; bind(R);
 }
 function viewLogin(){
-  return `<div class="card login-panel"><h2>Masuk ke Form Penilaian</h2><p>Gunakan nama penilai dan password pribadi. Data yang ditampilkan hanya tugas pada akun Anda.</p>
+  return `<div class="card login-panel"><h2>Masuk ke Form Penilaian</h2><p>Gunakan nama pengguna dan password pribadi. Reviewer melihat assignment sendiri; akses admin mengikuti hak akses server.</p>
     ${!CFG.api?`<div class="banner err" role="alert">Backend autentikasi belum dikonfigurasi.</div>`:""}
-    <form id="loginForm" autocomplete="on"><label for="loginName">Nama penilai</label><input id="loginName" name="username" type="text" autocomplete="username" required maxlength="80">
+    <form id="loginForm" autocomplete="on"><label for="loginName">Nama pengguna</label><input id="loginName" name="username" type="text" autocomplete="username" required maxlength="80">
     <label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required maxlength="256">
     <button class="btn btn-p" id="loginButton" type="submit" ${!CFG.api?"disabled":""}>Masuk</button><p id="loginError" class="login-error" role="alert"></p></form></div>`;
 }
@@ -365,23 +370,26 @@ window.addEventListener("hashchange",()=>{ closeSheet(true); render(); window.sc
 
 /* ---------- beranda ---------- */
 function viewHome(){
-  const S={todo:0,draft:0,done:0,lock:0}; let slots=0,fill=0;
-  TEAMS.forEach(t=>{ S[teamState(t).k]++; if(!isLocked(t)) t.r.forEach(r=>{slots++; if(nFill(eff(t,r))===6) fill++;}); });
+  const isAdmin=AUTH_ROLE==="admin";
+  const S={todo:0,draft:0,done:0,lock:0,blocked:0}; let slots=0,fill=0;
+  TEAMS.forEach(t=>{ S[teamState(t).k]++; if(!isLocked(t)&&hasProposal(t)) t.r.forEach(r=>{slots++; if(nFill(eff(t,r))===6) fill++;}); });
   const open=slots-fill;
-  const card=n=>{ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); const open=mine.filter(t=>!isLocked(t));
-    const w=workload(n), done=w.done, lock=w.lock;
-    const pct=w.all?Math.round(done/w.all*100):100;
+  const card=n=>{ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n));
+    const w=workload(n), done=w.done;
+    const pct=w.eligible?Math.round(done/w.eligible*100):100;
     return `<button class="person" data-go="${slug(n)}"><div class="top"><div class="av">${esc(ini(n))}</div><div><b>${esc(n)}</b><small>${mine.length} tim ditugaskan</small></div></div>
     <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
-    <div class="meta"><span>${done} dari ${w.all} sudah dinilai</span><span>${w.all-done} sisa</span></div></button>`; };
+    <div class="meta"><span>${done} dari ${w.eligible} tugas aktif selesai</span><span>${w.open} sisa${w.lock?` · ${w.lock} terkunci`:""}${w.blocked?` · ${w.blocked} berkas tertahan`:""}</span></div></button>`; };
   const oth=otherNames();
   return `<div class="kpis">
-    <div class="card kpi"><b>${TEAMS.length}</b><span>Tim ditugaskan ke Anda</span></div>
-    <div class="card kpi"><b>${S.done+S.lock}</b><span>Penilaian lengkap</span></div>
+    <div class="card kpi"><b>${TEAMS.length}</b><span>${isAdmin?"Tim pada roster":"Tim ditugaskan ke Anda"}</span></div>
+    <div class="card kpi"><b>${S.done}</b><span>Penilaian lengkap</span></div>
     <div class="card kpi"><b>${S.draft}</b><span>Dalam proses</span></div>
     <div class="card kpi"><b>${S.todo}</b><span>Belum dinilai</span></div>
+    <div class="card kpi"><b>${S.lock}</b><span>Terkunci</span></div>
+    <div class="card kpi"><b>${S.blocked}</b><span>Berkas belum tersedia</span></div>
     <div class="card kpi"><b>${open}</b><span>Penilaian individu tersisa</span></div></div>
-  <div class="sec-h"><h2>Tugas penilaian Anda</h2><span class="muted">Data dibatasi pada assignment akun yang sedang login</span></div>
+  <div class="sec-h"><h2>${isAdmin?"Beban seluruh reviewer":"Tugas penilaian Anda"}</h2><span class="muted">${isAdmin?"Pilih reviewer untuk melihat atau mengubah skor. Perubahan admin dicatat terpisah.":"Data dibatasi pada assignment akun yang sedang login"}</span></div>
   <div class="people">${POOL.map(card).join("")}</div>
   ${oth.length?`<div class="sec-h"><h2>Penilai lainnya</h2><span class="muted">Penilai yang tercatat di Kertas Kerja tahap awal</span></div><div class="people">${oth.map(card).join("")}</div>`:""}`;
 }
@@ -389,30 +397,32 @@ function viewHome(){
 /* ---------- daftar tim milik penilai ---------- */
 function viewMe(name){
   const mine=TEAMS.filter(t=>t.r.some(r=>r.n===name));
-  const cnt={todo:0,done:0,lock:0,all:mine.length};
-  mine.forEach(t=>{ const k=myState(t,name).k; if(k==="done")cnt.done++; else if(k==="lock")cnt.lock++; else cnt.todo++; });
+  const cnt={todo:0,done:0,lock:0,blocked:0,all:mine.length};
+  mine.forEach(t=>{ const k=myState(t,name).k; if(k==="done")cnt.done++; else if(k==="lock")cnt.lock++; else if(k==="blocked")cnt.blocked++; else cnt.todo++; });
   let list=mine.filter(t=>{ const k=myState(t,name).k;
     if(F.filter==="todo"&&!(k==="todo"||k==="draft")) return false;
     if(F.filter==="done"&&k!=="done") return false;
     if(F.filter==="lock"&&k!=="lock") return false;
+    if(F.filter==="blocked"&&k!=="blocked") return false;
     if(F.q){ const q=F.q.toLowerCase(); if(!(t.tim+" "+t.inov+" "+t.id).toLowerCase().includes(q)) return false; }
     return true; });
-  const W_=workload(name), pct=W_.all?Math.round(W_.done/W_.all*100):100;
+  const W_=workload(name), pct=W_.eligible?Math.round(W_.done/W_.eligible*100):100;
   const ch=(k,l,n)=>`<button class="chip" data-f="${k}" aria-pressed="${F.filter===k}">${l}<small>${n}</small></button>`;
   return `<div class="card me-head"><div class="av">${esc(ini(name))}</div><div class="grow"><h2>${esc(name)}</h2>
-    <div class="muted">${W_.done} dari ${W_.all} tim sudah dinilai${W_.lock?` (${W_.lock} di tim terkunci)`:""} · ${W_.all-W_.done} sisa</div>
+    <div class="muted">${W_.done} dari ${W_.eligible} tugas aktif selesai · ${W_.open} sisa${W_.lock?` · ${W_.lock} terkunci`:""}${W_.blocked?` · ${W_.blocked} terhambat berkas`:""}</div>
     <div class="bar" style="max-width:360px"><i style="width:${pct}%"></i></div></div>
     <button class="linkbtn" type="button" data-logout>Keluar</button></div>
-  <div class="tools"><div class="chips" role="group" aria-label="Filter">${ch("todo","Perlu dinilai",cnt.todo)}${ch("done","Selesai",cnt.done)}${cnt.lock?ch("lock","Terkunci",cnt.lock):""}${ch("all","Semua",cnt.all)}</div>
+  ${AUTH_ROLE==="admin"?`<div class="banner warn"><div><b>Mode admin.</b> Skor yang Anda ubah disimpan atas nama reviewer pada profil ini, sedangkan perubahan admin dicatat pada tab audit tersendiri.</div></div>`:""}
+  <div class="tools"><div class="chips" role="group" aria-label="Filter">${ch("todo","Perlu dinilai",cnt.todo)}${ch("done","Selesai",cnt.done)}${cnt.blocked?ch("blocked","Berkas bermasalah",cnt.blocked):""}${cnt.lock?ch("lock","Terkunci",cnt.lock):""}${ch("all","Semua",cnt.all)}</div>
     <input class="search" id="q" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(F.q)}" aria-label="Cari tim"></div>
-  <div class="list">${list.length?list.map(t=>teamRow(t,name)).join(""):`<div class="card empty">${F.filter==="todo"&&!F.q?"Semua tim Anda sudah dinilai. Terima kasih!":"Tidak ada tim yang cocok."}</div>`}</div>`;
+  <div class="list">${list.length?list.map(t=>teamRow(t,name)).join(""):`<div class="card empty">${F.filter==="todo"&&!F.q?"Tidak ada tugas aktif yang menunggu penilaian pada filter ini.":"Tidak ada tim yang cocok."}</div>`}</div>`;
 }
 function teamRow(t,name){
-  const m=myState(t,name), lock=m.k==="lock";
+  const m=myState(t,name), lock=m.k==="lock", blocked=m.k==="blocked";
   const st=lock?`<span class="st s-lock">&#128274; Terkunci${t.dec?" · "+decLabel(t):""}</span>`
     :m.k==="done"?`<span class="st s-done">&#10003; Selesai · ${fmt(sc10(m.s))}</span>`
-    :m.k==="draft"?`<span class="st s-draft">Draft ${m.f}/6</span>`:`<span class="st s-todo">Belum dinilai</span>`;
-  const btn=lock?"Lihat":m.k==="done"?"Ubah":m.k==="draft"?"Lanjutkan":"Nilai";
+    :blocked?`<span class="st s-fail">Berkas belum tersedia</span>`:m.k==="draft"?`<span class="st s-draft">Draft ${m.f}/6</span>`:`<span class="st s-todo">Belum dinilai</span>`;
+  const btn=lock||blocked?"Lihat status":m.k==="done"?"Ubah":m.k==="draft"?"Lanjutkan":"Nilai";
   return `<button class="team" data-open="${t.id}" data-n="${esc(name)}"><div><div class="t1"><span class="num">#${t.id}</span><span>${esc(t.kat.replace("Efisiensi Risiko pada ",""))}</span>${t.rv?`<span class="st s-rev">Hasil revisi</span>`:""}</div>
     <h3>${esc(t.tim)}</h3><div class="j">${esc(t.inov)}</div></div>
     <div class="act">${st}<span class="btn ${m.k==="todo"||m.k==="draft"?"btn-p":"btn-o"}">${btn}</span></div></button>`;
@@ -420,31 +430,33 @@ function teamRow(t,name){
 
 /* ---------- ringkasan ---------- */
 function viewSum(){
+  const isAdmin=AUTH_ROLE==="admin";
   const rows=TEAMS.map(t=>({t,s:teamState(t)}));
   const tot={all:rows.length}; rows.forEach(r=>tot[r.s.k]=(tot[r.s.k]||0)+1);
   const list=rows.filter(r=>(SUM.st==="all"||r.s.k===SUM.st)&&(!SUM.q||(r.t.tim+" "+r.t.inov+" "+r.t.id).toLowerCase().includes(SUM.q.toLowerCase())));
   const opt=(k,l)=>`<option value="${k}"${SUM.st===k?" selected":""}>${l} (${tot[k]||0})</option>`;
   const PN=[...POOL,...otherNames()], LD=PN.map(n=>workload(n));
   const sum=k=>LD.reduce((a,x)=>a+x[k],0);
-  const load=LD.map((x,i)=>`<tr><td>${esc(PN[i])}</td><td class="num">${x.all}</td><td class="num">${x.done}${x.lock?` <span class="muted" style="font-size:12px">(${x.lock} terkunci)</span>`:""}</td><td class="num">${x.prog}</td><td class="num">${x.none}</td></tr>`).join("")
-    +`<tr style="font-weight:700"><td>Total</td><td class="num">${sum("all")}</td><td class="num">${sum("done")}</td><td class="num">${sum("prog")}</td><td class="num">${sum("none")}</td></tr>`;
-  return `<div class="tools"><select class="search" id="sst" aria-label="Filter status">${opt("all","Semua tim")}${opt("todo","Belum dinilai")}${opt("draft","Dalam proses")}${opt("done","Selesai")}${opt("lock","Terkunci")}</select>
+  const load=LD.map((x,i)=>`<tr><td>${esc(PN[i])}</td><td class="num">${x.all}</td><td class="num">${x.done}</td><td class="num">${x.prog}</td><td class="num">${x.none}</td><td class="num">${x.lock}</td><td class="num">${x.blocked}</td></tr>`).join("")
+    +`<tr style="font-weight:700"><td>Total</td><td class="num">${sum("all")}</td><td class="num">${sum("done")}</td><td class="num">${sum("prog")}</td><td class="num">${sum("none")}</td><td class="num">${sum("lock")}</td><td class="num">${sum("blocked")}</td></tr>`;
+  return `<div class="tools"><select class="search" id="sst" aria-label="Filter status">${opt("all","Semua tim")}${opt("todo","Belum dinilai")}${opt("draft","Dalam proses")}${opt("done","Selesai")}${opt("lock","Terkunci")}${opt("blocked","Berkas belum tersedia")}</select>
     <input class="search" id="sq" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(SUM.q)}" aria-label="Cari tim"></div>
-  <div class="card tablewrap"><table class="rtab"><thead><tr><th>ID</th><th>Tim</th><th>Status Anda</th><th>Penilai</th><th>Skor Anda</th></tr></thead><tbody>
+  <div class="card tablewrap"><table class="rtab"><thead><tr><th>ID</th><th>Tim</th><th>${isAdmin?"Status tim":"Status Anda"}</th><th>Penilai</th><th>${isAdmin?"Skor akhir":"Skor Anda"}</th></tr></thead><tbody>
   ${list.map(({t,s})=>`<tr><td class="num idc">${t.id}</td><td><b>#${t.id} ${esc(t.tim)}</b>${t.rv?` <span class="st s-rev">Hasil revisi</span>`:""}<div class="muted" style="font-size:13px;max-width:46ch">${esc(t.inov)}</div></td>
    <td data-l="Status"><span class="st ${s.cls}">${s.k==="lock"?"&#128274; ":""}${s.label}</span>${t.lk&&t.dec?`<div class="muted" style="font-size:12.5px;margin-top:4px">${decLabel(t)} · flag ${esc(t.fd)}</div>`:""}</td>
    <td data-l="Penilai">${s.i.rs.map(r=>`<span class="rv ${r.f===6?"d":r.f>0?"p":""}" title="${r.f}/6 kriteria terisi">${r.f===6?"&#10003;":r.f>0?"&#9684;":"&#9675;"} ${esc(r.n)}</span>`).join("")||'<span class="muted">-</span>'}</td>
-   <td class="num" data-l="Skor akhir">${s.i.complete||t.lk?fmt(s.i.total):'<span class="muted">-</span>'}</td></tr>`).join("")||`<tr><td colspan="5" class="empty">Tidak ada tim yang cocok.</td></tr>`}
+   <td class="num" data-l="Skor akhir">${s.i.complete?fmt(s.i.total):'<span class="muted">-</span>'}</td></tr>`).join("")||`<tr><td colspan="5" class="empty">Tidak ada tim yang cocok.</td></tr>`}
   </tbody></table></div>
-  <div class="sec-h"><h2>Beban per penilai</h2><span class="muted">Ditugaskan = Sudah dinilai + Dalam proses + Belum dinilai</span></div>
-  <div class="card tablewrap"><table><thead><tr><th>Penilai</th><th>Ditugaskan</th><th>Sudah dinilai</th><th>Dalam proses</th><th>Belum dinilai</th></tr></thead><tbody>${load}</tbody></table></div>
-  <p class="muted" style="font-size:13px;margin:12px 4px">Ringkasan ini hanya mencakup tim yang ditugaskan pada akun Anda. Nilai reviewer lain tidak dimuat ke browser. Tim yang terkunci tidak dapat diubah.</p>`;
+  <div class="sec-h"><h2>Beban per penilai</h2><span class="muted">Ditugaskan = selesai + proses + belum dinilai + terkunci + berkas tertahan</span></div>
+  <div class="card tablewrap"><table><thead><tr><th>Penilai</th><th>Ditugaskan</th><th>Selesai</th><th>Dalam proses</th><th>Belum dinilai</th><th>Terkunci</th><th>Berkas belum tersedia</th></tr></thead><tbody>${load}</tbody></table></div>
+  <p class="muted" style="font-size:13px;margin:12px 4px">${isAdmin?"Akses admin mencakup seluruh assignment reviewer. Penyimpanan tetap dibatasi oleh assignment, lock, dan ketersediaan proposal; aktivitas admin tercatat terpisah.":"Ringkasan ini hanya mencakup assignment akun Anda. Assignment terkunci dan berkas proposal yang tidak tersedia dihitung terpisah dari tugas aktif yang belum dinilai."} Tim terkunci tidak dapat diubah.</p>`;
 }
 
-function workload(n){   // satu penilai: tim terkunci memakai nilai dari Kertas Kerja dan dihitung sebagai sudah dinilai
-  const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); let done=0,lock=0,prog=0;
-  mine.forEach(t=>{ const m=myState(t,n); if(m.f===6){ done++; if(isLocked(t)) lock++; } else if(!isLocked(t)&&m.f>0) prog++; });
-  return {all:mine.length,done,lock,prog,none:mine.length-done-prog};
+function workload(n){   // status dibagi eksklusif: aktif, locked, atau tertahan berkas
+  const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); let done=0,lock=0,blocked=0,prog=0,none=0;
+  mine.forEach(t=>{ const k=myState(t,n).k; if(k==="lock") lock++; else if(k==="blocked") blocked++; else if(k==="done") done++; else if(k==="draft") prog++; else none++; });
+  const eligible=mine.length-lock-blocked;
+  return {all:mine.length,eligible,done,lock,blocked,prog,none,open:eligible-done};
 }
 function bind(R){
   document.querySelectorAll("[data-logout]").forEach(b=>b.onclick=()=>logout());
@@ -459,11 +471,11 @@ function bind(R){
 $("#sync").onclick=()=>{ if(AUTH_TOKEN) load(); };
 
 /* ---------- panel penilaian ---------- */
-function nextTodo(from,name){ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===name)&&!isLocked(t)&&myState(t,name).k!=="done");
+function nextTodo(from,name){ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===name)&&!isLocked(t)&&hasProposal(t)&&myState(t,name).k!=="done");
   const i=mine.findIndex(t=>t.id===from); return mine.find((t,j)=>t.id!==from&&j>i)||mine.find(t=>t.id!==from)||null; }
 function openSheet(id,name){
-  const t=TB[id], r=t.r.find(x=>x.n===name), lock=isLocked(t);
-  DRAW={id,n:name,s:eff(t,r).slice(),orig:eff(t,r).slice(),dirty:false,lock,busy:false};
+  const t=TB[id], r=t.r.find(x=>x.n===name), lock=isLocked(t), blocked=!hasProposal(t);
+  DRAW={id,n:name,s:eff(t,r).slice(),orig:eff(t,r).slice(),dirty:false,lock,blocked,busy:false};
   drawSheet(); $("#sheet").classList.add("on"); $("#scrim").classList.add("on"); document.body.style.overflow="hidden";
   $("#sheet .x").focus();
 }
@@ -477,7 +489,7 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&DRAW){ if(closeShe
 window.addEventListener("beforeunload",e=>{ if(DRAW&&DRAW.dirty){ e.preventDefault(); e.returnValue=""; } });
 
 function drawSheet(){
-  const D=DRAW, t=TB[D.id], i=info(t), lock=D.lock;
+  const D=DRAW, t=TB[D.id], i=info(t), lock=D.lock, blocked=D.blocked, readOnly=lock||blocked;
   const filled=nFill(D.s), full=filled===6, my=full?sc10(D.s):null;
   const row=SV[key(D.id,D.n)];
   const fileInfo=t.f?`<div class="line"><span class="muted">Berkas proposal:</span><span class="file">${esc(t.f.replace(/^revisi\//,""))}</span></div>`:"";
@@ -487,27 +499,28 @@ function drawSheet(){
     <button class="x" type="button" aria-label="Tutup" data-x>&times;</button></div></div>
   <div class="sh-body"><div class="split"><div class="pane" id="paneA">
     ${lock?`<div class="banner lock"><div>&#128274; <b>Penilaian dikunci.</b> Tim ini sudah diflag di sistem${t.fd?` (${esc(t.fd)})`:""}${t.dec?` dengan keputusan <b>${decLabel(t)}</b>`:""}, sehingga nilai tidak dapat diubah.</div></div>`:""}
+    ${blocked?`<div class="banner warn"><div><b>Penilaian ditahan.</b> File proposal belum tersedia dan nilai baru tidak dapat disimpan. Laporkan ke administrator agar file dipulihkan dan status roster diperbarui.</div></div>`:""}
     ${t.fw?`<div class="banner err"><div><b>Perhatian:</b> ${esc(t.fw)}</div></div>`:""}
     <div class="card info">
       ${t.rv?`<div class="line"><span class="st s-rev">Hasil revisi</span><span class="muted">${esc(t.rv)}</span></div>`:""}
       ${fileInfo}
       <div class="line" style="margin-top:6px">${CFG.sp?`<a class="btn btn-o" href="${esc(CFG.sp)}" target="_blank" rel="noopener">Buka folder proposal (SharePoint)</a>`:""}</div>
-      <div class="line" style="margin-top:8px"><span class="muted">Akun penilai:</span>${i.rs.map(r=>`<span class="rv ${r.f===6?"d":r.f>0?"p":""}${r.n===D.n?" me":""}">${r.f===6?"&#10003;":r.f>0?"&#9684;":"&#9675;"} ${esc(r.n)}${r.n===D.n?" (Anda)":""}</span>`).join("")}</div>
+      <div class="line" style="margin-top:8px"><span class="muted">Akun penilai:</span>${i.rs.map(r=>`<span class="rv ${r.f===6?"d":r.f>0?"p":""}${r.n===D.n?" me":""}">${r.f===6?"&#10003;":r.f>0?"&#9684;":"&#9675;"} ${esc(r.n)}${r.n===D.n?(AUTH_ROLE==="admin"?" (target reviewer)":" (Anda)"):""}</span>`).join("")}</div>
     </div>
     ${submHtml(t)}
     </div><div class="pane" id="paneB">
-    ${CRIT.map((c,k)=>critHtml(c,k,D.s[k],lock)).join("")}
+    ${CRIT.map((c,k)=>critHtml(c,k,D.s[k],readOnly)).join("")}
   </div></div></div>
-  <div class="sh-foot"><div class="score"><b class="num">${my!=null?fmt(my):"-"}</b><small>${full?"Skor Anda (skala 10)":`Terisi ${filled} dari 6 kriteria`}</small>
+  <div class="sh-foot"><div class="score"><b class="num">${my!=null?fmt(my):"-"}</b><small>${full?(AUTH_ROLE==="admin"?"Skor target reviewer (skala 10)":"Skor Anda (skala 10)"):`Terisi ${filled} dari 6 kriteria`}</small>
       <div class="dots">${D.s.map(v=>`<i class="${v!=null?"on":""}"></i>`).join("")}</div>
       ${row&&row.t?`<small>Tersimpan ${new Date(row.t).toLocaleString("id-ID",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}</small>`:""}</div>
-    <div class="btns">${lock?`<button class="btn btn-o" data-x type="button">Tutup</button>`:
+    <div class="btns">${readOnly?`<button class="btn btn-o" data-x type="button">Tutup</button>`:
       `<button class="btn btn-o" data-save="close" type="button" ${D.dirty&&!D.busy?"":"disabled"}>Simpan</button>
        ${nxt?`<button class="btn btn-p" data-save="next" type="button" ${D.dirty&&!D.busy?"":"disabled"}>Simpan &amp; berikutnya</button>`:`<button class="btn btn-p" data-save="close" type="button" ${D.dirty&&!D.busy?"":"disabled"}>${D.busy?"Menyimpan...":"Simpan"}</button>`}`}</div></div>`;
   // ikat event
   const sh=$("#sheet");
   sh.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{ if(closeSheet()) render(); });
-  sh.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ if(D.lock) return; const k=+b.dataset.k, v=+b.dataset.v;
+  sh.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ if(D.lock||D.blocked) return; const k=+b.dataset.k, v=+b.dataset.v;
     D.s[k]=v; D.dirty=D.s.some((x,j)=>x!==D.orig[j]); const tops=["#paneA","#paneB",".sh-body"].map(q=>{const e=sh.querySelector(q);return e?e.scrollTop:0}); drawSheet(); ["#paneA","#paneB",".sh-body"].forEach((q,i)=>{const e=sh.querySelector(q); if(e) e.scrollTop=tops[i];});
     const nb=sh.querySelector(`.seg[data-k="${k}"] button[data-v="${v}"]`); if(nb) nb.focus({preventScroll:true}); });
   sh.querySelectorAll("[data-save]").forEach(b=>b.onclick=()=>doSave(b.dataset.save));
@@ -519,27 +532,31 @@ function submHtml(t){
     <div class="sec"><h4>Judul inovasi</h4><p>${esc(t.inov)}</p></div>
     ${t.sub.map((x,j)=>`<div class="sec"><h4>${SUBL[j]}</h4><p>${esc(x)}</p></div>`).join("")}</details>`;
 }
-function critHtml(c,k,val,lock){
+function critHtml(c,k,val,readOnly){
   return `<div class="card crit"><div class="crit-h"><div class="kn">${k+1}</div><div><b>${esc(c.n)}</b><small>Bobot ${Math.round(c.w*100)}%</small></div></div>
   <p class="ket">${esc(c.ket)}</p>
-  <div class="seg" role="radiogroup" aria-label="${esc(c.n)}" data-k="${k}">${[1,2,3,4].map(v=>`<button type="button" role="radio" aria-checked="${val===v}" data-k="${k}" data-v="${v}" ${lock?"disabled":""}><b>${v}</b><span>${LVL[v-1]}</span></button>`).join("")}</div>
+  <div class="seg" role="radiogroup" aria-label="${esc(c.n)}" data-k="${k}">${[1,2,3,4].map(v=>`<button type="button" role="radio" aria-checked="${val===v}" data-k="${k}" data-v="${v}" ${readOnly?"disabled":""}><b>${v}</b><span>${LVL[v-1]}</span></button>`).join("")}</div>
   <div class="ind ${val==null?"none":""}">${val==null?"Pilih nilai 1-4 untuk melihat indikatornya.":`<b>Nilai ${val}:</b> ${esc(c.ind[val-1])}`}</div>
   <details class="all"><summary>Lihat semua indikator</summary>${c.ind.map((x,j)=>`<div><b>${j+1}</b><span>${esc(x)}</span></div>`).join("")}</details></div>`;
 }
 async function doSave(mode){
-  const D=DRAW; if(!D||D.busy||!D.dirty) return;
+  const D=DRAW; if(!D||D.busy||!D.dirty||D.lock||D.blocked) return;
   D.busy=true; drawSheet();
   const id=D.id,n=D.n,s=D.s.slice(); const nxt=nextTodo(id,n);
   try{
     await saveRow(id,n,s);
-    toast(nFill(s)===6?"Nilai tersimpan":"Draft tersimpan ("+nFill(s)+"/6 kriteria)");
+    toast(AUTH_ROLE==="admin"?"Nilai tersimpan atas nama "+n+"; audit admin dicatat.":nFill(s)===6?"Nilai tersimpan":"Draft tersimpan ("+nFill(s)+"/6 kriteria)");
     D.orig=s.slice(); D.dirty=false; D.busy=false;
     if(mode==="next"&&nxt){ DRAW=null; openSheet(nxt.id,n); render(); }
     else { closeSheet(true); render(); }
   }catch(e){
     if(!DRAW){ toast("Sesi berakhir. Silakan masuk kembali.",true); return; }
+    if(String(e.message)==="admin_save_uncertain"){
+      await load(true); closeSheet(true); render();
+      toast("Status simpan belum pasti. Periksa data terbaru dan Riwayat Admin sebelum mencoba lagi.",true); return;
+    }
     D.busy=false; drawSheet();
-    toast(String(e.message)==="locked"?"Tim ini sudah terkunci, nilai tidak dapat diubah.":String(e.message)==="session_expired"?"Sesi berakhir. Silakan masuk kembali.":"Gagal menyimpan. Periksa koneksi lalu coba lagi.",true);
+    toast(String(e.message)==="locked"?"Tim ini sudah terkunci, nilai tidak dapat diubah.":String(e.message)==="proposal_unavailable"?"File proposal belum tersedia; nilai tidak disimpan.":String(e.message)==="session_expired"?"Sesi berakhir. Silakan masuk kembali.":"Gagal menyimpan. Periksa koneksi lalu coba lagi.",true);
   }
 }
 
