@@ -218,7 +218,7 @@ details.all div{margin:6px 0;display:flex;gap:8px} details.all div b{color:var(-
 
 <script>
 /*DATA_START*/
-const CFG={"api": "https://script.google.com/macros/s/AKfycbwN2A9ifD8aAPVVCy-VlO6vpRhKHmILJoRn5t8oDcDCFtFcSUXjA6-9F8uMTEd4gE1USA/exec", "sp": "https://bpjskesehatano365-my.sharepoint.com/:f:/g/personal/reza_fahdevy_bpjs-kesehatan_go_id/IgANs0qjyaf8SqgFsG0hYDXqAbs2p_X1AEs2do7ooykkqS0", "spRev": "https://bpjskesehatano365-my.sharepoint.com/:f:/g/personal/reza_fahdevy_bpjs-kesehatan_go_id/IgANs0qjyaf8SqgFsG0hYDXqAbs2p_X1AEs2do7ooykkqS0", "nilai": "09/10/2026", "submisi": "12/10/2026"};
+const CFG={"api": "https://script.google.com/macros/s/AKfycbwFj9bHqQrkxBCnQRCDa2AHAfzEB9KF0M1Sx16X60FpIWmVzkLE54Xc6vb_g8sHlZ6tzA/exec", "sp": "https://bpjskesehatano365-my.sharepoint.com/:f:/g/personal/reza_fahdevy_bpjs-kesehatan_go_id/IgANs0qjyaf8SqgFsG0hYDXqAbs2p_X1AEs2do7ooykkqS0", "spRev": "https://bpjskesehatano365-my.sharepoint.com/:f:/g/personal/reza_fahdevy_bpjs-kesehatan_go_id/IgANs0qjyaf8SqgFsG0hYDXqAbs2p_X1AEs2do7ooykkqS0", "nilai": "14/10/2026", "submisi": "12/10/2026"};
 let POOL=[];
 const CRIT=[{"n": "Relevansi Permasalahan", "w": 0.2, "ket": "Menilai seberapa penting dan nyata permasalahan, kejelasan problem statement, dan kesesuaian solusi dengan kebutuhan BPJS Kesehatan dalam program JKN.", "ind": ["Permasalahan tidak jelas, tidak penting, atau tidak relevan dengan program JKN/BPJS Kesehatan. Solusi tidak menjawab permasalahan yang diidentifikasi.", "Permasalahan cukup relevan, tetapi belum didukung pemahaman yang memadai terhadap kebutuhan atau proses bisnis. Solusi hanya menjawab sebagian permasalahan.", "Permasalahan jelas dan relevan dengan kebutuhan JKN/BPJS Kesehatan. Solusi menjawab sebagian besar permasalahan dan sesuai dengan proses bisnis serta ketentuan yang berlaku.", "Permasalahan sangat jelas, nyata, strategis, dan berdampak signifikan terhadap JKN/BPJS Kesehatan. Solusi secara tepat dan menyeluruh menjawab akar permasalahan serta sesuai dengan proses bisnis dan ketentuan yang berlaku."]}, {"n": "Kreativitas, Inovasi, dan Keunikan", "w": 0.15, "ket": "Menilai kebaruan, kreativitas solusi, serta nilai tambah penggunaan AI dibandingkan metode atau solusi yang sudah tersedia.", "ind": ["Solusi bersifat konvensional dan hampir tidak memiliki unsur inovasi. Penggunaan AI tidak memberikan nilai tambah yang jelas.", "Solusi memiliki unsur inovasi, tetapi masih menyerupai solusi yang sudah tersedia. Pemanfaatan AI memberikan nilai tambah yang terbatas.", "Solusi memiliki pendekatan yang kreatif dan inovatif. AI dimanfaatkan secara tepat untuk menghasilkan nilai tambah yang jelas dibandingkan pendekatan konvensional.", "Solusi memiliki pendekatan yang sangat inovatif dan berbeda secara signifikan dari solusi yang tersedia. Pemanfaatan AI memberikan nilai tambah yang kuat dan berpotensi menjadi pendekatan baru yang dapat diterapkan pada JKN."]}, {"n": "Kualitas Teknologi/ Teknis", "w": 0.2, "ket": "Menilai ketepatan pemilihan teknologi AI, kualitas rancangan dan model, kualitas data, integrasi sistem, serta kemampuan tim menjelaskan dan membuktikan pendekatan teknis.", "ind": ["Teknologi/model tidak sesuai dengan permasalahan. Rancangan teknis lemah, kualitas data tidak memadai, dan tim tidak mampu menjelaskan pendekatan teknis yang digunakan.", "Teknologi/model cukup sesuai, tetapi masih terdapat kelemahan pada data, model, arsitektur, integrasi, atau proses pengujian atau ada beberapa masalah teknis yang kurang teratasi. Penjelasan teknis masih terbatas.", "Teknologi/model sesuai dengan permasalahan. Data, arsitektur, model, dan proses pengujian dirancang dengan baik. Tim mampu menjelaskan pendekatan teknis dan hasil pengujian dengan jelas.", "Teknologi/model sangat tepat dan dirancang secara matang. Kualitas data, arsitektur, model, integrasi, pengujian, performa, dan reliability diperhatikan dengan baik. Tim mampu menjelaskan, membuktikan, dan mempertanggungjawabkan keputusan teknis secara mendalam."]}, {"n": "Efektivitas dan Dampak", "w": 0.2, "ket": "Menilai kemampuan solusi menghasilkan perbaikan yang nyata dan terukur terhadap proses, layanan, kualitas, efisiensi, atau manfaat program JKN.", "ind": ["Solusi tidak menunjukkan manfaat yang jelas dan tidak memberikan perbaikan berarti terhadap permasalahan. Dampak sulit dibuktikan.", "Solusi memberikan manfaat, tetapi dampaknya masih terbatas atau belum didukung ukuran keberhasilan yang jelas.", "Solusi memberikan perbaikan yang signifikan dan dapat diukur, misalnya peningkatan efisiensi, kecepatan, akurasi, kualitas layanan, atau pengurangan beban kerja.", "Solusi memberikan dampak yang sangat signifikan, terukur, dan relevan terhadap BPJS Kesehatan maupun peserta JKN. Manfaat didukung hasil pengujian, benchmark, atau proof of concept yang meyakinkan."]}, {"n": "Kesiapan Implementasi Produk dan Skalabilitas", "w": 0.15, "ket": "Menilai apakah solusi dapat dikembangkan dari prototype menjadi produk yang dapat digunakan secara nyata, dioperasikan, dipelihara, dan dikembangkan pada skala yang lebih luas.", "ind": ["Masih berupa konsep/ide. Prototype belum berfungsi atau belum menunjukkan kemampuan untuk diimplementasikan. Kebutuhan implementasi belum jelas.", "Prototype sudah dapat menunjukkan fungsi utama, tetapi masih membutuhkan banyak pengembangan sebelum dapat digunakan. Aspek integrasi, operasional, pemeliharaan, atau kebutuhan sumber daya belum jelas.", "Produk/prototype sudah berfungsi dengan baik dan memiliki rancangan implementasi yang jelas, termasuk integrasi, infrastruktur, operasional, pemeliharaan, dan kebutuhan sumber daya. Solusi berpotensi dikembangkan ke skala yang lebih luas.", "Produk sangat siap untuk diimplementasikan atau dipilotkan. Arsitektur, integrasi, infrastruktur, operasional, pemeliharaan, deployment, dan monitoring telah dipersiapkan dengan baik. Solusi dapat diskalakan ke unit, proses, atau jumlah pengguna yang lebih besar."]}, {"n": "Keamanan, Privasi, dan Tata Kelola", "w": 0.1, "ket": "Menilai kemampuan solusi mengelola risiko keamanan dan AI, melindungi data pribadi, serta memenuhi prinsip dan ketentuan yang berlaku.", "ind": ["Tidak memperhatikan keamanan, privasi, atau risiko penggunaan AI. Data dapat digunakan tanpa kontrol yang memadai dan terdapat risiko tinggi terhadap kebocoran atau penyalahgunaan data.", "Sudah memperhatikan keamanan dan privasi secara dasar, tetapi masih terdapat kelemahan pada pengamanan data, akses, penggunaan model, atau pengelolaan risiko AI.", "Keamanan, privasi, dan risiko AI telah diperhitungkan dalam rancangan. Terdapat pengendalian terhadap akses, penggunaan data, keamanan sistem, dan risiko model serta memperhatikan ketentuan yang berlaku.", "Keamanan, privasi, dan tata kelola telah menjadi bagian integral dari desain produk (privacy/security by design). Terdapat pengelolaan risiko AI, kontrol akses, perlindungan data, audit trail, pengelolaan model, monitoring, serta mekanisme penanganan insiden dan kepatuhan yang jelas."]}];
 let TEAMS=[];
@@ -259,12 +259,11 @@ function info(t){
   return {rs,N,done,started,total,complete:N>0&&done===N};
 }
 const isLocked=t=>LOCKED.has(t.id);
-const hasProposal=t=>t.allowMissingProposal===true||Boolean(String(t.f||"").trim()&&!String(t.fw||"").trim());
+
 function teamState(t){            // status global tim
   const i=info(t);
   if(isLocked(t)) return {k:"lock",label:"Terkunci",cls:"s-lock",i};
   if(i.complete) return {k:"done",label:"Selesai",cls:"s-done",i};
-  if(!hasProposal(t)) return {k:"blocked",label:"Berkas belum tersedia",cls:"s-fail",i};
   if(i.started) return {k:"draft",label:`Dalam proses ${i.done}/${i.N}`,cls:"s-draft",i};
   return {k:"todo",label:"Belum dinilai",cls:"s-todo",i};
 }
@@ -272,7 +271,6 @@ function myState(t,name){         // status untuk satu penilai
   const r=t.r.find(x=>x.n===name), s=eff(t,r), f=nFill(s);
   if(isLocked(t)) return {k:"lock",f,s};
   if(f===6) return {k:"done",f,s};
-  if(!hasProposal(t)) return {k:"blocked",f,s};
   return {k:f>0?"draft":"todo",f,s};
 }
 const decLabel=t=>t.dec==="L"?"Lulus":t.dec==="T"?"Tidak lulus":"";
@@ -371,15 +369,15 @@ window.addEventListener("hashchange",()=>{ closeSheet(true); render(); window.sc
 /* ---------- beranda ---------- */
 function viewHome(){
   const isAdmin=AUTH_ROLE==="admin";
-  const S={todo:0,draft:0,done:0,lock:0,blocked:0}; let slots=0,fill=0;
-  TEAMS.forEach(t=>{ S[teamState(t).k]++; if(!isLocked(t)&&hasProposal(t)) t.r.forEach(r=>{slots++; if(nFill(eff(t,r))===6) fill++;}); });
+  const S={todo:0,draft:0,done:0,lock:0}; let slots=0,fill=0;
+  TEAMS.forEach(t=>{ S[teamState(t).k]++; if(!isLocked(t)) t.r.forEach(r=>{slots++; if(nFill(eff(t,r))===6) fill++;}); });
   const open=slots-fill;
   const card=n=>{ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n));
     const w=workload(n), done=w.done;
     const pct=w.eligible?Math.round(done/w.eligible*100):100;
     return `<button class="person" data-go="${slug(n)}"><div class="top"><div class="av">${esc(ini(n))}</div><div><b>${esc(n)}</b><small>${mine.length} tim ditugaskan</small></div></div>
     <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
-    <div class="meta"><span>${done} dari ${w.eligible} tugas aktif selesai</span><span>${w.open} sisa${w.lock?` · ${w.lock} terkunci`:""}${w.blocked?` · ${w.blocked} berkas tertahan`:""}</span></div></button>`; };
+    <div class="meta"><span>${done} dari ${w.eligible} tugas aktif selesai</span><span>${w.open} sisa${w.lock?` · ${w.lock} terkunci`:""}</span></div></button>`; };
   const oth=otherNames();
   return `<div class="kpis">
     <div class="card kpi"><b>${TEAMS.length}</b><span>${isAdmin?"Tim pada roster":"Tim ditugaskan ke Anda"}</span></div>
@@ -387,7 +385,6 @@ function viewHome(){
     <div class="card kpi"><b>${S.draft}</b><span>Dalam proses</span></div>
     <div class="card kpi"><b>${S.todo}</b><span>Belum dinilai</span></div>
     <div class="card kpi"><b>${S.lock}</b><span>Terkunci</span></div>
-    <div class="card kpi"><b>${S.blocked}</b><span>Berkas belum tersedia</span></div>
     <div class="card kpi"><b>${open}</b><span>Penilaian individu tersisa</span></div></div>
   <div class="sec-h"><h2>${isAdmin?"Beban seluruh reviewer":"Tugas penilaian Anda"}</h2><span class="muted">${isAdmin?"Pilih reviewer untuk melihat atau mengubah skor. Perubahan admin dicatat terpisah.":"Data dibatasi pada assignment akun yang sedang login"}</span></div>
   <div class="people">${POOL.map(card).join("")}</div>
@@ -397,33 +394,32 @@ function viewHome(){
 /* ---------- daftar tim milik penilai ---------- */
 function viewMe(name){
   const mine=TEAMS.filter(t=>t.r.some(r=>r.n===name));
-  const cnt={todo:0,done:0,lock:0,blocked:0,all:mine.length};
-  mine.forEach(t=>{ const k=myState(t,name).k; if(k==="done")cnt.done++; else if(k==="lock")cnt.lock++; else if(k==="blocked")cnt.blocked++; else cnt.todo++; });
+  const cnt={todo:0,done:0,lock:0,all:mine.length};
+  mine.forEach(t=>{ const k=myState(t,name).k; if(k==="done")cnt.done++; else if(k==="lock")cnt.lock++; else cnt.todo++; });
   let list=mine.filter(t=>{ const k=myState(t,name).k;
     if(F.filter==="todo"&&!(k==="todo"||k==="draft")) return false;
     if(F.filter==="done"&&k!=="done") return false;
     if(F.filter==="lock"&&k!=="lock") return false;
-    if(F.filter==="blocked"&&k!=="blocked") return false;
     if(F.q){ const q=F.q.toLowerCase(); if(!(t.tim+" "+t.inov+" "+t.id).toLowerCase().includes(q)) return false; }
     return true; });
   const W_=workload(name), pct=W_.eligible?Math.round(W_.done/W_.eligible*100):100;
   const ch=(k,l,n)=>`<button class="chip" data-f="${k}" aria-pressed="${F.filter===k}">${l}<small>${n}</small></button>`;
   return `<div class="card me-head"><div class="av">${esc(ini(name))}</div><div class="grow"><h2>${esc(name)}</h2>
-    <div class="muted">${W_.done} dari ${W_.eligible} tugas aktif selesai · ${W_.open} sisa${W_.lock?` · ${W_.lock} terkunci`:""}${W_.blocked?` · ${W_.blocked} terhambat berkas`:""}</div>
+    <div class="muted">${W_.done} dari ${W_.eligible} tugas aktif selesai · ${W_.open} sisa${W_.lock?` · ${W_.lock} terkunci`:""}</div>
     <div class="bar" style="max-width:360px"><i style="width:${pct}%"></i></div></div>
     <button class="linkbtn" type="button" data-logout>Keluar</button></div>
   ${AUTH_ROLE==="admin"?`<div class="banner warn"><div><b>Mode admin.</b> Skor yang Anda ubah disimpan atas nama reviewer pada profil ini, sedangkan perubahan admin dicatat pada tab audit tersendiri.</div></div>`:""}
-  <div class="tools"><div class="chips" role="group" aria-label="Filter">${ch("todo","Perlu dinilai",cnt.todo)}${ch("done","Selesai",cnt.done)}${cnt.blocked?ch("blocked","Berkas bermasalah",cnt.blocked):""}${cnt.lock?ch("lock","Terkunci",cnt.lock):""}${ch("all","Semua",cnt.all)}</div>
+  <div class="tools"><div class="chips" role="group" aria-label="Filter">${ch("todo","Perlu dinilai",cnt.todo)}${ch("done","Selesai",cnt.done)}${cnt.lock?ch("lock","Terkunci",cnt.lock):""}${ch("all","Semua",cnt.all)}</div>
     <input class="search" id="q" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(F.q)}" aria-label="Cari tim"></div>
   <div class="list">${list.length?list.map(t=>teamRow(t,name)).join(""):`<div class="card empty">${F.filter==="todo"&&!F.q?"Tidak ada tugas aktif yang menunggu penilaian pada filter ini.":"Tidak ada tim yang cocok."}</div>`}</div>`;
 }
 function teamRow(t,name){
-  const m=myState(t,name), lock=m.k==="lock", blocked=m.k==="blocked";
+  const m=myState(t,name), lock=m.k==="lock", missingFile=!String(t.f||"").trim()||!!String(t.fw||"").trim();
   const st=lock?`<span class="st s-lock">&#128274; Terkunci${t.dec?" · "+decLabel(t):""}</span>`
     :m.k==="done"?`<span class="st s-done">&#10003; Selesai · ${fmt(sc10(m.s))}</span>`
-    :blocked?`<span class="st s-fail">Berkas belum tersedia</span>`:m.k==="draft"?`<span class="st s-draft">Draft ${m.f}/6</span>`:`<span class="st s-todo">Belum dinilai</span>`;
-  const btn=lock||blocked?"Lihat status":m.k==="done"?"Ubah":m.k==="draft"?"Lanjutkan":"Nilai";
-  return `<button class="team" data-open="${t.id}" data-n="${esc(name)}"><div><div class="t1"><span class="num">#${t.id}</span><span>${esc(t.kat.replace("Efisiensi Risiko pada ",""))}</span>${t.allowMissingProposal&&!String(t.f||"").trim()?`<span class="st s-draft">Penilaian dibuka tanpa file</span>`:""}${t.rv?`<span class="st s-rev">Hasil revisi</span>`:""}</div>
+    :m.k==="draft"?`<span class="st s-draft">Draft ${m.f}/6</span>`:`<span class="st s-todo">Belum dinilai</span>`;
+  const btn=lock?"Lihat status":m.k==="done"?"Ubah":m.k==="draft"?"Lanjutkan":"Nilai";
+  return `<button class="team" data-open="${t.id}" data-n="${esc(name)}"><div><div class="t1"><span class="num">#${t.id}</span><span>${esc(t.kat.replace("Efisiensi Risiko pada ",""))}</span>${missingFile?`<span class="st s-draft">File perlu dicari manual</span>`:""}${t.rv?`<span class="st s-rev">Hasil revisi</span>`:""}</div>
     <h3>${esc(t.tim)}</h3><div class="j">${esc(t.inov)}</div></div>
     <div class="act">${st}<span class="btn ${m.k==="todo"||m.k==="draft"?"btn-p":"btn-o"}">${btn}</span></div></button>`;
 }
@@ -437,9 +433,9 @@ function viewSum(){
   const opt=(k,l)=>`<option value="${k}"${SUM.st===k?" selected":""}>${l} (${tot[k]||0})</option>`;
   const PN=[...POOL,...otherNames()], LD=PN.map(n=>workload(n));
   const sum=k=>LD.reduce((a,x)=>a+x[k],0);
-  const load=LD.map((x,i)=>`<tr><td>${esc(PN[i])}</td><td class="num">${x.all}</td><td class="num">${x.done}</td><td class="num">${x.prog}</td><td class="num">${x.none}</td><td class="num">${x.lock}</td><td class="num">${x.blocked}</td></tr>`).join("")
-    +`<tr style="font-weight:700"><td>Total</td><td class="num">${sum("all")}</td><td class="num">${sum("done")}</td><td class="num">${sum("prog")}</td><td class="num">${sum("none")}</td><td class="num">${sum("lock")}</td><td class="num">${sum("blocked")}</td></tr>`;
-  return `<div class="tools"><select class="search" id="sst" aria-label="Filter status">${opt("all","Semua tim")}${opt("todo","Belum dinilai")}${opt("draft","Dalam proses")}${opt("done","Selesai")}${opt("lock","Terkunci")}${opt("blocked","Berkas belum tersedia")}</select>
+  const load=LD.map((x,i)=>`<tr><td>${esc(PN[i])}</td><td class="num">${x.all}</td><td class="num">${x.done}</td><td class="num">${x.prog}</td><td class="num">${x.none}</td><td class="num">${x.lock}</td></tr>`).join("")
+    +`<tr style="font-weight:700"><td>Total</td><td class="num">${sum("all")}</td><td class="num">${sum("done")}</td><td class="num">${sum("prog")}</td><td class="num">${sum("none")}</td><td class="num">${sum("lock")}</td></tr>`;
+  return `<div class="tools"><select class="search" id="sst" aria-label="Filter status">${opt("all","Semua tim")}${opt("todo","Belum dinilai")}${opt("draft","Dalam proses")}${opt("done","Selesai")}${opt("lock","Terkunci")}</select>
     <input class="search" id="sq" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(SUM.q)}" aria-label="Cari tim"></div>
   <div class="card tablewrap"><table class="rtab"><thead><tr><th>ID</th><th>Tim</th><th>${isAdmin?"Status tim":"Status Anda"}</th><th>Penilai</th><th>${isAdmin?"Skor akhir":"Skor Anda"}</th></tr></thead><tbody>
   ${list.map(({t,s})=>`<tr><td class="num idc">${t.id}</td><td><b>#${t.id} ${esc(t.tim)}</b>${t.rv?` <span class="st s-rev">Hasil revisi</span>`:""}<div class="muted" style="font-size:13px;max-width:46ch">${esc(t.inov)}</div></td>
@@ -447,16 +443,16 @@ function viewSum(){
    <td data-l="Penilai">${s.i.rs.map(r=>`<span class="rv ${r.f===6?"d":r.f>0?"p":""}" title="${r.f}/6 kriteria terisi">${r.f===6?"&#10003;":r.f>0?"&#9684;":"&#9675;"} ${esc(r.n)}</span>`).join("")||'<span class="muted">-</span>'}</td>
    <td class="num" data-l="Skor akhir">${s.i.complete?fmt(s.i.total):'<span class="muted">-</span>'}</td></tr>`).join("")||`<tr><td colspan="5" class="empty">Tidak ada tim yang cocok.</td></tr>`}
   </tbody></table></div>
-  <div class="sec-h"><h2>Beban per penilai</h2><span class="muted">Ditugaskan = selesai + proses + belum dinilai + terkunci + berkas tertahan</span></div>
-  <div class="card tablewrap"><table><thead><tr><th>Penilai</th><th>Ditugaskan</th><th>Selesai</th><th>Dalam proses</th><th>Belum dinilai</th><th>Terkunci</th><th>Berkas belum tersedia</th></tr></thead><tbody>${load}</tbody></table></div>
-  <p class="muted" style="font-size:13px;margin:12px 4px">${isAdmin?"Akses admin mencakup seluruh assignment reviewer. Penyimpanan tetap dibatasi oleh assignment, lock, dan ketersediaan proposal; aktivitas admin tercatat terpisah.":"Ringkasan ini hanya mencakup assignment akun Anda. Assignment terkunci dan berkas proposal yang tidak tersedia dihitung terpisah dari tugas aktif yang belum dinilai."} Tim terkunci tidak dapat diubah.</p>`;
+  <div class="sec-h"><h2>Beban per penilai</h2><span class="muted">Ditugaskan = selesai + proses + belum dinilai + terkunci</span></div>
+  <div class="card tablewrap"><table><thead><tr><th>Penilai</th><th>Ditugaskan</th><th>Selesai</th><th>Dalam proses</th><th>Belum dinilai</th><th>Terkunci</th></tr></thead><tbody>${load}</tbody></table></div>
+  <p class="muted" style="font-size:13px;margin:12px 4px">${isAdmin?"Akses admin mencakup seluruh assignment reviewer. Penyimpanan dibatasi oleh assignment dan lock; aktivitas admin tercatat terpisah.":"Ringkasan ini hanya mencakup assignment akun Anda. Assignment tanpa file proposal tetap masuk tugas yang dapat dinilai."} Tim terkunci tidak dapat diubah.</p>`;
 }
 
-function workload(n){   // status dibagi eksklusif: aktif, locked, atau tertahan berkas
-  const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); let done=0,lock=0,blocked=0,prog=0,none=0;
-  mine.forEach(t=>{ const k=myState(t,n).k; if(k==="lock") lock++; else if(k==="blocked") blocked++; else if(k==="done") done++; else if(k==="draft") prog++; else none++; });
-  const eligible=mine.length-lock-blocked;
-  return {all:mine.length,eligible,done,lock,blocked,prog,none,open:eligible-done};
+function workload(n){   // semua assignment non-lock dapat dinilai, terlepas ketersediaan file
+  const mine=TEAMS.filter(t=>t.r.some(r=>r.n===n)); let done=0,lock=0,prog=0,none=0;
+  mine.forEach(t=>{ const k=myState(t,n).k; if(k==="lock") lock++; else if(k==="done") done++; else if(k==="draft") prog++; else none++; });
+  const eligible=mine.length-lock;
+  return {all:mine.length,eligible,done,lock,prog,none,open:eligible-done};
 }
 function bind(R){
   document.querySelectorAll("[data-logout]").forEach(b=>b.onclick=()=>logout());
@@ -471,11 +467,11 @@ function bind(R){
 $("#sync").onclick=()=>{ if(AUTH_TOKEN) load(); };
 
 /* ---------- panel penilaian ---------- */
-function nextTodo(from,name){ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===name)&&!isLocked(t)&&hasProposal(t)&&myState(t,name).k!=="done");
+function nextTodo(from,name){ const mine=TEAMS.filter(t=>t.r.some(r=>r.n===name)&&!isLocked(t)&&myState(t,name).k!=="done");
   const i=mine.findIndex(t=>t.id===from); return mine.find((t,j)=>t.id!==from&&j>i)||mine.find(t=>t.id!==from)||null; }
 function openSheet(id,name){
-  const t=TB[id], r=t.r.find(x=>x.n===name), lock=isLocked(t), blocked=!hasProposal(t);
-  DRAW={id,n:name,s:eff(t,r).slice(),orig:eff(t,r).slice(),dirty:false,lock,blocked,busy:false};
+  const t=TB[id], r=t.r.find(x=>x.n===name), lock=isLocked(t);
+  DRAW={id,n:name,s:eff(t,r).slice(),orig:eff(t,r).slice(),dirty:false,lock,busy:false};
   drawSheet(); $("#sheet").classList.add("on"); $("#scrim").classList.add("on"); document.body.style.overflow="hidden";
   $("#sheet .x").focus();
 }
@@ -489,19 +485,18 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&DRAW){ if(closeShe
 window.addEventListener("beforeunload",e=>{ if(DRAW&&DRAW.dirty){ e.preventDefault(); e.returnValue=""; } });
 
 function drawSheet(){
-  const D=DRAW, t=TB[D.id], i=info(t), lock=D.lock, blocked=D.blocked, readOnly=lock||blocked;
+  const D=DRAW, t=TB[D.id], i=info(t), lock=D.lock, readOnly=lock;
   const filled=nFill(D.s), full=filled===6, my=full?sc10(D.s):null;
   const row=SV[key(D.id,D.n)];
   const fileInfo=t.f?`<div class="line"><span class="muted">Berkas proposal:</span><span class="file">${esc(t.f.replace(/^revisi\//,""))}</span></div>`:"";
-  const proposalWarning=t.allowMissingProposal&&!String(t.f||"").trim()?"File proposal tidak tersedia. Atas arahan pemilik, penilaian ID 2822 tetap dibuka. Gunakan informasi yang benar-benar dapat diakses dan jangan menebak isi dokumen.":t.fw;
+  const proposalWarning=(!String(t.f||"").trim()||String(t.fw||"").trim())?"Berkas proposal belum ditemukan di folder penilai. Penilaian tetap dibuka; file dapat dicari manual. Gunakan informasi submisi yang tersedia dan jangan menebak isi proposal.":"";
   const nxt=nextTodo(D.id,D.n);
   $("#sheet").innerHTML=`
   <div class="sh-head"><div class="row"><div><div class="eyebrow">#${esc(t.id)} · ${esc(t.kat)}</div><h2 id="shT">${esc(t.tim)}</h2><p>${esc(t.inov)}</p></div>
     <button class="x" type="button" aria-label="Tutup" data-x>&times;</button></div></div>
   <div class="sh-body"><div class="split"><div class="pane" id="paneA">
     ${lock?`<div class="banner lock"><div>&#128274; <b>Penilaian dikunci.</b> Tim ini sudah diflag di sistem${t.fd?` (${esc(t.fd)})`:""}${t.dec?` dengan keputusan <b>${decLabel(t)}</b>`:""}, sehingga nilai tidak dapat diubah.</div></div>`:""}
-    ${blocked?`<div class="banner warn"><div><b>Penilaian ditahan.</b> File proposal belum tersedia dan nilai baru tidak dapat disimpan. Laporkan ke administrator agar file dipulihkan dan status roster diperbarui.</div></div>`:""}
-    ${proposalWarning?`<div class="banner ${t.allowMissingProposal?"warn":"err"}"><div><b>Perhatian:</b> ${esc(proposalWarning)}</div></div>`:""}
+    ${proposalWarning?`<div class="banner warn"><div><b>Informasi berkas:</b> ${esc(proposalWarning)}</div></div>`:""}
     <div class="card info">
       ${t.rv?`<div class="line"><span class="st s-rev">Hasil revisi</span><span class="muted">${esc(t.rv)}</span></div>`:""}
       ${fileInfo}
@@ -521,7 +516,7 @@ function drawSheet(){
   // ikat event
   const sh=$("#sheet");
   sh.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{ if(closeSheet()) render(); });
-  sh.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ if(D.lock||D.blocked) return; const k=+b.dataset.k, v=+b.dataset.v;
+  sh.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ if(D.lock) return; const k=+b.dataset.k, v=+b.dataset.v;
     D.s[k]=v; D.dirty=D.s.some((x,j)=>x!==D.orig[j]); const tops=["#paneA","#paneB",".sh-body"].map(q=>{const e=sh.querySelector(q);return e?e.scrollTop:0}); drawSheet(); ["#paneA","#paneB",".sh-body"].forEach((q,i)=>{const e=sh.querySelector(q); if(e) e.scrollTop=tops[i];});
     const nb=sh.querySelector(`.seg[data-k="${k}"] button[data-v="${v}"]`); if(nb) nb.focus({preventScroll:true}); });
   sh.querySelectorAll("[data-save]").forEach(b=>b.onclick=()=>doSave(b.dataset.save));
@@ -541,7 +536,7 @@ function critHtml(c,k,val,readOnly){
   <details class="all"><summary>Lihat semua indikator</summary>${c.ind.map((x,j)=>`<div><b>${j+1}</b><span>${esc(x)}</span></div>`).join("")}</details></div>`;
 }
 async function doSave(mode){
-  const D=DRAW; if(!D||D.busy||!D.dirty||D.lock||D.blocked) return;
+  const D=DRAW; if(!D||D.busy||!D.dirty||D.lock) return;
   D.busy=true; drawSheet();
   const id=D.id,n=D.n,s=D.s.slice(); const nxt=nextTodo(id,n);
   try{
@@ -557,7 +552,7 @@ async function doSave(mode){
       toast("Status simpan belum pasti. Periksa data terbaru dan Riwayat Admin sebelum mencoba lagi.",true); return;
     }
     D.busy=false; drawSheet();
-    toast(String(e.message)==="locked"?"Tim ini sudah terkunci, nilai tidak dapat diubah.":String(e.message)==="proposal_unavailable"?"File proposal belum tersedia; nilai tidak disimpan.":String(e.message)==="session_expired"?"Sesi berakhir. Silakan masuk kembali.":"Gagal menyimpan. Periksa koneksi lalu coba lagi.",true);
+    toast(String(e.message)==="locked"?"Tim ini sudah terkunci, nilai tidak dapat diubah.":String(e.message)==="session_expired"?"Sesi berakhir. Silakan masuk kembali.":"Gagal menyimpan. Periksa koneksi lalu coba lagi.",true);
   }
 }
 
