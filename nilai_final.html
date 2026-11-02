@@ -310,7 +310,7 @@ function teamInfo(t){
     total:complete?avg(sc):null, interim:sc.length?avg(sc):null, crit,
     spread:sc.length>1?Math.max(...sc)-Math.min(...sc):null};
 }
-let INFO={}, RANK=[], RANKMAP={};
+let INFO={}, RANK=[], RANKMAP={}, CATRANK={}, CATLIST={};
 function recompute(){
   INFO={}; CFG.teams.forEach(t=>INFO[t.id]=teamInfo(t));
   const cmp=(a,b)=>{ const A=INFO[a.id],B=INFO[b.id]; if(B.total!==A.total) return B.total-A.total;
@@ -318,6 +318,8 @@ function recompute(){
     const s=(B.crit[IDX_SIAP]||0)-(A.crit[IDX_SIAP]||0); if(s) return s; return a.id<b.id?-1:1; };
   RANK=CFG.teams.filter(t=>INFO[t.id].complete).sort(cmp);
   RANKMAP={}; RANK.forEach((t,i)=>RANKMAP[t.id]=i+1);
+  /* peringkat per kategori lomba: urut skor akhir tertinggi, tanpa batas lulus */
+  CATRANK={}; CATLIST={}; RANK.forEach(t=>{ (CATLIST[t.kat]=CATLIST[t.kat]||[]).push(t); CATRANK[t.id]=CATLIST[t.kat].length; });
 }
 
 /* ---------- sesi ---------- */
@@ -373,7 +375,7 @@ function render(){
   if(isViewer()){
     const cur=["progres","analisis","metode"].includes(r)?r:"";
     setNav([["","Peringkat"],["progres","Progres penilai"],["analisis","Analisis"],["metode","Metode &amp; kriteria"]],cur);
-    $("#sub").textContent="Hasil penilaian project final (tahap seleksi 20 besar). Dashboard ini terpisah dari dashboard penilaian proposal awal dan hanya dapat dilihat.";
+    $("#sub").textContent="Hasil penilaian project final (peringkat per kategori lomba). Dashboard ini terpisah dari dashboard penilaian proposal awal dan hanya dapat dilihat.";
     h+= cur==="progres"?viewProgress(): cur==="analisis"?viewAnalysis(): cur==="metode"?viewMethod(): viewRank();
   }else{
     setNav([["","Tugas saya"],["metode","Kriteria"]],r==="metode"?"metode":"");
@@ -512,49 +514,48 @@ async function doSave(mode){
 
 /* ---------- dashboard: peringkat ---------- */
 function statusOf(t){ const i=INFO[t.id]; return i.complete?"lengkap":i.started?"sebagian":"belum"; }
-function seleksiTag(rank){ return rank&&rank<=CFG.finalis?`<span class="tag fin">${CFG.finalis} Besar</span>`:""; }
+const katShort=k=>String(k).replace("Efisiensi Risiko pada ","");
+const katOrder=()=>[...new Set(CFG.teams.map(t=>t.kat))].sort((x,y)=>CFG.teams.filter(t=>t.kat===y).length-CFG.teams.filter(t=>t.kat===x).length||(x<y?-1:1));
 function viewRank(){
   const F=V.rank, total=CFG.teams.length, S={lengkap:0,sebagian:0,belum:0}; CFG.teams.forEach(t=>S[statusOf(t)]++);
-  const cats=[...new Set(CFG.teams.map(t=>t.kat))];
+  const cats=katOrder();
   const done=RANK.map(t=>INFO[t.id].total);
-  const cutFin=RANK.length>=CFG.finalis?INFO[RANK[CFG.finalis-1].id].total:null;
-  let list=CFG.teams.filter(t=>{ const s=statusOf(t); if(F.f!=="all"&&s!==F.f) return false; if(F.kat!=="all"&&t.kat!==F.kat) return false;
-    if(F.q&&!(t.tim+" "+t.inov+" "+t.id).toLowerCase().includes(F.q.toLowerCase())) return false; return true; });
-  list.sort((a,b)=>{ const ra=RANKMAP[a.id],rb=RANKMAP[b.id]; if(ra&&rb) return ra-rb; if(ra) return -1; if(rb) return 1; return (INFO[b.id].interim||0)-(INFO[a.id].interim||0)||(a.id<b.id?-1:1); });
-  const filtered=F.f!=="all"||F.kat!=="all"||F.q;
-  let rows="";
-  list.forEach(t=>{
-    const i=INFO[t.id], rk=RANKMAP[t.id], st=statusOf(t);
-    rows+=`<tr><td data-l="Peringkat">${rk?`<span class="medal ${rk<=CFG.finalis?"fin":""}">${rk}</span>`:'<span class="muted">-</span>'}</td>
-      <td data-l="Tim"><button class="tname" data-team="${esc(t.id)}">#${esc(t.id)} ${esc(t.tim)}</button><div class="muted" style="font-size:12.5px;max-width:44ch">${esc(t.kat.replace("Efisiensi Risiko pada ",""))} · ${esc(t.inov)}</div></td>
+  const q=(F.q||"").toLowerCase();
+  const matches=t=>{ const s=statusOf(t); if(F.f!=="all"&&s!==F.f) return false; if(q&&!(t.tim+" "+t.inov+" "+t.id).toLowerCase().includes(q)) return false; return true; };
+  const rowHtml=t=>{ const i=INFO[t.id], rk=CATRANK[t.id], st=statusOf(t);
+    return `<tr><td data-l="Peringkat">${rk?`<span class="medal ${rk<=3?"dd":""}">${rk}</span>`:'<span class="muted">-</span>'}</td>
+      <td data-l="Tim"><button class="tname" data-team="${esc(t.id)}">#${esc(t.id)} ${esc(t.tim)}</button><div class="muted" style="font-size:12.5px;max-width:44ch">${esc(t.inov)}</div></td>
       <td data-l="Status"><span class="st ${st==="lengkap"?"s-done":st==="sebagian"?"s-draft":"s-todo"}">${st==="lengkap"?"Lengkap":st==="sebagian"?`Sebagian ${i.done}/${i.N}`:"Belum dinilai"}</span></td>
       <td data-l="Skor akhir"><span class="sc">${i.complete?fmt(i.total):(i.interim!=null?'<span class="muted">'+fmt(i.interim)+'*</span>':'<span class="muted">-</span>')}</span></td>
       ${C.map((c,k)=>`<td class="cv" data-l="${esc(c.n)}">${i.crit[k]!=null?fmt(i.crit[k],1):"-"}</td>`).join("")}
-      <td data-l="Selisih penilai">${i.spread!=null&&i.spread>CFG.selisih?`<span class="tag warn" title="Selisih skor antar penilai ${fmt(i.spread)} poin">Kalibrasi ${fmt(i.spread,0)}</span>`:(i.spread!=null?'<span class="cv">'+fmt(i.spread,0)+'</span>':"-")}</td>
-      <td data-l="Seleksi">${i.complete?seleksiTag(rk):""}</td></tr>`;
-    if(!filtered&&rk===CFG.finalis) rows+=`<tr class="cutrow"><td colspan="${5+K+1}"><div class="cut">&#9650; Garis potong ${CFG.finalis} besar (${CFG.finalis} skor tertinggi)</div></td></tr>`;
-  });
+      <td data-l="Selisih penilai">${i.spread!=null&&i.spread>CFG.selisih?`<span class="tag warn" title="Selisih skor antar penilai ${fmt(i.spread)} poin">Kalibrasi ${fmt(i.spread,0)}</span>`:(i.spread!=null?'<span class="cv">'+fmt(i.spread,0)+'</span>':"-")}</td></tr>`; };
+  const head=`<thead><tr><th>#</th><th>Tim</th><th>Status</th><th>Skor</th>${C.map(c=>`<th title="${esc(c.n)} (rata-rata skor 0-${SMAX}), bobot ${Math.round(c.w*100)}%">${esc(c.n.split(/[ ,&]/)[0])} ${Math.round(c.w*100)}%</th>`).join("")}<th>Selisih</th></tr></thead>`;
+  const sections=cats.filter(k=>F.kat==="all"||F.kat===k).map(k=>{
+    const all=CFG.teams.filter(t=>t.kat===k), list=all.filter(matches);
+    list.sort((a,b)=>{ const ra=CATRANK[a.id],rb=CATRANK[b.id]; if(ra&&rb) return ra-rb; if(ra) return -1; if(rb) return 1; return (INFO[b.id].interim||0)-(INFO[a.id].interim||0)||(a.id<b.id?-1:1); });
+    const ranked=all.filter(t=>CATRANK[t.id]).length;
+    return `<section class="rk-sec" id="kat-${esc(katShort(k)).replace(/\W+/g,"-")}"><div class="sec-h"><h2>Peringkat ${esc(katShort(k))}</h2><span class="muted">${all.length} proyek · ${ranked} sudah lengkap dinilai${list.length!==all.length?` · ditampilkan ${list.length}`:""}</span></div>
+    <div class="card tablewrap"><table class="rtab">${head}<tbody>${list.map(rowHtml).join("")||`<tr><td colspan="${5+K}" class="empty">Tidak ada proyek yang cocok.</td></tr>`}</tbody></table></div></section>`; }).join("");
   const chip=(k,l,n)=>`<button class="chip" data-rf="${k}" aria-pressed="${F.f===k}">${l}<small>${n}</small></button>`;
-  return `${S.lengkap<total?`<div class="banner warn"><div><b>Peringkat bersifat sementara.</b> ${total-S.lengkap} dari ${total} proyek belum selesai dinilai oleh semua penilainya. Tanda * pada skor menunjukkan rata-rata sementara.</div></div>`:""}
+  return `${S.lengkap<total?`<div class="banner warn"><div><b>Peringkat bersifat sementara.</b> ${total-S.lengkap} dari ${total} proyek belum selesai dinilai oleh semua penilainya. Proyek yang belum lengkap tidak diberi nomor peringkat; tanda * pada skor menunjukkan rata-rata sementara.</div></div>`:""}
   <div class="kpis"><div class="card kpi"><b>${total}</b><span>Proyek final</span></div><div class="card kpi"><b>${S.lengkap}</b><span>Lengkap dinilai</span></div><div class="card kpi"><b>${S.sebagian}</b><span>Dalam proses</span></div>
-    <div class="card kpi"><b>${S.belum}</b><span>Belum dinilai</span></div><div class="card kpi"><b>${done.length?fmt(avg(done)):"-"}</b><span>Rata-rata skor (skala 100)</span></div>
-    <div class="card kpi"><b>${cutFin!=null?fmt(cutFin):"-"}</b><span>Skor garis ${CFG.finalis} besar (#${CFG.finalis})</span></div></div>
+    <div class="card kpi"><b>${S.belum}</b><span>Belum dinilai</span></div><div class="card kpi"><b>${done.length?fmt(avg(done)):"-"}</b><span>Rata-rata skor (skala 100)</span></div></div>
   <div class="tools"><div class="chips" role="group" aria-label="Filter status">${chip("all","Semua",total)}${chip("lengkap","Lengkap",S.lengkap)}${chip("sebagian","Sebagian",S.sebagian)}${chip("belum","Belum",S.belum)}</div>
-    <select class="search" id="rkat" aria-label="Kategori" style="flex:0 1 220px"><option value="all">Semua kategori</option>${cats.map(c=>`<option value="${esc(c)}"${F.kat===c?" selected":""}>${esc(c.replace("Efisiensi Risiko pada ",""))}</option>`).join("")}</select>
+    <select class="search" id="rkat" aria-label="Kategori" style="flex:0 1 240px"><option value="all">Semua kategori (3 peringkat)</option>${cats.map(c=>`<option value="${esc(c)}"${F.kat===c?" selected":""}>${esc(katShort(c))}</option>`).join("")}</select>
     <input class="search" id="rq" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(F.q)}" aria-label="Cari"><button class="btn btn-o" type="button" data-csv>Unduh CSV</button></div>
-  <div class="card tablewrap"><table class="rtab"><thead><tr><th>#</th><th>Tim</th><th>Status</th><th>Skor</th>${C.map(c=>`<th title="${esc(c.n)} (rata-rata skor 0-${SMAX}), bobot ${Math.round(c.w*100)}%">${esc(c.n.split(/[ ,&]/)[0])} ${Math.round(c.w*100)}%</th>`).join("")}<th>Selisih</th><th>Seleksi</th></tr></thead>
-  <tbody>${rows||`<tr><td colspan="${5+K+1}" class="empty">Tidak ada proyek yang cocok.</td></tr>`}</tbody></table></div>
-  <p class="muted" style="font-size:13px;margin:12px 4px">Skor akhir = rata-rata skor seluruh penilai (skala 100). Kolom kriteria menampilkan rata-rata skor 0 sampai ${SMAX}. "Kalibrasi" menandai selisih skor antar penilai lebih dari ${CFG.selisih} poin. Tie-break: nilai Dampak, lalu Kesiapan Produk.</p>`;
+  ${sections}
+  <p class="muted" style="font-size:13px;margin:12px 4px">Peringkat disusun per kategori lomba dari skor akhir tertinggi ke terendah, tanpa batas lulus. Skor akhir = rata-rata skor seluruh penilai (skala 100). Kolom kriteria menampilkan rata-rata skor 0 sampai ${SMAX}. "Kalibrasi" menandai selisih skor antar penilai lebih dari ${CFG.selisih} poin. Tie-break: nilai Dampak, lalu Kesiapan Produk.</p>`;
 }
 function csvDownload(){
-  const rows=[["Peringkat","ID","Tim","Kategori","Judul","Status","Skor akhir","Skor sementara",...C.map(c=>c.n+" (rata-rata)"),"Selisih penilai","Seleksi"]];
-  CFG.teams.forEach(t=>{ const i=INFO[t.id], r=RANKMAP[t.id]; rows.push([r||"",t.id,t.tim,t.kat,t.inov,statusOf(t),i.total!=null?i.total.toFixed(2):"",i.interim!=null?i.interim.toFixed(2):"",...i.crit.map(v=>v!=null?v.toFixed(2):""),i.spread!=null?i.spread.toFixed(1):"",r&&r<=CFG.finalis?CFG.finalis+" Besar":""]); });
-  const csv="﻿"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
-  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download="Hasil Penilaian Project Final.csv"; document.body.appendChild(a); a.click(); a.remove();
+  const rows=[["Kategori","Peringkat kategori","ID","Tim","Judul","Status","Skor akhir","Skor sementara",...C.map(c=>c.n+" (rata-rata)"),"Selisih penilai"]];
+  katOrder().forEach(k=>CFG.teams.filter(t=>t.kat===k).sort((a,b)=>{ const ra=CATRANK[a.id],rb=CATRANK[b.id]; if(ra&&rb) return ra-rb; if(ra) return -1; if(rb) return 1; return (INFO[b.id].interim||0)-(INFO[a.id].interim||0)||(a.id<b.id?-1:1); })
+    .forEach(t=>{ const i=INFO[t.id]; rows.push([katShort(k),CATRANK[t.id]||"",t.id,t.tim,t.inov,statusOf(t),i.total!=null?i.total.toFixed(2):"",i.interim!=null?i.interim.toFixed(2):"",...i.crit.map(v=>v!=null?v.toFixed(2):""),i.spread!=null?i.spread.toFixed(1):""]); }));
+  const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download="Peringkat Penilaian Project Final per Kategori.csv"; document.body.appendChild(a); a.click(); a.remove();
 }
 function teamDetail(id){
-  const t=TB[id], i=INFO[id], rk=RANKMAP[id];
-  $("#sheet").innerHTML=`<div class="sh-head"><div class="row"><div><div class="eyebrow">#${esc(t.id)} · ${esc(t.kat)}${rk?` · Peringkat ${rk}`:""}</div><h2 id="shT">${esc(t.tim)}</h2><p>${esc(t.inov)}</p></div><button class="x" type="button" aria-label="Tutup" data-x>&times;</button></div></div>
+  const t=TB[id], i=INFO[id], rk=CATRANK[id];
+  $("#sheet").innerHTML=`<div class="sh-head"><div class="row"><div><div class="eyebrow">#${esc(t.id)} · ${esc(t.kat)}${rk?` · Peringkat ${rk} di kategorinya`:""}</div><h2 id="shT">${esc(t.tim)}</h2><p>${esc(t.inov)}</p></div><button class="x" type="button" aria-label="Tutup" data-x>&times;</button></div></div>
   <div class="sh-body"><div class="split"><div class="pane">${projectHtml(t)}</div><div class="pane">
    <div class="card pad"><div class="kpis" style="margin:0 0 10px"><div class="kpi"><b>${i.complete?fmt(i.total):"-"}</b><span>Skor akhir</span></div><div class="kpi"><b>${i.done}/${i.N}</b><span>Penilai selesai</span></div><div class="kpi"><b>${i.spread!=null?fmt(i.spread,0):"-"}</b><span>Selisih antar penilai</span></div></div>
    ${i.spread!=null&&i.spread>CFG.selisih?`<div class="banner warn" style="margin:0"><div>Selisih skor antar penilai melebihi ${CFG.selisih} poin. Pertimbangkan diskusi kalibrasi sebelum keputusan.</div></div>`:""}</div>
@@ -585,12 +586,12 @@ function viewAnalysis(){
   tot.forEach(v=>{ const j=Math.min(bk.length-1,Math.max(0,Math.floor((v-lo)/step))); bk[j].n++; });
   const mx=Math.max(1,...bk.map(b=>b.n));
   const ca=C.map((c,k)=>({c,v:avg(RANK.map(t=>INFO[t.id].crit[k]).filter(v=>v!=null))}));
-  const cats=[...new Set(CFG.teams.map(t=>t.kat))].map(k=>{ const ts=CFG.teams.filter(t=>t.kat===k), cs=ts.filter(t=>INFO[t.id].complete); return {k,n:ts.length,d:cs.length,avg:avg(cs.map(t=>INFO[t.id].total)),fin:RANK.slice(0,CFG.finalis).filter(t=>t.kat===k).length}; });
+  const cats=[...new Set(CFG.teams.map(t=>t.kat))].map(k=>{ const ts=CFG.teams.filter(t=>t.kat===k), cs=ts.filter(t=>INFO[t.id].complete); return {k,n:ts.length,d:cs.length,avg:avg(cs.map(t=>INFO[t.id].total))}; });
   if(!RANK.length) return `<div class="card empty">Belum ada proyek yang selesai dinilai oleh semua penilainya. Analisis muncul setelah ada data lengkap.</div>`;
   return `<div class="grid2"><div class="card pad"><h2 style="font-size:18px;margin-bottom:12px">Sebaran skor akhir</h2><div class="hist">${bk.map(b=>`<div class="hrow"><span class="num">${b.a}-${b.a+step}</span><div class="hbar"><i style="width:${b.n/mx*100}%"></i></div><span class="num">${b.n}</span></div>`).join("")}</div><p class="mini" style="margin-top:10px">${tot.length} proyek lengkap dinilai.</p></div>
   <div class="card pad"><h2 style="font-size:18px;margin-bottom:12px">Rata-rata per kriteria</h2><div class="hist">${ca.map(x=>`<div class="hrow" style="grid-template-columns:150px 1fr 42px"><span style="font-size:12.5px">${esc(x.c.n)} <span class="muted">${Math.round(x.c.w*100)}%</span></span><div class="hbar"><i style="width:${x.v!=null?x.v/SMAX*100:0}%"></i></div><span class="num">${fmt(x.v,1)}</span></div>`).join("")}</div><p class="mini" style="margin-top:10px">Rata-rata skor 0 sampai ${SMAX}.</p></div></div>
-  <div class="sec-h"><h2>Per kategori lomba</h2><span class="muted">Daftar ${CFG.finalis} besar mengikuti skor tertinggi, bukan kuota kategori</span></div>
-  <div class="card tablewrap"><table><thead><tr><th>Kategori</th><th>Proyek</th><th>Lengkap</th><th>Rata-rata skor</th><th>Masuk ${CFG.finalis} besar</th></tr></thead><tbody>${cats.map(c=>`<tr><td>${esc(c.k)}</td><td class="num">${c.n}</td><td class="num">${c.d}</td><td class="num">${c.avg!=null?fmt(c.avg):"-"}</td><td class="num">${c.fin}</td></tr>`).join("")}</tbody></table></div>`;
+  <div class="sec-h"><h2>Per kategori lomba</h2><span class="muted">Ringkasan tiap kategori lomba</span></div>
+  <div class="card tablewrap"><table><thead><tr><th>Kategori</th><th>Proyek</th><th>Lengkap</th><th>Rata-rata skor</th></tr></thead><tbody>${cats.map(c=>`<tr><td>${esc(c.k)}</td><td class="num">${c.n}</td><td class="num">${c.d}</td><td class="num">${c.avg!=null?fmt(c.avg):"-"}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function viewMethod(){
   const rg=RANGES.length?`<p class="mini" style="margin:10px 0 0"><b>Panduan rentang skor (usulan):</b> ${RANGES.map(r=>r.min+" sampai "+r.max+" = "+esc(r.label)).join(" · ")}.</p>`:"";
@@ -598,8 +599,8 @@ function viewMethod(){
   <div class="tablewrap"><table><thead><tr><th>No</th><th>Kriteria</th><th>Bobot</th><th>Keterangan</th></tr></thead><tbody>${C.map((c,k)=>`<tr><td class="num">${k+1}</td><td><b>${esc(c.n)}</b></td><td class="num">${Math.round(c.w*100)}%</td><td style="max-width:70ch">${esc(c.ket)}</td></tr>`).join("")}<tr style="font-weight:700"><td></td><td>Total</td><td class="num">${Math.round(C.reduce((a,c)=>a+c.w,0)*100)}%</td><td></td></tr></tbody></table></div>${rg}</div>
   <div class="card pad" style="margin-top:14px"><h2 style="font-size:20px;margin-bottom:8px">Cara menghitung</h2>
   <p style="margin:0 0 8px">Skor satu penilai = &Sigma; (bobot &times; skor kriteria), hasilnya 0 sampai ${SMAX}. Skor akhir proyek = rata-rata skor seluruh penilai yang ditugaskan, dan baru dihitung bila semua penilai sudah mengisi kelima kriteria.</p>
-  <p style="margin:0 0 8px">Peringkat diurutkan dari skor akhir tertinggi. Bila skor sama, dipakai rata-rata skor Dampak, lalu Kesiapan Produk. ${CFG.finalis} proyek dengan skor tertinggi ditetapkan sebagai ${CFG.finalis} besar.</p>
-  <p style="margin:0 0 8px">Penentuan 5 besar tidak dibahas pada tahap ini. Setelah ${CFG.finalis} besar ditetapkan, peserta mengikuti coaching dan mengunggah ulang project; penilaian 5 besar dilakukan pada putaran terpisah.</p>
+  <p style="margin:0 0 8px">Peringkat diurutkan dari skor akhir tertinggi. Bila skor sama, dipakai rata-rata skor Dampak, lalu Kesiapan Produk. Peringkat disusun terpisah untuk tiap kategori lomba, tanpa batas lulus; keputusan finalis ditetapkan panitia berdasarkan peringkat ini.</p>
+  <p style="margin:0 0 8px">Penentuan finalis tidak dilakukan otomatis oleh aplikasi. Setelah peringkat per kategori selesai, panitia menetapkan finalis; peserta kemudian mengikuti coaching dan mengunggah ulang project, dan penilaian putaran berikutnya dilakukan terpisah.</p>
   <p style="margin:0">Selisih skor antar penilai lebih dari ${CFG.selisih} poin ditandai "Kalibrasi" agar dapat didiskusikan sebelum keputusan.</p></div>`;
 }
 /* ---------- alat demo ---------- */
@@ -656,7 +657,10 @@ async function liveLogin(ev){
       :c==="role"?(PAGE==="dash"?"Akun ini bukan akun panitia (admin). Gunakan akun admin.":"Akun admin tidak dapat mengisi nilai. Gunakan akun penilai.")
       :c==="final_not_initialized"?"Penilaian final belum diaktifkan di server (setupFinal belum dijalankan)."
       :c==="auth_not_initialized"?"Server belum siap."
-      :e.name==="AbortError"?"Server tidak merespons. Coba lagi.":"Tidak dapat terhubung ke server. Periksa koneksi lalu coba lagi.";
+      :c==="action_not_allowed"?"Server belum diperbarui: versi Apps Script yang memuat penilaian final belum di-deploy (Deploy > Manage deployments > Edit > New version)."
+      :e.name==="AbortError"?"Server tidak merespons. Coba lagi."
+      :(e instanceof TypeError||/^http /.test(e.message))?"Tidak dapat terhubung ke server. Periksa koneksi lalu coba lagi."
+      :"Kesalahan server (kode: "+esc(c)+"). Hubungi panitia.";
   }finally{ btn.disabled=false; btn.textContent="Masuk"; }
 }
 function liveBar(){
