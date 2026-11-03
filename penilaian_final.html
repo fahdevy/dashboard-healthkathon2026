@@ -73,11 +73,12 @@
 .note{white-space:pre-line;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:6px 0 10px}
 .dsec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin:10px 0}.dsec h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#52665f}.dsec p{margin:0;font-size:13.5px;line-height:1.55;white-space:pre-line}
 .aud-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
-.aud{border-collapse:collapse;width:100%;min-width:1080px;font-size:12.5px}.aud th,.aud td{padding:10px 11px;border-bottom:1px solid #e8eeeb;text-align:center;vertical-align:middle}.aud th{background:#f0f5f2;color:#52665f;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0}
+.aud{border-collapse:collapse;width:100%;min-width:1180px;font-size:12.5px}.aud th,.aud td{padding:10px 11px;border-bottom:1px solid #e8eeeb;text-align:center;vertical-align:middle}.aud th{background:#f0f5f2;color:#52665f;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0}
 .aud td:first-child,.aud th:first-child{text-align:left;font-weight:800}.aud td.na{color:#a3b0ab}
 .aud td.warn{background:#fff6e3;color:#8a5d10;font-weight:800}.aud td.ok{color:#26734b;font-weight:700}
 .aud-st{display:inline-flex;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:850;white-space:nowrap}.aud-st.ok{background:#e2f4eb;color:#26734b}.aud-st.watch{background:#fff3d8;color:#9a6a16}.aud-st.review{background:#fbe3e0;color:#a2392f}.aud-st.na{background:#edf0ef;color:#65736f}
 .aud-fl{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:5px}.aud-fl span{background:#fff3d8;color:#8a5d10;border-radius:999px;padding:2px 8px;font-size:10.5px;font-weight:800}
+.aud-fl span.okc{background:#e2f4eb;color:#26734b}.aud-warn{margin-top:6px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:10.5px;font-weight:800;padding:3px 9px;color:#52665f;cursor:pointer}.aud-warn:hover{border-color:var(--green);color:var(--green)}
 .aud-note{margin:12px 0 0;padding:12px 15px;border-radius:12px;background:#f8faf9;border:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.55}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(30px);background:#123e6e;color:#fff;padding:10px 16px;border-radius:999px;font-size:13.5px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:60}#toast.on{opacity:1;transform:translateX(-50%)}#toast.err{background:#a64740}
 @media(max-width:760px){.dkpis{grid-template-columns:1fr 1fr}.cal-row{grid-template-columns:1fr 70px}.cal-row .rng{display:none}.rev-row{grid-template-columns:minmax(90px,1fr) minmax(60px,1.4fr) 56px}}
@@ -109,7 +110,7 @@ const katShort=k=>String(k||"-").replace("Efisiensi Risiko pada ","");
 const initial={f:"all",kat:"all",q:""}; let V=Object.assign({},initial);
 
 /* ---------- state ---------- */
-let TOKEN="", ME=null, TEAMS=[], REVIEWERS=[], STORE={}, AUDIT=[], LOCKED=false, LOADING=false, CONN={ok:true,msg:"",at:null};
+let TOKEN="", ME=null, TEAMS=[], REVIEWERS=[], STORE={}, AUDIT={akt:[],log:[],warn:[]}, LOCKED=false, LOADING=false, CONN={ok:true,msg:"",at:null};
 try{ const s=JSON.parse(sessionStorage.getItem(SSK)); if(s&&s.tok){ TOKEN=s.tok; LOADING=true; } }catch(e){}
 const rowKey=(id,u)=>id+"|"+u, getRow=(id,u)=>STORE[rowKey(id,u)]||null;
 const raw=s=>s.reduce((a,v,k)=>a+(v!=null?C[k].w*v:0),0), pct=s=>raw(s)/SMAX*100, nFill=s=>s.filter(v=>v!=null).length, EMPTY=()=>Array(K).fill(null);
@@ -143,7 +144,7 @@ async function liveLoad(scoresOnly){
   if(!d.ok){ const e=new Error(d.err||"gagal"); e.code=d.err; throw e; }
   if(d.role!=="admin"){ const e=new Error("role"); e.code="role"; throw e; }
   if(!scoresOnly||!TEAMS.length){ TEAMS=d.teams; REVIEWERS=d.reviewers; }
-  AUDIT=d.audit||[];
+  AUDIT=Array.isArray(d.audit)?{akt:d.audit,log:[],warn:[]}:Object.assign({akt:[],log:[],warn:[]},d.audit||{});
   STORE={}; d.rows.forEach(r=>{ STORE[rowKey(r.id,r.u)]={s:r.s,c:r.c||"",t:Date.parse(r.t)||0}; });
   ME={u:d.me.u,name:d.me.name}; LOCKED=!!d.locked; CONN={ok:true,msg:"",at:new Date()}; recompute();
 }
@@ -245,8 +246,37 @@ function calibration(){
 const median=a=>{ if(!a.length) return null; const b=a.slice().sort((x,y)=>x-y), m=b.length>>1; return b.length%2?b[m]:(b[m-1]+b[m])/2; };
 const sdev=a=>{ if(a.length<2) return null; const m=avg(a); return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1)); };
 function pearson(x,y){ const n=x.length; if(n<3) return null; const mx=avg(x), my=avg(y); let sxy=0,sx=0,sy=0; for(let i=0;i<n;i++){ sxy+=(x[i]-mx)*(y[i]-my); sx+=(x[i]-mx)**2; sy+=(y[i]-my)**2; } return sx&&sy?sxy/Math.sqrt(sx*sy):null; }
+const fmtDur=sec=>sec==null?"-":sec>=60?Math.floor(sec/60)+" mnt "+(sec%60)+" dtk":sec+" dtk";
+const fmtWhen=ms=>ms?new Date(ms).toLocaleString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"-";
+/* Per penilai: susun riwayat simpan -> sesi -> waktu per proyek. Penilaian ulang (edit setelah lengkap) dihitung: waktunya DIJUMLAHKAN ke proyek yang sama,
+   sehingga indikasi "terlalu singkat" yang lama gugur otomatis bila total waktu kini mencapai ambang. */
+function reviewerSessions(rv,A){
+  const sess=(A.jeda_sesi_menit||90)*60000, minSec=A.min_durasi_detik||300;
+  const akt=AUDIT.akt.filter(x=>x[2]===rv.u&&x[3]>0);
+  let saves=AUDIT.log.filter(x=>x[2]===rv.u).map(x=>({id:x[1],t:Date.parse(x[0]),b:x[3],a:x[4]})).filter(x=>x.t).sort((p,q)=>p.t-q.t);
+  const hasLog=saves.length>0;
+  if(!hasLog){ /* server lama tanpa riwayat: pakai waktu simpan terakhir tiap proyek */
+    saves=[]; TEAMS.forEach(t=>{ if(!t.rv.includes(rv.u)) return; const r=getRow(t.id,rv.u); if(r&&r.t) saves.push({id:t.id,t:r.t,b:"",a:r.s.join(",")}); }); saves.sort((p,q)=>p.t-q.t);
+  }
+  const filled=str=>String(str||"").split(",").filter(x=>x!=="").length;
+  saves.forEach((sv,i)=>{ const m=akt.find(x=>x[1]===sv.id&&Math.abs(Date.parse(x[0])-sv.t)<=3000);
+    if(m){ sv.sec=m[3]; sv.src="meter"; sv.away=m[4]; sv.vid=m[5]; }
+    else if(i>0&&sv.t-saves[i-1].t<=sess){ sv.sec=Math.round((sv.t-saves[i-1].t)/1000); sv.src="jeda"; }
+    sv.full=filled(sv.a)===K; sv.changed=sv.a!==sv.b; });
+  const byId={}; saves.forEach(sv=>(byId[sv.id]=byId[sv.id]||[]).push(sv));
+  const items=[], revisions=[];
+  Object.keys(byId).forEach(id=>{
+    const L=byId[id], fi=L.findIndex(x=>x.full); if(fi<0) return;           /* belum pernah lengkap: belum dinilai penuh */
+    const init=L.slice(0,fi+1), rev=L.slice(fi+1).filter(x=>x.full&&x.changed);
+    const sum=arr=>{ const v=arr.map(x=>x.sec).filter(x=>x!=null); return v.length?v.reduce((p,q)=>p+q,0):null; };
+    const tInit=sum(init), tRev=sum(rev), tAll=sum(init.concat(rev)), src=init.concat(rev).some(x=>x.src==="jeda")?"jeda":"meter";
+    items.push({id,sec:tAll,src,first:init[init.length-1].t});
+    if(rev.length) revisions.push({id,n:rev.length,at:rev[rev.length-1].t,tInit,tRev,tAll,gugur:tInit!=null&&tInit<minSec&&tAll!=null&&tAll>=minSec,masihCepat:tAll!=null&&tAll<minSec,firstRev:rev[0].t});
+  });
+  return {items,revisions,saves,hasLog};
+}
 function auditStats(){
-  const A=CFG.audit||{}, all=RANK.length?avg(TEAMS.flatMap(t=>INFO[t.id].rs.filter(r=>r.score!=null).map(r=>r.score))):null;
+  const A=CFG.audit||{}, minSec=A.min_durasi_detik||300;
   const allScores=TEAMS.flatMap(t=>INFO[t.id].rs.filter(r=>r.score!=null).map(r=>r.score)), grand=avg(allScores);
   return REVIEWERS.map(rv=>{
     const done=[]; TEAMS.forEach(t=>{ if(!t.rv.includes(rv.u)) return; const row=getRow(t.id,rv.u); if(row&&nFill(row.s)===K){ const others=INFO[t.id].rs.filter(r=>r.u!==rv.u&&r.score!=null).map(r=>r.score); done.push({t,row,score:pct(row.s),oth:others.length?avg(others):null}); } });
@@ -254,18 +284,15 @@ function auditStats(){
     const uni=done.filter(d=>Math.max(...d.row.s)-Math.min(...d.row.s)<=(A.seragam_rentang||2)).length, uniPct=n?uni/n*100:null;
     const pairs=done.filter(d=>d.oth!=null), mad=pairs.length?avg(pairs.map(d=>Math.abs(d.score-d.oth))):null, corr=pairs.length>=(A.min_data||8)?pearson(pairs.map(d=>d.score),pairs.map(d=>d.oth)):null;
     const notes=done.map(d=>(d.row.c||"").trim().toLowerCase().replace(/\s+/g," ")).filter(Boolean), dupNotes=notes.length-new Set(notes).size, notePct=n?notes.length/n*100:null;
-    const lg=AUDIT.filter(x=>x[2]===rv.u&&x[3]>0), meter={};   /* baris durasi 0 (simpanan dari halaman lama) dianggap tanpa data */ lg.forEach(x=>{ meter[x[1]]=(meter[x[1]]||0)+x[3]; });
-    /* Waktu per proyek: (1) pengukur dari form bila ada; (2) bila tidak ada, perkiraan dari jeda antar simpan berurutan (riwayat simpan di Google Sheet).
-       Jeda lebih dari jeda_sesi_menit dianggap istirahat dan tidak dihitung. */
-    const myRows=[]; TEAMS.forEach(t=>{ if(!t.rv.includes(rv.u)) return; const r=getRow(t.id,rv.u); if(r&&r.t) myRows.push({id:t.id,t:r.t}); }); myRows.sort((a,b)=>a.t-b.t);
-    const sess=(A.jeda_sesi_menit||90)*60000, gap={}; for(let i=1;i<myRows.length;i++){ const g=myRows[i].t-myRows[i-1].t; if(g<=sess) gap[myRows[i].id]=Math.round(g/1000); }
-    const perItem=done.map(d=>d.t.id).map(id=>meter[id]>0?{id,sec:meter[id],src:"meter"}:(gap[id]!=null?{id,sec:gap[id],src:"jeda"}:null)).filter(Boolean);
-    const durs=perItem.map(x=>x.sec), med=median(durs), minSec=A.min_durasi_detik||300, nJeda=perItem.filter(x=>x.src==="jeda").length;
-    const quick=perItem.filter(x=>x.sec<minSec).sort((a,b)=>a.sec-b.sec), quickPct=durs.length?quick.length/durs.length*100:null;
-    const ts=(myRows.length?myRows.map(x=>x.t):lg.map(x=>Date.parse(x[0])).filter(x=>x)).sort((a,b)=>a-b), win=(A.burst_menit||15)*60000; let burst=0; for(let i=0,j=0;i<ts.length;i++){ while(ts[i]-ts[j]>win) j++; burst=Math.max(burst,i-j+1); }
-    const noVid=lg.length?lg.filter(x=>!x[5]).length/lg.length*100:null, away0=lg.length?lg.filter(x=>!x[4]).length/lg.length*100:null;
-    const enough=n>=(A.min_data||8), F=[];
-    const mnt=Math.round(minSec/60); let strong=false;
+    const S=reviewerSessions(rv,A), doneIds=new Set(done.map(d=>d.t.id));
+    const items=S.items.filter(x=>doneIds.has(x.id)&&x.sec!=null), durs=items.map(x=>x.sec), med=median(durs), nJeda=items.filter(x=>x.src==="jeda").length;
+    const quick=items.filter(x=>x.sec<minSec).sort((a,b)=>a.sec-b.sec), quickPct=durs.length?quick.length/durs.length*100:null;
+    const win=(A.burst_menit||15)*60000, ts=S.items.map(x=>x.first).sort((a,b)=>a-b); let burst=0; for(let i=0,j=0;i<ts.length;i++){ while(ts[i]-ts[j]>win) j++; burst=Math.max(burst,i-j+1); }
+    const lg=AUDIT.akt.filter(x=>x[2]===rv.u&&x[3]>0), noVid=lg.length?lg.filter(x=>!x[5]).length/lg.length*100:null, away0=lg.length?lg.filter(x=>!x[4]).length/lg.length*100:null;
+    const warns=AUDIT.warn.filter(w=>w[1]===rv.u).map(w=>({t:Date.parse(w[0]),note:w[2]})).sort((a,b)=>a.t-b.t), warnAt=warns.length?warns[warns.length-1].t:null;
+    const rv_=S.revisions, nRev=rv_.length, nGugur=rv_.filter(x=>x.gugur).length, nMasih=rv_.filter(x=>x.masihCepat).length;
+    const revAfter=warnAt?rv_.filter(x=>x.at>warnAt):[], gugurAfter=revAfter.filter(x=>x.gugur).length;
+    const enough=n>=(A.min_data||8), F=[], mnt=Math.round(minSec/60); let strong=false;
     if(durs.length>=5&&((med!=null&&med<minSec)||quickPct>=(A.proyek_cepat_persen||25))){ F.push("Waktu per proyek di bawah "+mnt+" menit ("+quick.length+" dari "+durs.length+" proyek)"); if(quickPct>=(A.proyek_cepat_kuat_persen||50)) strong=true; }
     if(burst>=(A.burst_proyek||8)) F.push("Banyak simpan beruntun ("+burst+" dalam "+(A.burst_menit||15)+" menit)");
     if(enough&&((uniPct>=(A.seragam_persen||30))||(sd!=null&&sd<(A.sd_min||3)))) F.push("Skor seragam");
@@ -273,7 +300,7 @@ function auditStats(){
     if(pairs.length>=(A.min_data||8)&&((mad!=null&&mad>(A.mad_poin||12))||(corr!=null&&pairs.length>=15&&corr<(A.korelasi_min||0.2)))) F.push("Menyimpang dari penilai lain");
     if(dupNotes>=2) F.push("Catatan identik berulang");
     if(lg.length>=5&&noVid>(A.video_tak_dibuka_persen||60)&&away0>=80) F.push("Tidak membuka video dan tidak meninggalkan tab");
-    return {rv,n,mean,sd,uniPct,mad,corr,notePct,dupNotes,med,burst,noVid,logN:durs.length,F,enough,grand,quick,quickPct,strong,minSec,nJeda};
+    return {rv,n,mean,sd,uniPct,mad,corr,notePct,dupNotes,med,burst,noVid,logN:durs.length,F,enough,grand,quick,quickPct,strong,minSec,nJeda,revisions:rv_,nRev,nGugur,nMasih,warnAt,warns,revAfter,gugurAfter};
   });
 }
 function auditPanel(){
@@ -282,13 +309,22 @@ function auditPanel(){
   const body=R.map(x=>{ const st=!x.enough&&x.logN<5?["na","Data belum cukup"]:(x.F.length>=2||x.strong)?["review","Perlu ditinjau"]:x.F.length===1?["watch","Perhatian"]:["ok","Wajar"];
     const md=x.med==null?null:(x.nJeda>x.logN/2?"≈ ":"")+(x.med>=120?Math.round(x.med/60*10)/10+" mnt":Math.round(x.med)+" dtk");
     const qTxt=x.quickPct==null?null:x.quick.length+"/"+x.logN+" ("+Math.round(x.quickPct)+"%)", qBad=x.logN>=5&&x.quickPct>=(A.proyek_cepat_persen||25);
-    const detail=x.quick.length?`<tr class="aud-det" hidden><td colspan="12" style="text-align:left;background:#f8faf9"><b>Proyek dengan total waktu di bawah ${Math.round(x.minSec/60)} menit (${x.quick.length}):</b> ${x.quick.slice(0,40).map(q=>`<a href="#" data-team="${esc(q.id)}" style="color:#123e6e;font-weight:700;margin-right:10px">#${esc(q.id)} (${q.src==="jeda"?"≈ ":""}${q.sec>=60?Math.floor(q.sec/60)+" mnt "+(q.sec%60)+" dtk":q.sec+" dtk"})</a>`).join("")}${x.quick.length>40?" ...":""}</td></tr>`:"";
-    return `<tr class="aud-main" ${x.quick.length?'style="cursor:pointer" title="Klik untuk melihat proyek yang dinilai singkat"':""}><td>${esc(x.rv.name)}<div class="aud-fl">${x.F.map(f=>`<span>${esc(f)}</span>`).join("")}</div></td><td>${x.n}</td>
-    ${cell(x.med,md,x.med!=null&&x.logN>=5&&x.med<x.minSec)}${cell(x.quickPct,qTxt,qBad)}${cell(x.mean,fmt(x.mean)+(x.grand!=null?` <small style="color:var(--muted)">(${x.mean>=x.grand?"+":""}${fmt(x.mean-x.grand)})</small>`:""),x.enough&&x.grand!=null&&Math.abs(x.mean-x.grand)>(A.bias_poin||8))}
+    const revTxt=x.nRev?x.nRev+" proyek"+(x.nGugur?` · <span style="color:#26734b">${x.nGugur} gugur</span>`:"")+(x.nMasih?` · <span style="color:#9a6a16">${x.nMasih} masih singkat</span>`:""):"-";
+    const sec=(title,list)=>list.length?`<div style="margin:6px 0"><b>${title}</b> ${list.join("")}</div>`:"";
+    const link=(id,txt)=>`<a href="#" data-team="${esc(id)}" style="color:#123e6e;font-weight:700;margin-right:12px">#${esc(id)} (${txt})</a>`;
+    const detail=(x.quick.length||x.nRev||x.warns.length)?`<tr class="aud-det" hidden><td colspan="12" style="text-align:left;background:#f8faf9;line-height:1.7">
+      ${x.warns.length?`<div style="margin:2px 0"><b>Diingatkan:</b> ${x.warns.map(w=>fmtWhen(w.t)+(w.note?" ("+esc(w.note)+")":"")).join("; ")}${x.warnAt?` · revisi sesudah peringatan terakhir: <b>${x.revAfter.length} proyek</b>${x.revAfter.length?` (${x.gugurAfter} indikasi gugur)`:""}`:""}</div>`:""}
+      ${sec(`Masih di bawah ${Math.round(x.minSec/60)} menit (${x.quick.length}):`,x.quick.slice(0,40).map(q=>link(q.id,(q.src==="jeda"?"≈ ":"")+fmtDur(q.sec))))}
+      ${sec(`Ditinjau ulang (${x.nRev}):`,x.revisions.sort((a,b)=>b.at-a.at).slice(0,40).map(r=>link(r.id,`${r.n}x, ${fmtWhen(r.at)}; awal ${fmtDur(r.tInit)} → total ${fmtDur(r.tAll)}${r.tRev==null?" · waktu peninjauan tidak terukur":r.gugur?" · INDIKASI GUGUR":r.masihCepat?" · masih singkat":""}`)))}</td></tr>`:"";
+    return `<tr class="aud-main" ${detail?'style="cursor:pointer" title="Klik untuk rincian"':""}><td>${esc(x.rv.name)}${x.warnAt?`<div style="font-weight:600;font-size:11px;color:var(--muted)">Diingatkan ${fmtWhen(x.warnAt)}</div>`:""}<div class="aud-fl">${x.F.map(f=>`<span>${esc(f)}</span>`).join("")}${x.nGugur?`<span class="okc">${x.nGugur} indikasi gugur setelah ditinjau ulang</span>`:""}</div><button type="button" class="aud-warn" data-warn="${esc(x.rv.u)}">Tandai sudah diingatkan</button></td><td>${x.n}</td>
+    ${cell(x.med,md,x.med!=null&&x.logN>=5&&x.med<x.minSec)}${cell(x.quickPct,qTxt,qBad)}<td class="${x.nMasih?"warn":x.nRev?"ok":""}">${revTxt}</td>${cell(x.mean,fmt(x.mean)+(x.grand!=null?` <small style="color:var(--muted)">(${x.mean>=x.grand?"+":""}${fmt(x.mean-x.grand)})</small>`:""),x.enough&&x.grand!=null&&Math.abs(x.mean-x.grand)>(A.bias_poin||8))}
     ${cell(x.sd,fmt(x.sd),x.enough&&x.sd!=null&&x.sd<(A.sd_min||3))}${cell(x.uniPct,Math.round(x.uniPct)+"%",x.enough&&x.uniPct>=(A.seragam_persen||30))}${cell(x.mad,fmt(x.mad),x.mad!=null&&x.enough&&x.mad>(A.mad_poin||12))}${cell(x.corr,x.corr==null?"-":x.corr.toFixed(2).replace(".",","),x.corr!=null&&x.n>=15&&x.corr<(A.korelasi_min||0.2))}
-    ${cell(x.notePct,Math.round(x.notePct)+"%"+(x.dupNotes?` (${x.dupNotes} ganda)`:""),x.dupNotes>=2)}${cell(x.noVid,Math.round(x.noVid)+"%",false)}<td><span class="aud-st ${st[0]}">${st[1]}</span></td></tr>${detail}`; }).join("");
-  return `<div class="aud-wrap"><table class="aud"><thead><tr><th>Penilai</th><th>Proyek selesai</th><th>Median waktu / proyek</th><th>Proyek di bawah ${Math.round((A.min_durasi_detik||300)/60)} mnt</th><th>Rata-rata skor (vs semua)</th><th>Sebaran skor (SD)</th><th>Skor seragam</th><th>Selisih vs penilai lain</th><th>Korelasi vs penilai lain</th><th>Catatan terisi</th><th>Simpan tanpa buka video</th><th>Status</th></tr></thead><tbody>${body}</tbody></table></div>
-  <div class="aud-note"><b>Cara membaca.</b> Ini indikator pola, bukan bukti. Sistem <b>tidak dapat mengetahui</b> apakah penilai memakai AI atau benar-benar menonton video; penilai yang jujur pun bisa tampak "menyimpang" (mis. lebih cermat atau memang berbeda pendapat). Gunakan hanya untuk memilih proyek yang perlu didiskusikan atau dinilai ulang, dan konfirmasi langsung ke penilai sebelum menyimpulkan. <b>Waktu per proyek</b> = total lama panel penilaian proyek itu dibuka sampai disimpan (dijumlahkan bila disimpan lebih dari sekali). Untuk penilaian yang disimpan sebelum pengukur waktu aktif, waktu <b>diperkirakan (tanda ≈)</b> dari jeda antara dua simpan berurutan oleh penilai yang sama di Google Sheet; jeda lebih dari ${A.jeda_sesi_menit||90} menit dianggap istirahat dan tidak dihitung, dan proyek pertama setiap sesi tidak dapat diperkirakan. Perkiraan ini kurang tepat bila penilai menonton beberapa video sekaligus lalu menyimpan berturut-turut. Video rata-rata berdurasi sekitar ${A.durasi_video_rata_menit||10} menit, sehingga penilaian di bawah ${Math.round((A.min_durasi_detik||300)/60)} menit ditandai (bisa jadi video ditonton lebih dulu di luar form atau dengan kecepatan tinggi, jadi tetap perlu dikonfirmasi); "Simpan tanpa buka video" menghitung penyimpanan tanpa mengeklik tautan video dari form (video bisa saja dibuka di luar form). Ambang: waktu per proyek < ${A.min_durasi_detik||300} detik (median, atau ≥ ${A.proyek_cepat_persen||25}% proyek; ≥ ${A.proyek_cepat_kuat_persen||50}% langsung berstatus Perlu ditinjau), skor seragam ≥ ${A.seragam_persen||30}% atau SD < ${A.sd_min||3}, selisih rata-rata dari penilai lain > ${A.mad_poin||12} poin atau korelasi < ${A.korelasi_min||0.2} (korelasi dinilai bila ≥ 15 proyek), rata-rata skor beda > ${A.bias_poin||8} poin dari rata-rata semua. Status memerlukan minimal ${A.min_data||8} proyek selesai.</div>`;
+    ${cell(x.notePct,Math.round(x.notePct)+"%"+(x.dupNotes?` (${x.dupNotes} ganda)`:""),x.dupNotes>=2)}<td><span class="aud-st ${st[0]}">${st[1]}</span></td></tr>${detail}`; }).join("");
+  return `<div class="aud-wrap"><table class="aud"><thead><tr><th>Penilai</th><th>Proyek selesai</th><th>Median waktu / proyek</th><th>Proyek di bawah ${Math.round((A.min_durasi_detik||300)/60)} mnt</th><th>Ditinjau ulang</th><th>Rata-rata skor (vs semua)</th><th>Sebaran skor (SD)</th><th>Skor seragam</th><th>Selisih vs penilai lain</th><th>Korelasi vs penilai lain</th><th>Catatan terisi</th><th>Status</th></tr></thead><tbody>${body}</tbody></table></div>
+  <div class="aud-note"><b>Cara membaca.</b> Ini indikator pola, bukan bukti. Sistem <b>tidak dapat mengetahui</b> apakah penilai memakai AI atau benar-benar menonton video; penilai yang jujur pun bisa tampak "menyimpang" (mis. lebih cermat atau memang berbeda pendapat). Gunakan hanya untuk memilih proyek yang perlu didiskusikan atau dinilai ulang, dan konfirmasi langsung ke penilai sebelum menyimpulkan.
+  <br><b>Waktu per proyek</b> = total lama panel penilaian proyek itu dibuka sampai disimpan, dijumlahkan dari seluruh simpanan proyek yang sama. Video rata-rata berdurasi sekitar ${A.durasi_video_rata_menit||10} menit, sehingga di bawah ${Math.round((A.min_durasi_detik||300)/60)} menit ditandai (video bisa ditonton lebih dulu di luar form atau dengan kecepatan tinggi, jadi perlu dikonfirmasi). Bila tidak ada data pengukur (simpanan lama), waktu <b>diperkirakan (≈)</b> dari jeda antara dua simpan berurutan penilai yang sama; jeda lebih dari ${A.jeda_sesi_menit||90} menit dianggap istirahat, dan proyek pertama tiap sesi tidak dapat diperkirakan.
+  <br><b>Penilaian ulang.</b> Simpanan yang mengubah skor setelah proyek pernah lengkap dihitung sebagai <b>ditinjau ulang</b>. Waktu peninjauan <b>ditambahkan</b> ke waktu proyek itu, sehingga bila totalnya kini mencapai ambang, indikasi "terlalu singkat" untuk proyek tersebut <b>gugur</b> (ditandai "gugur"); skor baru juga langsung dipakai pada seluruh indikator lain. Bila peninjauan juga singkat, proyek tetap ditandai "masih singkat". Tombol <b>Tandai sudah diingatkan</b> mencatat waktu peringatan agar revisi sesudahnya dapat dipisahkan. Peninjauan yang hanya mengubah catatan (tanpa mengubah skor) tidak terbaca.
+  <br>Ambang: waktu per proyek &lt; ${A.min_durasi_detik||300} detik (median, atau ≥ ${A.proyek_cepat_persen||25}% proyek; ≥ ${A.proyek_cepat_kuat_persen||50}% langsung berstatus Perlu ditinjau), skor seragam ≥ ${A.seragam_persen||30}% atau SD &lt; ${A.sd_min||3}, selisih rata-rata dari penilai lain &gt; ${A.mad_poin||12} poin atau korelasi &lt; ${A.korelasi_min||0.2} (korelasi dinilai bila ≥ 15 proyek), rata-rata skor beda &gt; ${A.bias_poin||8} poin dari rata-rata semua. Status memerlukan minimal ${A.min_data||8} proyek selesai.</div>`;
 }
 function rulesPanel(){
   return `<article class="panel"><h3>Aturan penilaian</h3><div class="formula">Skor penilai = Σ (bobot × skor kriteria), skala 0-${SMAX}<br><b>Skor akhir</b> = rata-rata skor ${CFG.perProyek} penilai, dihitung bila semuanya lengkap<br><b>Peringkat</b> per kategori lomba, tanpa batas lulus. Tie-break: Dampak, lalu Kesiapan Produk</div>
@@ -335,7 +371,11 @@ function renderData(){
   <div class="toolbar"><input id="rq" type="search" placeholder="Cari nama tim, judul, atau ID" aria-label="Cari" value="${esc(V.q)}"><select id="rk" aria-label="Kategori"><option value="all">Semua kategori</option>${cats().map(c=>`<option value="${esc(c)}"${V.kat===c?" selected":""}>${esc(katShort(c))}</option>`).join("")}</select>
   <select id="rs" aria-label="Status">${[["all","Semua status"],["lengkap","Lengkap"],["sebagian","Sebagian"],["belum","Belum dinilai"]].map(([k,l])=>`<option value="${k}"${V.f===k?" selected":""}>${l}</option>`).join("")}</select><span class="result-count" id="rcount"></span></div>
   <div id="tables"></div><p class="mini-note">Tanda * pada skor menunjukkan rata-rata sementara (belum semua penilai selesai); proyek tersebut belum diberi nomor peringkat.</p></section>`;
-  document.querySelectorAll(".aud-main").forEach(r=>r.onclick=e=>{ if(e.target.closest("a")) return; const n=r.nextElementSibling; if(n&&n.classList.contains("aud-det")) n.hidden=!n.hidden; });
+  document.querySelectorAll("[data-warn]").forEach(b=>b.onclick=async e=>{ e.stopPropagation(); const key=b.dataset.warn, nm=(UN[key]||key);
+    const note=prompt("Catatan peringatan untuk "+nm+" (opsional, mis. alasan atau tanggal pemberitahuan):",""); if(note===null) return;
+    try{ const d=await apiPost({action:"final_lock",token:TOKEN,warn:key,note:note}); if(!d.ok) throw new Error(d.err||"gagal"); toast("Peringatan untuk "+nm+" tercatat"); refreshNow(true); }
+    catch(err){ toast(err&&/not_assigned|role_not_allowed/.test(err.message)?"Peringatan ditolak server.":"Gagal mencatat peringatan. Pastikan Final.gs terbaru sudah di-deploy.",true); } });
+  document.querySelectorAll(".aud-main").forEach(r=>r.onclick=e=>{ if(e.target.closest("a")||e.target.closest("button")) return; const n=r.nextElementSibling; if(n&&n.classList.contains("aud-det")) n.hidden=!n.hidden; });
   $("#rf").onclick=()=>refreshNow(true); $("#lk").onclick=toggleLock; $("#dl").onclick=csvDownload;
   $("#rq").oninput=e=>{ V.q=e.target.value; renderTables(); }; $("#rk").onchange=e=>{ V.kat=e.target.value; renderTables(); }; $("#rs").onchange=e=>{ V.f=e.target.value; renderTables(); };
   renderTables(); bindTeams(); setConn();
