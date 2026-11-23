@@ -633,6 +633,7 @@ function bind(){
   document.querySelectorAll("[data-csv]").forEach(b=>b.onclick=csvDownload);
   document.querySelectorAll("[data-reload]").forEach(b=>b.onclick=()=>autoRefresh(true));
   document.querySelectorAll("[data-lock]").forEach(b=>b.onclick=toggleLock);
+  document.querySelectorAll("[data-reset-juri]").forEach(b=>b.onclick=resetDialog);
   document.querySelectorAll("[data-sim]").forEach(b=>b.onclick=()=>{ simulate(+$("#simPct").value); toast("Nilai simulasi terisi"); render(); });
   document.querySelectorAll("[data-reset]").forEach(b=>b.onclick=()=>{ if(confirm("Hapus semua nilai demo di browser ini?")){ STORE={s:{}}; persist(); toast("Data demo direset"); render(); } });
 }
@@ -675,7 +676,7 @@ function liveBar(){
   const t=CONN.at?CONN.at.toLocaleTimeString("id-ID"):"-";
   if(PAGE!=="dash") return LOCKED?`<div class="livebar lock"><b>TERKUNCI</b><span>Penjurian sudah dikunci oleh panitia. Nilai tidak dapat diubah.</span></div>`:"";
   const st=CONN.ok?`Tersambung ke Google Sheet. Diperbarui ${t} (otomatis tiap 30 detik).`:`<b>${esc(CONN.msg)}</b> Terakhir diperbarui ${t}.`;
-  return `<div class="livebar ${CONN.ok?(LOCKED?"lock":""):"bad"}"><b>${LOCKED?"TERKUNCI":"LIVE"}</b><span>${st}${LOCKED?" Juri tidak dapat mengubah nilai.":""}</span><span class="sp"></span><button type="button" data-reload>Muat ulang</button><button type="button" data-lock>${LOCKED?"Buka kunci penilaian":"Kunci penilaian"}</button></div>`;
+  return `<div class="livebar ${CONN.ok?(LOCKED?"lock":""):"bad"}"><b>${LOCKED?"TERKUNCI":"LIVE"}</b><span>${st}${LOCKED?" Juri tidak dapat mengubah nilai.":""}</span><span class="sp"></span><button type="button" data-reload>Muat ulang</button><button type="button" data-lock>${LOCKED?"Buka kunci penilaian":"Kunci penilaian"}</button><button type="button" data-reset-juri title="Hapus nilai juri untuk latihan sebelum hari H">Reset nilai</button></div>`;
 }
 async function autoRefresh(manual){
   if(!LIVE||!ME||PAGE!=="dash"||LOADING) return;
@@ -689,6 +690,35 @@ async function toggleLock(){
   if(!confirm(to?"Kunci seluruh penjurian Grand Final? Juri tidak dapat lagi menyimpan atau mengubah nilai sampai kunci dibuka.":"Buka kunci penjurian? Juri dapat kembali menyimpan dan mengubah nilai.")) return;
   try{ const d=await apiPost({action:"juri_lock",token:TOKEN,locked:to}); if(!d.ok) throw new Error(d.err||"gagal"); LOCKED=!!d.locked; toast(LOCKED?"Penjurian dikunci":"Kunci dibuka"); render(); }
   catch(e){ toast("Gagal mengubah kunci. Coba lagi.",true); }
+}
+/* ---------- reset nilai (admin): latihan sebelum hari H ---------- */
+function resetDialog(){
+  if(LOCKED){ toast("Penjurian sedang terkunci. Buka kunci terlebih dahulu bila ingin mereset nilai.",true); return; }
+  const cnt={}; Object.keys(STORE.s).forEach(k=>{ const u=k.slice(k.indexOf("|")+1); cnt[u]=(cnt[u]||0)+1; });
+  const total=Object.values(cnt).reduce((a,b)=>a+b,0);
+  $("#sheet").innerHTML=`<div class="sh-head"><div class="row"><div><div class="eyebrow">Hanya panitia</div><h2 id="shT">Reset nilai juri</h2><p>Hapus nilai untuk latihan proses penjurian sebelum hari H.</p></div><button class="x" type="button" aria-label="Tutup" data-x>&times;</button></div></div>
+  <div class="sh-body"><div class="card pad" style="max-width:640px;margin:0 auto">
+    <label for="rjuri" style="font-weight:600;display:block;margin-bottom:6px">Nilai yang dihapus</label>
+    <select class="search" id="rjuri" style="width:100%"><option value="">Semua juri (${total} nilai)</option>${REVIEWERS.map(u=>`<option value="${esc(u.u)}">${esc(u.name)} (${cnt[u.u]||0} nilai)</option>`).join("")}</select>
+    <p class="mini" style="margin:12px 0">Yang dihapus: skor dan catatan juri yang dipilih. Akun, daftar finalis, dan riwayat perubahan tidak dihapus. Salinan nilai yang dihapus disimpan di sheet <b>Arsip Reset Juri</b> pada Google Sheet, jadi masih dapat dipulihkan manual. Juri akan melihat semua finalis kembali berstatus belum dinilai.</p>
+    <label for="rconf" style="font-weight:600;display:block;margin-bottom:6px">Ketik <code>RESET</code> untuk melanjutkan</label>
+    <input class="search" id="rconf" autocomplete="off" style="width:100%" placeholder="RESET"></div></div>
+  <div class="sh-foot"><div class="score"><small>Tidak dapat dibatalkan dari aplikasi.</small></div><div class="btns"><button class="btn btn-o" data-x type="button">Batal</button><button class="btn btn-p" id="rgo" type="button" disabled>Hapus nilai</button></div></div>`;
+  const sh=$("#sheet"); sh.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>closeSheet(true));
+  $("#rconf").oninput=e=>{ $("#rgo").disabled=e.target.value.trim()!=="RESET"; };
+  $("#rgo").onclick=async()=>{
+    const btn=$("#rgo"), who=$("#rjuri").value; btn.disabled=true; btn.textContent="Menghapus...";
+    try{
+      const d=await apiPost({action:"juri_reset",token:TOKEN,confirm:"RESET",juri:who});
+      if(!d.ok){ const e=new Error(d.err||"gagal"); e.code=d.err; throw e; }
+      closeSheet(true); await liveLoad(true); render(); toast(d.deleted?d.deleted+" nilai dihapus dan diarsipkan":"Tidak ada nilai yang perlu dihapus");
+    }catch(e){
+      const c=e.code||""; btn.textContent="Hapus nilai"; btn.disabled=false;
+      if(c==="session_expired"){ toast("Sesi berakhir. Silakan masuk kembali.",true); closeSheet(true); logout(); return; }
+      toast(c==="locked"?"Penjurian terkunci. Buka kunci terlebih dahulu.":c==="juri_unknown"?"Juri tidak dikenal.":c==="action_not_allowed"?"Server belum diperbarui (deploy New version).":"Gagal menghapus nilai. Coba lagi.",true);
+    }
+  };
+  $("#sheet").classList.add("on"); $("#scrim").classList.add("on"); document.body.style.overflow="hidden"; $("#rconf").focus();
 }
 document.querySelector(".band .eyebrow").textContent="Healthkathon 2026 · Penjurian Grand Final · "+CFG.tahap.nama;
 if(LIVE&&TOKEN){ liveLoad(false).then(()=>{ LOADING=false; render(); }).catch(()=>{ LOADING=false; TOKEN=""; ME=null; try{sessionStorage.removeItem(SSK)}catch(_){} render(); }); }
