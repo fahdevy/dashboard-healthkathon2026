@@ -472,8 +472,7 @@ function drawSheet(){
     <textarea class="cat" id="cat" maxlength="1000" placeholder="Alasan skor, hal yang menonjol, atau pertanyaan untuk tim di pleno">${esc(D.c)}</textarea></div>
   </div></div></div>
   <div class="sh-foot"><div class="score"><b class="num" id="fscore">${my!=null?fmt(my):"-"}</b><small id="fsub">${full?"Skor Anda (skala 100)":`Terisi ${filled} dari ${K} kriteria`}</small><div class="dots">${D.s.map(v=>`<i class="${v!=null?"on":""}"></i>`).join("")}</div></div>
-    <div class="btns"><button class="btn btn-o" data-save="close" type="button" ${D.dirty&&!D.busy?"":"disabled"}>Simpan</button>
-    <button class="btn btn-p" data-save="next" type="button" ${D.dirty&&!D.busy?"":"disabled"}>Simpan &amp; berikutnya</button></div></div>`;
+    <div class="btns"><button class="btn btn-p" data-save="close" type="button" ${D.dirty&&!D.busy?"":"disabled"}>Simpan</button></div></div>`;
   const sh=$("#sheet");
   sh.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{ if(closeSheet()) render(); });
   const setScore=(k,val,from)=>{ D.s[k]=val; D.dirty=D.s.some((x,j)=>x!==D.orig[j])||D.c!==D.origC;
@@ -536,37 +535,39 @@ function viewRank(){
       <td data-l="Status"><span class="st ${st==="lengkap"?"s-done":st==="sebagian"?"s-draft":"s-todo"}">${st==="lengkap"?"Lengkap":st==="sebagian"?`Sebagian ${i.done}/${i.N}`:"Belum dinilai"}</span></td>
       <td data-l="Skor akhir"><span class="sc">${i.complete?fmt(i.total):(i.interim!=null?'<span class="muted">'+fmt(i.interim)+'*</span>':'<span class="muted">-</span>')}</span></td>
       ${C.map((c,k)=>`<td class="cv" data-l="${esc(c.n)}">${i.crit[k]!=null?fmt(i.crit[k],1):"-"}</td>`).join("")}
-      <td data-l="Selisih juri">${i.spread!=null&&i.spread>CFG.selisih?`<span class="tag warn" title="Selisih skor antar juri ${fmt(i.spread)} poin">Kalibrasi ${fmt(i.spread,0)}</span>`:(i.spread!=null?'<span class="cv">'+fmt(i.spread,0)+'</span>':"-")}</td></tr>`; };
-  const head=`<thead><tr><th>#</th><th>Tim</th><th>Status</th><th>Skor</th>${C.map(c=>`<th title="${esc(c.n)} (rata-rata skor 0-${SMAX}), bobot ${Math.round(c.w*100)}%">${esc(c.n.split(/[ ,&]/)[0])} ${Math.round(c.w*100)}%</th>`).join("")}<th>Selisih</th></tr></thead>`;
+</tr>`; };
+  const head=`<thead><tr><th>#</th><th>Tim</th><th>Status</th><th>Skor</th>${C.map(c=>`<th title="${esc(c.n)} (rata-rata skor 0-${SMAX}), bobot ${Math.round(c.w*100)}%">${esc(c.n.split(/[ ,&]/)[0])} ${Math.round(c.w*100)}%</th>`).join("")}</tr></thead>`;
   const sections=cats.filter(k=>F.kat==="all"||F.kat===k).map(k=>{
     const all=CFG.teams.slice(), list=all.filter(matches);
     list.sort((a,b)=>{ const ra=CATRANK[a.id],rb=CATRANK[b.id]; if(ra&&rb) return ra-rb; if(ra) return -1; if(rb) return 1; return (INFO[b.id].interim||0)-(INFO[a.id].interim||0)||(a.id<b.id?-1:1); });
     const ranked=all.filter(t=>CATRANK[t.id]).length;
     return `<section class="rk-sec" id="kat-${esc(katShort(k)).replace(/\W+/g,"-")}"><div class="sec-h"><h2>Peringkat Grand Final</h2><span class="muted">${all.length} finalis · ${ranked} sudah lengkap dinilai${list.length!==all.length?` · ditampilkan ${list.length}`:""}</span></div>
-    <div class="card tablewrap"><table class="rtab">${head}<tbody>${list.map(rowHtml).join("")||`<tr><td colspan="${5+K}" class="empty">Tidak ada finalis yang cocok.</td></tr>`}</tbody></table></div></section>`; }).join("");
+    <div class="card tablewrap"><table class="rtab">${head}<tbody>${list.map(rowHtml).join("")||`<tr><td colspan="${4+K}" class="empty">Tidak ada finalis yang cocok.</td></tr>`}</tbody></table></div></section>`; }).join("");
   const chip=(k,l,n)=>`<button class="chip" data-rf="${k}" aria-pressed="${F.f===k}">${l}<small>${n}</small></button>`;
   return `${S.lengkap<total?`<div class="banner warn"><div><b>Peringkat bersifat sementara.</b> ${total-S.lengkap} dari ${total} finalis belum selesai dinilai oleh seluruh juri. Finalis yang belum lengkap tidak diberi nomor peringkat; tanda * pada skor menunjukkan rata-rata sementara.</div></div>`:""}
   <div class="kpis"><div class="card kpi"><b>${total}</b><span>Finalis</span></div><div class="card kpi"><b>${S.lengkap}</b><span>Lengkap dinilai semua juri</span></div><div class="card kpi"><b>${S.sebagian}</b><span>Dalam proses</span></div>
     <div class="card kpi"><b>${S.belum}</b><span>Belum dinilai</span></div><div class="card kpi"><b>${done.length?fmt(avg(done)):"-"}</b><span>Rata-rata skor (skala 100)</span></div></div>
   <div class="tools"><div class="chips" role="group" aria-label="Filter status">${chip("all","Semua",total)}${chip("lengkap","Lengkap",S.lengkap)}${chip("sebagian","Sebagian",S.sebagian)}${chip("belum","Belum",S.belum)}</div>
     <select class="search" id="rkat" aria-label="Kelompok" style="flex:0 1 200px"><option value="all">Seluruh finalis</option></select>
-    <input class="search" id="rq" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(F.q)}" aria-label="Cari"><button class="btn btn-o" type="button" data-csv>Unduh CSV</button></div>
-  ${sections}
-  <p class="muted" style="font-size:13px;margin:12px 4px">Peringkat disusun dari skor akhir tertinggi: Juara 1, Juara 2, Juara 3, Juara Harapan 1, dan Juara Harapan 2. Skor akhir = rata-rata skor seluruh juri (skala 100) dan baru dihitung bila semua juri melengkapi kelima kriteria. Kolom kriteria menampilkan rata-rata skor 0 sampai ${SMAX}. "Kalibrasi" menandai selisih skor antar juri lebih dari ${CFG.selisih} poin; juri membahasnya di pleno sebelum skor dikunci. Tie-break: nilai Dampak, lalu Kesiapan Produk; bila masih sama, ditetapkan di pleno juri.</p>`;
+    <input class="search" id="rq" type="search" placeholder="Cari nama tim, judul, atau ID" value="${esc(F.q)}" aria-label="Cari"><button class="btn btn-o" type="button" data-xlsx>Unduh Excel</button></div>
+  ${sections}`;
 }
-function csvDownload(){
+function xlsxLoad(){ return new Promise((ok,no)=>{ if(window.XLSX) return ok(); const e=document.createElement("script"); e.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; e.onload=()=>ok(); e.onerror=()=>no(new Error("xlsx")); document.head.appendChild(e); }); }
+async function xlsxDownload(){
+  try{ await xlsxLoad(); }catch(e){ toast("Pustaka Excel gagal dimuat. Periksa koneksi internet lalu coba lagi.",true); return; }
   const rows=[["Peringkat","Predikat","ID","Tim","Judul","Status","Skor akhir","Skor sementara",...C.map(c=>c.n+" (rata-rata)"),"Selisih juri"]];
+  const num=v=>v!=null?Math.round(v*100)/100:"";
   katOrder().forEach(k=>CFG.teams.slice().sort((a,b)=>{ const ra=CATRANK[a.id],rb=CATRANK[b.id]; if(ra&&rb) return ra-rb; if(ra) return -1; if(rb) return 1; return (INFO[b.id].interim||0)-(INFO[a.id].interim||0)||(a.id<b.id?-1:1); })
-    .forEach(t=>{ const i=INFO[t.id]; rows.push([CATRANK[t.id]||"",CATRANK[t.id]?(LP[CATRANK[t.id]-1]||""):"",t.id,t.tim,t.inov,statusOf(t),i.total!=null?i.total.toFixed(2):"",i.interim!=null?i.interim.toFixed(2):"",...i.crit.map(v=>v!=null?v.toFixed(2):""),i.spread!=null?i.spread.toFixed(1):""]); }));
-  const csv="\ufeff"+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n");
-  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); a.download="Rekap Penjurian Grand Final.csv"; document.body.appendChild(a); a.click(); a.remove();
+    .forEach(t=>{ const i=INFO[t.id]; rows.push([CATRANK[t.id]||"",CATRANK[t.id]?(LP[CATRANK[t.id]-1]||""):"",t.id,t.tim,t.inov,statusOf(t),num(i.total),num(i.interim),...i.crit.map(num),i.spread!=null?Math.round(i.spread*10)/10:""]); }));
+  const ws=XLSX.utils.aoa_to_sheet(rows); ws["!cols"]=rows[0].map((_,c)=>({wch:c===4?44:c===3?24:c<2?12:16}));
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Rekap Grand Final"); XLSX.writeFile(wb,"Rekap Penjurian Grand Final.xlsx");
 }
 function teamDetail(id){
   const t=TB[id], i=INFO[id], rk=CATRANK[id];
   $("#sheet").innerHTML=`<div class="sh-head"><div class="row"><div><div class="eyebrow">#${esc(t.id)} · ${esc(t.kat)}${rk?` · Peringkat ${rk}${LP[rk-1]?" ("+esc(LP[rk-1])+")":""}`:""}</div><h2 id="shT">${esc(t.tim)}</h2><p>${esc(t.inov)}</p></div><button class="x" type="button" aria-label="Tutup" data-x>&times;</button></div></div>
   <div class="sh-body"><div class="split"><div class="pane">${projectHtml(t)}</div><div class="pane">
    <div class="card pad"><div class="kpis" style="margin:0 0 10px"><div class="kpi"><b>${i.complete?fmt(i.total):"-"}</b><span>Skor akhir</span></div><div class="kpi"><b>${i.done}/${i.N}</b><span>Juri selesai</span></div><div class="kpi"><b>${i.spread!=null?fmt(i.spread,0):"-"}</b><span>Selisih antar juri</span></div></div>
-   ${i.spread!=null&&i.spread>CFG.selisih?`<div class="banner warn" style="margin:0"><div>Selisih skor antar juri melebihi ${CFG.selisih} poin. Bahas alasannya di pleno sebelum skor dikunci; perubahan skor dicatat.</div></div>`:""}</div>
+   </div>
    <div class="card tablewrap" style="margin-top:12px"><table class="matrix"><thead><tr><th>Juri</th>${C.map(c=>`<th title="${esc(c.n)}">${esc(c.n.split(/[ ,&]/)[0])}</th>`).join("")}<th>Skor</th></tr></thead><tbody>
    ${i.rs.map(r=>`<tr><td>${esc(USERS[r.u]?USERS[r.u].name:r.u)}</td>${r.s.map(v=>`<td class="n">${v!=null?v:"-"}</td>`).join("")}<td class="n"><b>${r.score!=null?fmt(r.score):"-"}</b></td></tr>`).join("")}
    <tr style="font-weight:700"><td>Rata-rata</td>${i.crit.map(v=>`<td class="n">${v!=null?fmt(v,1):"-"}</td>`).join("")}<td class="n">${i.interim!=null?fmt(i.interim):"-"}</td></tr></tbody></table></div>
@@ -608,7 +609,7 @@ function viewMethod(){
   <div class="card pad" style="margin-top:14px"><h2 style="font-size:20px;margin-bottom:8px">Cara menghitung</h2>
   <p style="margin:0 0 8px">Skor satu juri = &Sigma; (bobot &times; skor kriteria), hasilnya 0 sampai ${SMAX}. Skor akhir finalis = rata-rata skor seluruh juri, dibulatkan dua desimal, dan baru dihitung bila semua juri sudah mengisi kelima kriteria. Kriteria yang kosong berarti belum dinilai, bukan skor 0.</p>
   <p style="margin:0 0 8px">Peringkat diurutkan dari skor akhir tertinggi: ${LP.map(esc).join(", ")}. Bila skor sama, dipakai rata-rata skor Dampak dan Efisiensi Risiko, lalu Kesiapan Produk; bila masih sama, ditetapkan dalam pleno juri.</p>
-  <p style="margin:0">Selisih skor antar juri lebih dari ${CFG.selisih} poin ditandai "Kalibrasi": juri membahas alasannya di pleno sebelum skor dikunci, dan perubahan skor dicatat. Juri hanya melihat skornya sendiri; rekap seluruh juri hanya dapat dibuka panitia.</p>
+  <p style="margin:0">Juri hanya melihat skornya sendiri; rekap seluruh juri hanya dapat dibuka panitia.</p>
   </div>`;
 }
 /* ---------- alat demo ---------- */
@@ -630,9 +631,10 @@ function bind(){
   const rk=$("#rkat"); if(rk) rk.onchange=e=>{ V.rank.kat=e.target.value; render(); };
   const rq=$("#rq"); if(rq) rq.oninput=e=>{ V.rank.q=e.target.value; const p=e.target.selectionStart; render(); const n=$("#rq"); n.focus(); n.setSelectionRange(p,p); };
   document.querySelectorAll("[data-team]").forEach(b=>b.onclick=()=>teamDetail(b.dataset.team));
-  document.querySelectorAll("[data-csv]").forEach(b=>b.onclick=csvDownload);
+  document.querySelectorAll("[data-xlsx]").forEach(b=>b.onclick=xlsxDownload);
   document.querySelectorAll("[data-reload]").forEach(b=>b.onclick=()=>autoRefresh(true));
   document.querySelectorAll("[data-lock]").forEach(b=>b.onclick=toggleLock);
+  document.querySelectorAll("[data-reset-juri]").forEach(b=>b.onclick=resetDialog);
   document.querySelectorAll("[data-sim]").forEach(b=>b.onclick=()=>{ simulate(+$("#simPct").value); toast("Nilai simulasi terisi"); render(); });
   document.querySelectorAll("[data-reset]").forEach(b=>b.onclick=()=>{ if(confirm("Hapus semua nilai demo di browser ini?")){ STORE={s:{}}; persist(); toast("Data demo direset"); render(); } });
 }
@@ -675,7 +677,7 @@ function liveBar(){
   const t=CONN.at?CONN.at.toLocaleTimeString("id-ID"):"-";
   if(PAGE!=="dash") return LOCKED?`<div class="livebar lock"><b>TERKUNCI</b><span>Penjurian sudah dikunci oleh panitia. Nilai tidak dapat diubah.</span></div>`:"";
   const st=CONN.ok?`Tersambung ke Google Sheet. Diperbarui ${t} (otomatis tiap 30 detik).`:`<b>${esc(CONN.msg)}</b> Terakhir diperbarui ${t}.`;
-  return `<div class="livebar ${CONN.ok?(LOCKED?"lock":""):"bad"}"><b>${LOCKED?"TERKUNCI":"LIVE"}</b><span>${st}${LOCKED?" Juri tidak dapat mengubah nilai.":""}</span><span class="sp"></span><button type="button" data-reload>Muat ulang</button><button type="button" data-lock>${LOCKED?"Buka kunci penilaian":"Kunci penilaian"}</button></div>`;
+  return `<div class="livebar ${CONN.ok?(LOCKED?"lock":""):"bad"}"><b>${LOCKED?"TERKUNCI":"LIVE"}</b><span>${st}${LOCKED?" Juri tidak dapat mengubah nilai.":""}</span><span class="sp"></span><button type="button" data-reload>Muat ulang</button><button type="button" data-lock>${LOCKED?"Buka kunci penilaian":"Kunci penilaian"}</button><button type="button" data-reset-juri title="Hapus nilai juri untuk latihan sebelum hari H">Reset nilai</button></div>`;
 }
 async function autoRefresh(manual){
   if(!LIVE||!ME||PAGE!=="dash"||LOADING) return;
@@ -689,6 +691,35 @@ async function toggleLock(){
   if(!confirm(to?"Kunci seluruh penjurian Grand Final? Juri tidak dapat lagi menyimpan atau mengubah nilai sampai kunci dibuka.":"Buka kunci penjurian? Juri dapat kembali menyimpan dan mengubah nilai.")) return;
   try{ const d=await apiPost({action:"juri_lock",token:TOKEN,locked:to}); if(!d.ok) throw new Error(d.err||"gagal"); LOCKED=!!d.locked; toast(LOCKED?"Penjurian dikunci":"Kunci dibuka"); render(); }
   catch(e){ toast("Gagal mengubah kunci. Coba lagi.",true); }
+}
+/* ---------- reset nilai (admin): latihan sebelum hari H ---------- */
+function resetDialog(){
+  if(LOCKED){ toast("Penjurian sedang terkunci. Buka kunci terlebih dahulu bila ingin mereset nilai.",true); return; }
+  const cnt={}; Object.keys(STORE.s).forEach(k=>{ const u=k.slice(k.indexOf("|")+1); cnt[u]=(cnt[u]||0)+1; });
+  const total=Object.values(cnt).reduce((a,b)=>a+b,0);
+  $("#sheet").innerHTML=`<div class="sh-head"><div class="row"><div><div class="eyebrow">Hanya panitia</div><h2 id="shT">Reset nilai juri</h2><p>Hapus nilai untuk latihan proses penjurian sebelum hari H.</p></div><button class="x" type="button" aria-label="Tutup" data-x>&times;</button></div></div>
+  <div class="sh-body"><div class="card pad" style="max-width:640px;margin:0 auto">
+    <label for="rjuri" style="font-weight:600;display:block;margin-bottom:6px">Nilai yang dihapus</label>
+    <select class="search" id="rjuri" style="width:100%"><option value="">Semua juri (${total} nilai)</option>${REVIEWERS.map(u=>`<option value="${esc(u.u)}">${esc(u.name)} (${cnt[u.u]||0} nilai)</option>`).join("")}</select>
+    <p class="mini" style="margin:12px 0">Yang dihapus: skor dan catatan juri yang dipilih. Akun, daftar finalis, dan riwayat perubahan tidak dihapus. Salinan nilai yang dihapus disimpan di sheet <b>Arsip Reset Juri</b> pada Google Sheet, jadi masih dapat dipulihkan manual. Juri akan melihat semua finalis kembali berstatus belum dinilai.</p>
+    <label for="rconf" style="font-weight:600;display:block;margin-bottom:6px">Ketik <code>RESET</code> untuk melanjutkan</label>
+    <input class="search" id="rconf" autocomplete="off" style="width:100%" placeholder="RESET"></div></div>
+  <div class="sh-foot"><div class="score"><small>Tidak dapat dibatalkan dari aplikasi.</small></div><div class="btns"><button class="btn btn-o" data-x type="button">Batal</button><button class="btn btn-p" id="rgo" type="button" disabled>Hapus nilai</button></div></div>`;
+  const sh=$("#sheet"); sh.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>closeSheet(true));
+  $("#rconf").oninput=e=>{ $("#rgo").disabled=e.target.value.trim()!=="RESET"; };
+  $("#rgo").onclick=async()=>{
+    const btn=$("#rgo"), who=$("#rjuri").value; btn.disabled=true; btn.textContent="Menghapus...";
+    try{
+      const d=await apiPost({action:"juri_reset",token:TOKEN,confirm:"RESET",juri:who});
+      if(!d.ok){ const e=new Error(d.err||"gagal"); e.code=d.err; throw e; }
+      closeSheet(true); await liveLoad(true); render(); toast(d.deleted?d.deleted+" nilai dihapus dan diarsipkan":"Tidak ada nilai yang perlu dihapus");
+    }catch(e){
+      const c=e.code||""; btn.textContent="Hapus nilai"; btn.disabled=false;
+      if(c==="session_expired"){ toast("Sesi berakhir. Silakan masuk kembali.",true); closeSheet(true); logout(); return; }
+      toast(c==="locked"?"Penjurian terkunci. Buka kunci terlebih dahulu.":c==="juri_unknown"?"Juri tidak dikenal.":c==="action_not_allowed"?"Server belum diperbarui (deploy New version).":"Gagal menghapus nilai. Coba lagi.",true);
+    }
+  };
+  $("#sheet").classList.add("on"); $("#scrim").classList.add("on"); document.body.style.overflow="hidden"; $("#rconf").focus();
 }
 document.querySelector(".band .eyebrow").textContent="Healthkathon 2026 · Penjurian Grand Final · "+CFG.tahap.nama;
 if(LIVE&&TOKEN){ liveLoad(false).then(()=>{ LOADING=false; render(); }).catch(()=>{ LOADING=false; TOKEN=""; ME=null; try{sessionStorage.removeItem(SSK)}catch(_){} render(); }); }
