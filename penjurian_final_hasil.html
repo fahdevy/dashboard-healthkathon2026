@@ -493,7 +493,8 @@ function updateFoot(){ const D=DRAW; if(!D) return; const filled=nFill(D.s), ful
 function keepScroll(sh,fn){ const q=[".pane",".sh-body"]; const tops=[...sh.querySelectorAll(".pane")].map(e=>e.scrollTop), b=sh.querySelector(".sh-body").scrollTop; fn(); [...sh.querySelectorAll(".pane")].forEach((e,i)=>e.scrollTop=tops[i]); sh.querySelector(".sh-body").scrollTop=b; }
 function nextTodo(from){ const m=myTeams().filter(t=>myState(t).k!=="done"); const i=m.findIndex(t=>t.id===from); return m.find((t,j)=>t.id!==from&&j>i)||m.find(t=>t.id!==from)||null; }
 async function doSave(mode){
-  const D=DRAW; if(!D||D.busy||!D.dirty) return; const id=D.id, nxt=nextTodo(id);
+  const D=DRAW; if(!D||D.busy||!D.dirty) return; if(nFill(D.s)<K){ const miss=C.map((c,k)=>D.s[k]==null?c.n.split(/[ ,&(]/)[0]:null).filter(Boolean); toast("Semua kriteria wajib diisi sebelum disimpan. Belum diisi: "+miss.join(", ")+".",true); const f=document.querySelector("#sheet .sin[data-k='"+D.s.findIndex(v=>v==null)+"']"); if(f) f.focus(); return; }
+  const id=D.id, nxt=nextTodo(id);
   if(LIVE){
     D.busy=true; updateFoot();
     try{
@@ -508,7 +509,7 @@ async function doSave(mode){
       D.busy=false; const c=e.code||"";
       if(c==="session_expired"){ toast("Sesi berakhir. Masuk kembali; nilai yang belum tersimpan perlu diisi ulang.",true); logout(); return; }
       if(c==="locked"){ LOCKED=true; toast("Penjurian sudah dikunci oleh panitia. Nilai tidak dapat disimpan.",true); }
-      else toast(c==="not_assigned"?"Tim ini tidak ada dalam daftar finalis.":c==="role_not_allowed"?"Hanya akun juri yang dapat menyimpan nilai.":c==="data_invalid"?"Skor tidak valid (harus 0 sampai "+SMAX+").":"Gagal menyimpan. Periksa koneksi lalu coba lagi.",true);
+      else toast(c==="incomplete"?"Semua kriteria wajib diisi sebelum disimpan.":c==="not_assigned"?"Tim ini tidak ada dalam daftar finalis.":c==="role_not_allowed"?"Hanya akun juri yang dapat menyimpan nilai.":c==="data_invalid"?"Skor tidak valid (harus 0 sampai "+SMAX+").":"Gagal menyimpan. Periksa koneksi lalu coba lagi.",true);
       updateFoot();
     }
     return;
